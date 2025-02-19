@@ -6,12 +6,12 @@
     <style>
         .container {
             font-family: Arial, sans-serif;
-            margin: 0 auto;
-            padding: 20px;
-            max-width: 600px;
-            background-color: #f8f9fa;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                            max-width: 600px;
+                            margin: auto;
+                            padding: 20px;
+                            background-color: #f8f9fa;
+                            border-radius: 10px;
+                            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         .header {
             background-color: #ced4da;

@@ -4,6 +4,8 @@
     <link rel="stylesheet" href="{{ asset('vendor/icheck-bootstrap/icheck-bootstrap.min.css') }}">
 @stop
 
+@php( $login_url = View::getSection('login_url') ?? config('adminlte.login_url', 'login') )
+
 @section('auth_header', 'Autenticación de doble factor')
 
 @section('auth_body')
@@ -66,5 +68,12 @@
                 </div>
             </div>
         </form>
+        @section('auth_footer')
+    <p class="my-0">
+        <a href="{{ $login_url }}">
+            Volver al Inicio
+        </a>
+    </p>
+@stop
     </div>
 @stop
