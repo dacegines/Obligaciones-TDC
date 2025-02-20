@@ -12,19 +12,19 @@ class CalendarController extends Controller
 {
     public function index()
     {
-        // Aquí puedes pasar datos necesarios para el calendario
+        
         return view('gestion_cumplimiento.calendario.index');
     }
 
     public function fetchRequisitos(Request $request)
     {
         try {
-            // Verificar si el usuario tiene los permisos adecuados
+            
             if (!Auth::user()->can('superUsuario') && !Auth::user()->can('obligaciones de concesión')  && !Auth::user()->can('obligaciones de concesión limitado')) {
                 abort(403, 'No tienes permiso para acceder a esta página.');
             }
     
-            // Obtener el usuario autenticado
+            
             $user = Auth::user();
     
             if (!$user || !$user->puesto) {
@@ -32,18 +32,18 @@ class CalendarController extends Controller
                 return response()->json(['error' => 'No se encontró el puesto del usuario autenticado'], 403);
             }
     
-            // Obtener el año desde la solicitud (si se envía), o usar el año actual
+           
             $ano = $request->get('year', now()->year);
     
             // Filtrar los requisitos usando los scopes definidos en el modelo
             $requisitos = Requisito::select([
-                'id', // ID del evento
-                'nombre as title', // Título del evento
+                'id', 
+                'nombre as title', 
                 'numero_evidencia as obligacion',
-                'fecha_limite_cumplimiento as start', // Fecha de inicio
-                'clausula_condicionante_articulo as description', // Descripción del evento
+                'fecha_limite_cumplimiento as start', 
+                'clausula_condicionante_articulo as description', 
                 'responsable',
-                'approved' // Estado del evento
+                'approved' 
             ])->get();
             
             return response()->json($requisitos, 200, [], JSON_UNESCAPED_UNICODE);
@@ -58,7 +58,7 @@ class CalendarController extends Controller
             return response()->json($requisitos, 200, [], JSON_UNESCAPED_UNICODE);
     
         } catch (\Exception $e) {
-            // Manejo de errores y log
+            
             Log::error('Error al cargar los requisitos', [
                 'error' => $e->getMessage(),
                 'user_id' => Auth::id()

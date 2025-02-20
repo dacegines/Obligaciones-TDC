@@ -13,8 +13,8 @@ class NotificacionController extends Controller
             abort(403, 'No tienes permiso para acceder a esta página.');
         }
 
-        // Aquí puedes obtener las notificaciones de la base de datos si es necesario
-        $notificaciones = []; // Arreglo de ejemplo para enviar a la vista
+
+        $notificaciones = [];
 
         return view('gestion_cumplimiento.notificaciones.index', compact('notificaciones'));
     }

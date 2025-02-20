@@ -9,7 +9,7 @@ class ObligacionUsuario extends Model
 {
     use HasFactory;
 
-    protected $table = 'obligacion_usuario'; // Nombre exacto de la tabla
+    protected $table = 'obligacion_usuario'; 
 
     protected $fillable = ['user_id', 'numero_evidencia', 'view']; // Cambiamos numero_requisito a numero_evidencia
 

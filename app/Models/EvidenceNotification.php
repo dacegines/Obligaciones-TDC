@@ -9,5 +9,5 @@ class EvidenceNotification extends Model
 {
     use HasFactory;
 
-    protected $table = 'evidence_notifications'; // Especifica el nombre de la tabla
+    protected $table = 'evidence_notifications'; 
 }

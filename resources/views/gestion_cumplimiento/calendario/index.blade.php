@@ -65,10 +65,10 @@
                                 </div>
                             </div>-->
 
-                <!-- Nueva sección con información del módulo -->
+                <!-- Sección con información del módulo -->
                 <div class="col-md-3">
                     <div class="sticky-top mb-3">
-                        <!-- Panel de información -->
+
                         <div class="card">
                             <div class="card-header bg-success text-white text-center">
                                 <h4 class="card-title container">Información del Calendario</h4>
@@ -151,7 +151,7 @@
                     <hr>
                     <p>
                         <span id="eventApproved" class="badge w-100"></span>
-                        <!-- Agregamos clase badge para estilos dinámicos -->
+                        
                     </p>
                 </div>
                 <div class="modal-footer">
@@ -164,7 +164,7 @@
 @endsection
 
 @section('css')
-    <!-- Estilos de FullCalendar -->
+   
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">

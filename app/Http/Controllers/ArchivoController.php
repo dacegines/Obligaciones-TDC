@@ -40,7 +40,7 @@ class ArchivoController extends Controller
             $archivo->fecha_limite_cumplimiento = $validatedData['fecha_limite_cumplimiento'];
             $archivo->usuario = $validatedData['usuario'];
             $archivo->puesto = $validatedData['puesto'];
-            $archivo->fecha_subida = now(); // Asigna la fecha y hora actual
+            $archivo->fecha_subida = now(); 
             $archivo->save();
 
             // Buscar el requisito relacionado
@@ -92,7 +92,7 @@ class ArchivoController extends Controller
             ->whereDate('fecha_limite_cumplimiento', $fechaLimite) // Filtrar por la fecha límite
             ->get();
 
-        // Devuelve los datos en formato JSON
+        
         return response()->json(['archivos' => $archivos]);
     }
 

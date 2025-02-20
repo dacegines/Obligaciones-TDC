@@ -1,18 +1,14 @@
-// Función para validar que un ID sea un número entero válido
 function isValidId(id) {
     return typeof id === "string" && id.trim().length > 0;
 }
 
-// Función para sanitizar entradas de texto
 function sanitizeInput(input) {
     const element = document.createElement("div");
     element.textContent = input;
     return element.innerHTML;
 }
 
-// Inicialización y control de comportamiento en modales
 document.addEventListener("DOMContentLoaded", function () {
-    // Unificar la lógica para manejar la apertura del segundo modal y cargar los detalles
     document.querySelectorAll(".custom-card").forEach(function (element) {
         element.addEventListener("click", function () {
             const evidenciaId = this.dataset.evidenciaId;
@@ -34,14 +30,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 numeroRequisito
             );
 
-            // Realizar la solicitud para obtener el estado "approved"
             axios
                 .post(approvedResultUrl, { id: requisitoId })
                 .then(function (response) {
                     const aprobado = response.data.approved;
                     const elementoPrueba =
                         document.querySelector(".status-alert");
-                    // Aquí puedes agregar lógica adicional para manejar el resultado
                 })
                 .catch(function (error) {
                     console.error(
@@ -50,14 +44,12 @@ document.addEventListener("DOMContentLoaded", function () {
                     );
                 });
 
-            // Mostrar el modal y hacer los demás inertes
             $("#modalDetalleContent").modal("show");
             $("#modalDetalleContent").data(
                 "first-modal-id",
                 "modal" + requisitoId
             );
 
-            // Desactivar otros modales y elementos fuera del modal activo
             $(".modal").not("#modalDetalleContent").attr("inert", "true");
         });
     });
@@ -73,7 +65,6 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
 
-        // Reactivar otros modales y elementos
         $(".modal").removeAttr("inert");
     });
 
@@ -84,7 +75,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-// Modal obligación - Carga de detalles y notificaciones
 document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll(".n_evidencia").forEach(function (element) {
         element.addEventListener("click", function () {
@@ -93,7 +83,6 @@ document.addEventListener("DOMContentLoaded", function () {
             const requisitoId = this.dataset.requisitoId;
             const numeroRequisito = this.dataset.numeroRequisito;
 
-            // Validar los IDs antes de hacer cualquier otra cosa
             if (
                 !isValidId(evidenciaId) ||
                 !isValidId(idNotificaciones) ||
@@ -103,13 +92,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
-            // Llamar a la función para obtener detalles de evidencia
             obtenerDetallesEvidencia(evidenciaId, requisitoId);
 
-            // Llamar a la función para obtener notificaciones
             obtenerNotificaciones(idNotificaciones, requisitoId);
 
-            // Obtener y mostrar la tabla de notificaciones
             obtenerTablaNotificaciones(
                 idNotificaciones,
                 requisitoId,
@@ -121,7 +107,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function obtenerDetallesEvidencia(evidenciaId, requisitoId) {
-    const year = document.getElementById("year-select").value; // Captura el año del formulario
+    const year = document.getElementById("year-select").value;
 
     axios
         .post(obtenerDetallesEvidenciaUrl, {
@@ -268,10 +254,8 @@ function obtenerTablaNotificaciones(
                     </div>
             `;
 
-            // Lista de roles permitidos para mostrar el botón
             const allowedRoles = ["superUsuario"];
 
-            // Verificar si el rol del usuario está dentro de los roles permitidos
             if (allowedRoles.includes(userRole) && response.data.length > 0) {
                 tablaNotificacionesHtml += `
                 <div class="d-flex justify-content-start mt-2">
@@ -392,7 +376,6 @@ function obtenerTablaNotificaciones(
             </div>
             `;
 
-            // Insertar contenido en el contenedor de la tabla
             document.getElementById(
                 "tabla-notificaciones-info-" + requisitoId
             ).innerHTML = tablaNotificacionesHtml;
@@ -405,14 +388,11 @@ function obtenerTablaNotificaciones(
         });
 }
 
-// Función para ocultar el formulario
 function ocultarFormulario(requisitoId) {
     document
         .getElementById(`formulario-agregar-${requisitoId}`)
         .classList.add("d-none");
 }
-
-// Función para guardar la nueva notificación
 
 function guardarNotificacion(requisitoId) {
     const puesto = document.getElementById(`select-tipo-${requisitoId}`).value;
@@ -454,7 +434,6 @@ function guardarNotificacion(requisitoId) {
         })
         .then((response) => {
             if (!response.data.success) {
-                // Muestra la alerta de registro duplicado
                 Swal.fire({
                     icon: "info",
                     title: "Por favor, seleccione otra opción.",
@@ -462,15 +441,14 @@ function guardarNotificacion(requisitoId) {
                     confirmButtonText: "Aceptar",
                 });
             } else {
-                // Muestra la alerta de éxito y recarga la tabla de notificaciones
                 Swal.fire({
                     icon: "success",
                     title: "¡Éxito!",
                     text: response.data.message,
                     confirmButtonText: "Aceptar",
                 }).then(() => {
-                    ocultarFormulario(requisitoId); // Oculta el formulario si se guarda con éxito
-                    // Recarga la tabla de notificaciones
+                    ocultarFormulario(requisitoId);
+
                     obtenerTablaNotificaciones(
                         idNotificaciones,
                         requisitoId,
@@ -538,43 +516,35 @@ function eliminarNotificacion(
     });
 }
 
-// Función para mostrar el formulario y cargar los usuarios
 function mostrarFormulario(requisitoId) {
     document
         .getElementById(`formulario-agregar-${requisitoId}`)
         .classList.remove("d-none");
 
-    // Obtener los selects del formulario
     const selectPuesto = document.getElementById(`select-tipo-${requisitoId}`);
     const selectCorreo = document.getElementById(
         `select-correo-${requisitoId}`
     );
 
-    // Limpiar los selects antes de llenarlos
     selectPuesto.innerHTML = '<option value="">Seleccione un puesto</option>';
     selectCorreo.innerHTML = '<option value="">Seleccione un correo</option>';
 
-    // Llamada al endpoint para obtener los usuarios
     axios
         .get(usuariosUrl)
         .then((response) => {
             const usuarios = response.data;
 
-            // Guardar la relación puesto-correo en un mapa para consulta rápida
             const puestoCorreoMap = {};
 
             usuarios.forEach((usuario) => {
-                // Llenar el select de puestos
                 const optionPuesto = document.createElement("option");
                 optionPuesto.value = usuario.puesto;
                 optionPuesto.textContent = `${usuario.name} - ${usuario.puesto}`;
                 selectPuesto.appendChild(optionPuesto);
 
-                // Guardar el correo asociado al puesto en el mapa
                 puestoCorreoMap[usuario.puesto] = usuario.email;
             });
 
-            // Evento para cambiar automáticamente el correo cuando se seleccione un puesto
             selectPuesto.addEventListener("change", function () {
                 const puestoSeleccionado = this.value;
                 const correoCorrespondiente =
@@ -590,21 +560,18 @@ function mostrarFormulario(requisitoId) {
         });
 }
 
-//modal detalle
-
 document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll(".custom-card").forEach(function (element) {
         element.addEventListener("click", function () {
             const detalleId = this.dataset.detalleId;
             const evidenciaId = this.dataset.evidenciaId;
             const requisitoId = this.dataset.requisitoId;
-            const numeroRequisito = this.dataset.numeroRequisito; // Recuperar el numero_requisito
+            const numeroRequisito = this.dataset.numeroRequisito;
             const fechaLimiteCumplimiento =
                 this.dataset.fechaLimiteCumplimiento;
 
             cargarArchivos(requisitoId, evidenciaId, fechaLimiteCumplimiento);
 
-            // Llamar a la función para cargar los detalles
             cargarDetalleEvidencia(
                 detalleId,
                 evidenciaId,
@@ -718,10 +685,8 @@ function cargarDetalleEvidencia(
                         <br>
                     `;
 
-                    // Lista de roles permitidos para mostrar el botón
                     const allowedRoles = ["admin", "superUsuario"];
 
-                    // Verificar si el rol del usuario está dentro de los roles permitidos
                     if (allowedRoles.includes(userRole)) {
                         content += `
         <button class="btn btn-secondary btnMarcarCumplido w-100" id="btnMarcarCumplido" data-requisito-id="${sanitizeInput(
@@ -732,10 +697,8 @@ function cargarDetalleEvidencia(
     `;
                     }
 
-                    // Insertar el contenido en la sección de información
                     infoSection.innerHTML = content;
 
-                    // Solo si el botón se ha renderizado, añadir la funcionalidad del evento click
                     const btnMarcarCumplido =
                         document.getElementById("btnMarcarCumplido");
                     if (btnMarcarCumplido) {
@@ -799,14 +762,12 @@ function cargarDetalleEvidencia(
         });
 }
 
-// Subir archivo
 document.querySelectorAll(".custom-card").forEach(function (element) {
     element.addEventListener("click", function () {
         const requisitoId = this.dataset.requisitoId;
         const evidenciaId = this.dataset.evidenciaId;
         const fechaLimite = this.dataset.fechaLimiteCumplimiento;
 
-        // Asignar los valores al formulario
         document.querySelector('#uploadForm input[name="requisito_id"]').value =
             requisitoId;
         document.querySelector('#uploadForm input[name="evidencia"]').value =
@@ -821,46 +782,42 @@ function handleFileUpload(formSelector) {
     const form = document.querySelector(formSelector);
     const formData = new FormData(form);
 
-    // Variables para almacenar los valores que necesitamos
     let requisitoId, evidenciaId, fechaLimite;
     let archivoAdjunto = form.querySelector('input[type="file"]').files[0];
 
-    // Validar si hay un archivo adjunto
     if (!archivoAdjunto) {
         Swal.fire(
             "Error",
             "Favor de verificar ya que no se tiene ningún archivo adjunto.",
             "warning"
         );
-        return; // Detener la ejecución si no hay archivo adjunto
+        return;
     }
 
-    // Validar el tamaño del archivo (máximo 20MB en este ejemplo)
-    const maxFileSize = 20 * 1024 * 1024; // 20MB
+    const maxFileSize = 20 * 1024 * 1024;
     if (archivoAdjunto.size > maxFileSize) {
         Swal.fire(
             "Error",
             "El archivo es demasiado grande. Comuníquese con el administrador del sistema.",
             "warning"
         );
-        return; // Detener la ejecución si el archivo es demasiado grande
+        return;
     }
 
-    // Validar el tipo de archivo
     const validFileTypes = [
-        "application/pdf", // PDF
-        "image/jpeg", // JPEG
-        "image/png", // PNG
-        "image/gif", // GIF
-        "application/msword", // DOC
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // DOCX
-        "application/vnd.ms-excel", // XLS
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // XLSX
-        "application/vnd.ms-powerpoint", // PPT
-        "application/vnd.openxmlformats-officedocument.presentationml.presentation", // PPTX
-        "text/plain", // TXT
-        "application/zip", // ZIP
-        "application/x-rar-compressed", // RAR
+        "application/pdf",
+        "image/jpeg",
+        "image/png",
+        "image/gif",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/vnd.ms-excel",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "application/vnd.ms-powerpoint",
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        "text/plain",
+        "application/zip",
+        "application/x-rar-compressed",
     ];
     if (!validFileTypes.includes(archivoAdjunto.type)) {
         Swal.fire(
@@ -868,10 +825,9 @@ function handleFileUpload(formSelector) {
             "Tipo de archivo no permitido. Los formatos permitidos son PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT, JPEG, PNG, GIF, ZIP y RAR.",
             "warning"
         );
-        return; // Detener la ejecución si el tipo de archivo no es permitido
+        return;
     }
 
-    // Iterar sobre los datos del formulario y extraer los valores específicos
     for (var pair of formData.entries()) {
         if (pair[0] === "requisito_id") {
             requisitoId = pair[1];
@@ -893,11 +849,9 @@ function handleFileUpload(formSelector) {
         cancelButtonText: "Cancelar",
     }).then((result) => {
         if (result.isConfirmed) {
-            // Mostrar la imagen de progreso al confirmar
             const loader = document.getElementById("loader");
             loader.style.display = "block";
 
-            // Si el usuario confirma, se procede con la subida del archivo
             axios
                 .post(form.action, formData, {
                     headers: {
@@ -910,8 +864,8 @@ function handleFileUpload(formSelector) {
                         "El archivo se subió correctamente.",
                         "success"
                     );
-                    cargarArchivos(requisitoId, evidenciaId, fechaLimite); // Recargar archivos
-                    form.reset(); // Limpiar el formulario tras una subida exitosa
+                    cargarArchivos(requisitoId, evidenciaId, fechaLimite);
+                    form.reset();
                 })
                 .catch(function (error) {
                     let errorMessage = "Error al subir el archivo.";
@@ -921,7 +875,7 @@ function handleFileUpload(formSelector) {
                     Swal.fire("Error", errorMessage, "error");
                 })
                 .finally(function () {
-                    loader.style.display = "none"; // Ocultar la imagen de progreso al finalizar
+                    loader.style.display = "none";
                 });
         }
     });
@@ -945,7 +899,6 @@ function correoEnviar() {
         });
 }
 
-// Recargar los archivos para un requisito específico
 function cargarArchivos(requisitoId, evidenciaId, fechaLimite) {
     axios
         .post(listarArchivosUrl, {
@@ -1018,29 +971,27 @@ function cargarArchivos(requisitoId, evidenciaId, fechaLimite) {
 
             document.getElementById("archivosTableBody").innerHTML = tableBody;
 
-            agregarEventos(); // Agregar eventos a los botones
+            agregarEventos();
         })
         .catch(function (error) {
             console.error("Error al cargar los archivos:", error);
         });
 }
 function agregarEventos() {
-    // Evento para el botón "Ver"
     document.querySelectorAll(".btn-ver-archivo").forEach((button) => {
         button.addEventListener("click", function () {
             const fileUrl = this.dataset.url;
-            window.open(fileUrl, "_blank"); // Abrir en una nueva pestaña
+            window.open(fileUrl, "_blank");
         });
     });
 
-    // Evento para el botón "Eliminar"
     document.querySelectorAll(".btn-eliminar-archivo").forEach((button) => {
         button.addEventListener("click", function () {
             const archivoId = this.dataset.id;
             const archivoUrl = this.dataset.url;
-            const requisitoId = this.dataset.requisitoId; // Asegúrate que el botón tenga este atributo
-            const evidenciaId = this.dataset.evidenciaId; // Asegúrate que el botón tenga este atributo
-            const fechaLimite = this.dataset.fechaLimite; // Asegúrate que el botón tenga este atributo
+            const requisitoId = this.dataset.requisitoId;
+            const evidenciaId = this.dataset.evidenciaId;
+            const fechaLimite = this.dataset.fechaLimite;
 
             Swal.fire({
                 title: "¿Estás seguro?",
@@ -1069,7 +1020,7 @@ function agregarEventos() {
                                     requisitoId,
                                     evidenciaId,
                                     fechaLimite
-                                ); // Ahora sí pasamos los valores correctos
+                                );
                             } else {
                                 Swal.fire(
                                     "Error",
@@ -1094,31 +1045,27 @@ function agregarEventos() {
         });
     });
 
-    // Evento para el botón "Descargar"
     document.querySelectorAll(".btn-descargar-archivo").forEach((button) => {
         button.addEventListener("click", function () {
-            const fileUrl = this.dataset.url; // URL del archivo
-            const fileName = fileUrl.split("/").pop(); // Extraer el nombre del archivo
+            const fileUrl = this.dataset.url;
+            const fileName = fileUrl.split("/").pop();
 
-            // Crear un enlace temporal para forzar la descarga
             const link = document.createElement("a");
             link.href = fileUrl;
             link.download = fileName;
-            document.body.appendChild(link); // Agregar al DOM
-            link.click(); // Simular clic para descargar
-            document.body.removeChild(link); // Eliminar del DOM
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         });
     });
 }
 
-// Marcado como revisado
 function actualizarEstado(
     detalleId,
     requisitoId,
     responsable,
     numero_requisito
 ) {
-    // Mostrar alerta de confirmación con SweetAlert2
     Swal.fire({
         title: "¿Estás seguro?",
         text: "Está a punto de modificar el estatus de esta obligación. Se notificará al responsable correspondiente por correo electrónico.",
@@ -1140,7 +1087,7 @@ function actualizarEstado(
 
             actualizarPorcentaje(detalleId);
             actualizarPorcentajeSuma(detalleId, numero_requisito);
-            // Si el usuario confirma, realiza la solicitud para cambiar el estado
+
             axios
                 .post(cambiarEstadoRequisitoUrl, {
                     id: detalleId,
@@ -1151,19 +1098,16 @@ function actualizarEstado(
                             `.btnMarcarCumplido[data-requisito-id="${requisitoId}"]`
                         );
 
-                        // Aquí ejecutamos la lógica para actualizar el contenido del elemento con la clase 'status-alert'
                         const aprobado = response.data.approved;
                         const elementoPrueba =
                             document.querySelector(".status-alert");
 
                         if (aprobado) {
-                            // Establecer la clase de éxito y el mensaje correspondiente
                             elementoPrueba.classList.remove("alert-danger");
                             elementoPrueba.classList.add("alert-success");
                             elementoPrueba.innerHTML =
                                 '<strong><i class="fas fa-check"></i></strong> Esta evidencia ha sido marcada como revisada.';
                         } else {
-                            // Establecer la clase de error y el mensaje correspondiente
                             elementoPrueba.classList.remove("alert-success");
                             elementoPrueba.classList.add("alert-danger");
                             elementoPrueba.innerHTML =
@@ -1184,16 +1128,13 @@ function actualizarEstado(
 }
 
 function abrirModalDetalle(detalleId, requisitoId) {
-    // Asegúrate de que los valores no están vacíos
     if (!detalleId || !requisitoId) {
         console.error("detalleId o requisitoId no están definidos");
         return;
     }
 
-    // Ahora puedes usar estos valores para hacer tus solicitudes y abrir el modal
-    $("#modalDetalleContent").modal("show"); // Abrir el modal
+    $("#modalDetalleContent").modal("show");
 
-    // Hacer la solicitud al servidor para obtener el estado 'approved'
     axios
         .post(obtenerEstadoAprobadoUrl, {
             id: detalleId,
@@ -1203,13 +1144,11 @@ function abrirModalDetalle(detalleId, requisitoId) {
             const elementoPrueba = document.querySelector(".status-alert");
 
             if (aprobado) {
-                // Establecer la clase de éxito y el mensaje correspondiente
                 elementoPrueba.classList.remove("alert-danger");
                 elementoPrueba.classList.add("alert-success");
                 elementoPrueba.innerHTML =
                     '<strong><i class="fas fa-check"></i></strong> Esta evidencia ha sido marcada como revisada.';
             } else {
-                // Establecer la clase de error y el mensaje correspondiente
                 elementoPrueba.classList.remove("alert-success");
                 elementoPrueba.classList.add("alert-danger");
                 elementoPrueba.innerHTML =
@@ -1229,7 +1168,7 @@ function obtenerDatosInfoSection() {
         const evidenciaElement = infoSection.querySelector(
             'p[style*="display: none;"] b'
         );
-        const nombreElement = infoSection.querySelector("p:nth-child(2) b"); // Recupera el nombre
+        const nombreElement = infoSection.querySelector("p:nth-child(2) b");
         const periodicidadElement = infoSection.querySelector(
             ".section-header + p"
         );
@@ -1246,7 +1185,6 @@ function obtenerDatosInfoSection() {
             ".section-header + p + .section-header + p + .section-header + p + .section-header + p + .section-header + p"
         );
 
-        // Asignar valores al objeto datos
         datos.evidencia = evidenciaElement
             ? evidenciaElement.textContent.trim()
             : "";
@@ -1275,7 +1213,6 @@ function obtenerDatosInfoSection() {
     return datos;
 }
 
-// Ejemplo de función que llama a `obtenerDatosInfoSection`
 function ejecutarAccionConDatos() {
     const datosRecuperados = obtenerDatosInfoSection();
 
@@ -1295,7 +1232,6 @@ function ejecutarAccionConDatos() {
 }
 
 function cambiarEstadoEvidencia(requisitoId, evidenciaId) {
-    // Cambiar el estado de la evidencia
     axios
         .post(cambiarEstadoRequisitoUrl, {
             id: requisitoId,
@@ -1355,7 +1291,6 @@ function actualizarPorcentajeSuma(detalleId, numeroRequisito) {
         });
 }
 
-// Cambiar color de estado de avance
 document.addEventListener("DOMContentLoaded", function () {
     const statusIndicators = document.querySelectorAll(".status-indicator");
 
@@ -1386,21 +1321,11 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 $("#modalDetalleContent").on("show.bs.modal", function () {
-    // Añadir 'inert' a todos los demás modales y elementos que no deberían ser interactivos
     $(".modal").not(this).attr("inert", "true");
-
-    // Opcionalmente, puedes agregar 'inert' a otros elementos que no deberían ser accesibles
-    // Ejemplo:
-    // $('header, footer, .sidebar').attr('inert', 'true');
 });
 
 $("#modalDetalleContent").on("hidden.bs.modal", function () {
-    // Quitar 'inert' cuando el modal se cierra para restaurar la interactividad
     $(".modal").removeAttr("inert");
-
-    // Si agregaste 'inert' a otros elementos, quítalo también
-    // Ejemplo:
-    // $('header, footer, .sidebar').removeAttr('inert');
 });
 
 function enviarAlertaCorreo(diasRestantes) {

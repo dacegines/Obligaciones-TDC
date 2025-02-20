@@ -12,8 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class DetallesController extends Controller
-{
-    // Método principal para mostrar la vista de requisitos
+
     public function index(Request $request)
     {
         if (!Auth::user()->can('superUsuario') && !Auth::user()->can('obligaciones de concesión') && !Auth::user()->can('obligaciones de concesión limitado')) {
@@ -83,7 +82,7 @@ class DetallesController extends Controller
         return response()->json($archivos);
     }
 
-    // Método para generar un PDF con los requisitos (sin modificaciones)
+    // Método para generar un PDF con los requisitos
     public function descargarPDF(Request $request)
     {
         $year = $request->input('year', \Carbon\Carbon::now()->year);

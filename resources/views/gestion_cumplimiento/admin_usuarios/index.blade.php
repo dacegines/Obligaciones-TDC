@@ -54,8 +54,6 @@
                 </div>
             @endif
 
-
-            {{-- Tabla de usuarios --}}
             <div class="table-responsive">
                 <table id="usersTable" class="table table-sm table-striped table-bordered text-center">
                     <thead class="thead-dark">
@@ -73,7 +71,7 @@
                     <tbody>
                         @foreach ($users as $user)
                             <tr>
-                                <td>{{ $user->id }}</td> <!-- ID del usuario -->
+                                <td>{{ $user->id }}</td>
                                 <td class="editable" data-id="{{ $user->id }}" data-column="name">{{ $user->user_name }}
                                 </td>
                                 <td class="editable" data-id="{{ $user->id }}" data-column="email">{{ $user->email }}
@@ -146,7 +144,7 @@
                         class="w-100">
                         @csrf
 
-                        {{-- Name field --}}
+
                         <div class="input-group mb-3">
                             <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
                                 value="{{ old('name') }}" placeholder="{{ __('adminlte::adminlte.full_name') }}"
@@ -165,7 +163,6 @@
                             @enderror
                         </div>
 
-                        {{-- Puesto field --}}
                         <div class="input-group mb-3">
                             <input type="text" name="puesto"
                                 class="form-control @error('puesto') is-invalid @enderror" value="{{ old('puesto') }}"
@@ -184,7 +181,7 @@
                             @enderror
                         </div>
 
-                        {{-- Email field --}}
+
                         <div class="input-group mb-3">
                             <input type="email" id="email" name="email"
                                 class="form-control @error('email') is-invalid @enderror" value="{{ old('email') }}"
@@ -198,7 +195,7 @@
                         </div>
                         <div id="email-feedback" class="text-danger"></div>
 
-                        {{-- Password field --}}
+
                         <div class="input-group mb-3">
                             <input type="password" name="password" id="password" class="form-control"
                                 placeholder="{{ __('adminlte::adminlte.password') }}">
@@ -226,7 +223,6 @@
                         </div>
 
 
-                        {{-- Confirm password field --}}
                         <div class="input-group mb-3">
                             <input type="password" name="password_confirmation" id="password-confirm"
                                 class="form-control" placeholder="{{ __('adminlte::adminlte.retype_password') }}">
@@ -246,7 +242,6 @@
                         <div id="password-feedback" class="mt-1"></div>
 
 
-                        {{-- Register button --}}
                         <div class="d-flex justify-content-center">
                             <button type="submit" id="submit-btn" class="btn btn-block btn-success w-25 text-center"
                                 style="display: none;">
@@ -273,10 +268,10 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <!-- Formulario para Crear Nuevo Rol -->
+
                     <form id="createRoleForm" action="{{ route('adminRoles.create') }}" method="POST">
                         @csrf
-                        <!-- Campo de Nombre -->
+
                         <div class="form-group">
                             <label for="roleName">Nombre del Rol</label>
                             <input type="text" name="name" id="roleName" class="form-control" required>
@@ -284,7 +279,7 @@
 
                         <button type="submit" class="btn btn-success">Guardar Rol</button>
                     </form>
-                    <!-- Tabla de Roles Existentes -->
+
                     <div class="table-responsive  mt-2">
                         <table class="table table-sm  table-bordered text-center">
                             <thead class="thead-dark">
@@ -332,10 +327,10 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <!-- Formulario para Crear Nuevo Permiso -->
+
                     <form id="createPermissionForm" action="{{ route('adminPermissions.create') }}" method="POST">
                         @csrf
-                        <!-- Campo de Nombre -->
+
                         <div class="form-group">
                             <label for="permissionName">Nombre del Permiso</label>
                             <input type="text" name="name" id="permissionName" class="form-control" required>
@@ -343,7 +338,7 @@
 
                         <button type="submit" class="btn btn-success">Guardar Permiso</button>
                     </form>
-                    <!-- Tabla de Permisos Existentes -->
+
                     <div class="table-responsive mt-2">
                         <table class="table table-sm table-bordered text-center">
                             <thead class="thead-dark">
@@ -397,19 +392,19 @@
                         @method('PUT')
                         <input type="hidden" name="user_id" id="editUserId">
 
-                        {{-- Nombre --}}
+
                         <div class="form-group">
                             <label for="editUserName">Nombre</label>
                             <input type="text" name="name" id="editUserName" class="form-control" required>
                         </div>
 
-                        {{-- Email --}}
+
                         <div class="form-group">
                             <label for="editUserEmail">Email</label>
                             <input type="email" name="email" id="editUserEmail" class="form-control" required>
                         </div>
 
-                        {{-- Puesto --}}
+
                         <div class="form-group">
                             <label for="editUserPuesto">Puesto</label>
                             <input type="text" name="puesto" id="editUserPuesto" class="form-control" required>
@@ -436,19 +431,19 @@
                 <div class="modal-body">
                     <form id="roleForm" action="{{ route('roles.store') }}" method="POST">
                         @csrf
-                        <!-- Input oculto predefinido -->
+
                         <input type="hidden" name="model_type" value="App\Models\User">
 
-                        <!-- Input oculto para el ID del usuario -->
+
                         <input type="hidden" name="model_id" id="modelIdRoleInput">
 
-                        <!-- Input visible para mostrar nombre y email -->
+
                         <div class="form-group">
                             <label for="userNameEmailRoleInput">Usuario</label>
                             <input type="text" id="userNameEmailRoleInput" class="form-control" readonly>
                         </div>
 
-                        <!-- Select para roles -->
+
                         <div class="form-group">
                             <label for="roleSelect">Seleccionar Rol</label>
                             <select id="roleSelect" name="role_id" class="form-control">
@@ -479,13 +474,13 @@
                 <div class="modal-body">
                     <form id="areaForm" action="{{ route('permissions.store') }}" method="POST">
                         @csrf
-                        <!-- Input oculto predefinido -->
+
                         <input type="hidden" name="model_type" value="App\Models\User">
 
-                        <!-- Input oculto para el ID del usuario -->
+
                         <input type="hidden" name="model_id" id="modelIdInput">
 
-                        <!-- Input visible para mostrar nombre y email -->
+
                         <div class="form-group">
                             <label for="userNameEmailInput">Usuario</label>
                             <input type="text" id="userNameEmailInput" class="form-control" readonly>
@@ -520,11 +515,11 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <!-- Formulario para Crear Nueva Autorización -->
+
                     <form id="createAuthorizationForm" action="{{ route('adminAuthorizations.create') }}"
                         method="POST">
                         @csrf
-                        <!-- Campo de Nombre -->
+
                         <div class="form-group">
                             <label for="authorizationName">Nombre de la Autorización</label>
                             <input type="text" name="name" id="authorizationName" class="form-control" required>
@@ -533,7 +528,7 @@
                         <button type="submit" class="btn btn-success">Guardar Autorización</button>
                     </form>
 
-                    <!-- Tabla de Autorizaciones Existentes -->
+
                     <div class="table-responsive mt-2">
                         <table class="table table-sm table-bordered text-center">
                             <thead class="thead-dark">
@@ -582,17 +577,16 @@
                 <div class="modal-body">
                     <form id="assignAuthorizationForm" action="{{ route('authorizations.store') }}" method="POST">
                         @csrf
-                        <!-- Campo oculto para el ID del usuario -->
+
                         <input type="hidden" name="model_id" id="modelIdAuthorization">
                         <input type="hidden" name="model_type" value="App\Models\User">
 
-                        <!-- Campo visible para nombre y email -->
                         <div class="form-group">
                             <label for="userNameAuthorization">Usuario</label>
                             <input type="text" id="userNameAuthorization" class="form-control" readonly>
                         </div>
 
-                        <!-- Select para Autorizaciones -->
+
                         <div class="form-group">
                             <label for="authorizationSelect">Seleccionar Autorización</label>
                             <select id="authorizationSelect" name="authorization_id" class="form-control">

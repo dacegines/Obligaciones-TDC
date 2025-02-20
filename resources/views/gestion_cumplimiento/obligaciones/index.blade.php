@@ -9,7 +9,7 @@
             // Definir los puestos que no deben mostrar el puesto del usuario
             $puestosExcluidos = DB::table('users')
                 ->join('model_has_authorizations', 'users.id', '=', 'model_has_authorizations.model_id')
-                ->where('model_has_authorizations.authorization_id', 7) // Cambia el ID si necesitas otra autorización
+                ->where('model_has_authorizations.authorization_id', 7) 
                 ->distinct()
                 ->pluck('users.puesto')
                 ->toArray();
@@ -115,7 +115,6 @@
 
 
     <!-- Modales dinámicos para cada requisito -->
-    <!-- Iterar sobre los requisitos -->
     @foreach ($requisitos->unique('nombre') as $requisito)
         <div class="modal fade" id="modal{{ $requisito->id }}" tabindex="-1"
             aria-labelledby="modal{{ $requisito->id }}Label" aria-hidden="true">
@@ -130,7 +129,7 @@
                     </div>
                     <div class="modal-body">
                         <div class="row">
-                            <!-- Columna de Obligaciones -->
+                            
                             <div class="col-md-6">
                                 <h5><b>Obligaciones</b></h5>
 
@@ -155,7 +154,7 @@
                                             data-parent="#obligacionesContainer{{ $requisito->id }}">
                                             @foreach ($requisitos->where('nombre', $requisito->nombre)->where('numero_evidencia', $evidencia->numero_evidencia) as $detalle)
                                                 @php
-                                                    // Verifica si el requisito tiene la columna approved en 1
+                                                    
                                                     $isApproved = $detalle->approved == 1;
                                                 @endphp
 
@@ -187,19 +186,19 @@
                                 </div>
                             </div>
 
-                            <!-- Columna de Detalles de Evidencia -->
+                            
                             <div class="col-md-6">
                                 <h5><b>Detalles de Obligación</b></h5>
                                 <div id="detail-info-{{ $requisito->id }}" class="info-container">
-                                    <!-- Aquí se cargarán los detalles de la evidencia -->
+                                    <!-- Detalles de la evidencia -->
                                 </div>
 
-                                <!-- Nuevo contenedor para las notificaciones -->
+                                <!-- Contenedor para las notificaciones -->
                                 <div id="notificaciones-info-{{ $requisito->id }}" class="info-container">
-                                    <!-- Aquí se cargarán las notificaciones -->
+                                    <!-- Notificaciones -->
                                 </div>
 
-                                <!-- Nuevo contenedor para la tabla de notificaciones -->
+                                <!-- Contenedor para la tabla de notificaciones -->
                                 <div id="tabla-notificaciones-info-{{ $requisito->id }}" class="info-container">
                                     <!-- Aquí se cargará la tabla de notificaciones -->
                                 </div>
@@ -222,12 +221,11 @@
 
     <!-- Modales para cada detalle -->
 
-    <!-- Verificar si $detalle existe -->
     @if (isset($detalle))
-        <!-- Modales para cada detalle -->
+
         <div class="modal fade" id="modalDetalleContent" tabindex="-1"
             aria-labelledby="modalDetalleLabel{{ $detalle->id }}">
-            <div class="modal-dialog modal-xl modal-dialog-scrollable"> <!-- Añadir modal-dialog-scrollable solo aquí -->
+            <div class="modal-dialog modal-xl modal-dialog-scrollable"> 
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="modalDetalleLabel{{ $detalle->id }}">Obligación</h5>
@@ -244,7 +242,7 @@
                                     <div class="alert status-alert" role="alert"></div>
                                     <div class="details-card">
                                         <div class="info-section">
-                                            <!-- Aquí puedes agregar detalles adicionales -->
+                                            <!-- Aquí se puede agregar detalles adicionales -->
 
                                         </div>
                                     </div>
@@ -254,8 +252,7 @@
                                             <i class="fas fa-file-upload"></i>
                                             <span>Agregar Archivos:</span>
                                         </div>
-                                        <!-- Formulario de carga de archivos -->
-                                        <!-- Formulario de carga de archivos -->
+
                                         <form id="uploadForm" action="{{ route('archivos.subir') }}" method="POST"
                                             enctype="multipart/form-data">
                                             @csrf
@@ -265,7 +262,7 @@
                                             <input type="hidden" name="evidencian" value="{{ $evidencia->evidencia }}">
                                             <input type="hidden" name="fecha_limite_cumplimiento"
                                                 value="{{ $detalle->fecha_limite_cumplimiento }}">
-                                            <!-- Campos ocultos para el usuario y puesto -->
+
                                             <input type="hidden" name="usuario" value="{{ Auth::user()->name }}">
                                             <input type="hidden" name="puesto" value="{{ Auth::user()->puesto }}">
 
@@ -331,12 +328,12 @@
                                             </tr>
                                         </thead>
                                         <tbody id="archivosTableBody">
-                                            <!-- Contenido dinámico -->
+                                            
                                         </tbody>
                                     </table>
                                 </div>
                                 <hr>
-                                <!-- Botón "Marcar como cumplido" -->
+                                
                             </div>
                         </div>
                     </div>
@@ -344,7 +341,7 @@
             </div>
         </div>
     @else
-        <!-- Mensaje si $detalle no está definido -->
+        
         <div class="text-center mt-4">
             <h5>Este usuario no tiene obligaciones registradas o el año no contiene obligaciones registradas.</h5>
         </div>

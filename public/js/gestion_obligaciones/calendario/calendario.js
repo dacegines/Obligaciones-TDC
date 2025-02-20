@@ -26,51 +26,51 @@ $(function () {
         editable: true,
         droppable: true,
         height: 700,
-        events: requisitosUrl, // URL para cargar eventos dinámicos
+        events: requisitosUrl, 
         eventClick: function (event) {
-            // Muestra los datos en el modal
-            $("#eventTitle").text(event.title); // Título del evento
-            $("#eventObligacion").text(event.obligacion); // Título del evento
-            $("#eventDate").text(event.start.format("YYYY-MM-DD")); // Fecha del evento
+            
+            $("#eventTitle").text(event.title); 
+            $("#eventObligacion").text(event.obligacion); 
+            $("#eventDate").text(event.start.format("YYYY-MM-DD")); 
             $("#eventDescription").text(
                 event.description || "No hay descripción disponible."
-            ); // Descripción
-            $("#eventResponsable").text(event.responsable || "No asignado"); // Responsable del evento
+            ); 
+            $("#eventResponsable").text(event.responsable || "No asignado"); 
 
-            // Lógica para mostrar el estado aprobado en verde/rojo
+            
             const eventApproved = $("#eventApproved");
             if (event.approved == 1) {
                 eventApproved.text(
                     "Esta evidencia ha sido marcada como revisada."
-                ); // Texto en verde
+                ); 
                 eventApproved
                     .removeClass("bg-danger")
-                    .addClass("bg-success text-white"); // Verde
+                    .addClass("bg-success text-white"); 
             } else {
                 eventApproved.text(
                     "Esta evidencia no ha sido revisada o volvió a su estatus inicial."
-                ); // Texto en rojo
+                ); 
                 eventApproved
                     .removeClass("bg-success")
-                    .addClass("bg-danger text-white"); // Rojo
+                    .addClass("bg-danger text-white"); 
             }
 
-            // Muestra el modal
+            
             $("#eventModal").modal("show");
         },
         eventRender: function (event, element) {
-            element.attr("title", event.title); // Tooltip con el título del evento
+            element.attr("title", event.title); 
         },
         eventRender: function (event, element) {
-            // Lógica para cambiar el color según condiciones
+            
             if (event.approved == 1) {
-                element.css("background-color", "#28a745"); // Verde
+                element.css("background-color", "#28a745"); 
                 element.css("border-color", "#28a745");
             } else {
-                element.css("background-color", "#dc3545"); // Rojo
+                element.css("background-color", "#dc3545"); 
                 element.css("border-color", "#dc3545");
             }
-            element.attr("title", event.title); // Tooltip con el título
+            element.attr("title", event.title); 
         },
     });
 

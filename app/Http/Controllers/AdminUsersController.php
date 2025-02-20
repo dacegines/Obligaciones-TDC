@@ -49,11 +49,11 @@ class AdminUsersController extends Controller
 
     public function register(Request $request)
     {
-        // Validar los datos, incluyendo que el correo sea único
+       
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'puesto' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email', // Esta regla asegura que el correo sea único
+            'email' => 'required|email|unique:users,email', 
             'password' => [
                 'required',
                 'string',
@@ -65,7 +65,7 @@ class AdminUsersController extends Controller
             ],
         ]);
 
-        // Crear el usuario
+        
         $user = User::create([
             'name' => $validatedData['name'],
             'puesto' => $validatedData['puesto'],
@@ -73,7 +73,7 @@ class AdminUsersController extends Controller
             'password' => Hash::make($validatedData['password']),
         ]);
 
-        // Redirigir con mensaje de éxito
+        
         return redirect()->back()->with('success', 'Usuario registrado exitosamente.');
     }
 
@@ -166,19 +166,19 @@ class AdminUsersController extends Controller
 
     public function destroy($id)
     {
-        // Borrar al usuario de la tabla users
+       
         DB::table('users')->where('id', $id)->delete();
 
-        // Borrar los permisos asociados de la tabla model_has_permissions
+
         DB::table('model_has_permissions')->where('model_id', $id)->delete();
 
-        // Borrar los roles asociados de la tabla model_has_roles
+
         DB::table('model_has_roles')->where('model_id', $id)->delete();
 
-        // Borrar las autorizaciones asociadas de la tabla model_has_authorizations
+
         DB::table('model_has_authorizations')->where('model_id', $id)->delete();
 
-        // Redirigir con un mensaje de éxito
+
         return redirect()->back()->with('success', 'Usuario eliminado exitosamente.');
     }
 
@@ -192,7 +192,6 @@ class AdminUsersController extends Controller
             'puesto' => 'required|string|max:255',
         ]);
 
-        // Actualizar al usuario
         User::where('id', $request->user_id)->update([
             'name' => $request->name,
             'email' => $request->email,
@@ -208,10 +207,10 @@ class AdminUsersController extends Controller
             'name' => 'required|string|max:255|unique:roles',
         ]);
 
-        // Crear el rol con el valor de 'guard_name'
+        
         Role::create([
             'name' => $request->name,
-            'guard_name' => 'web', // Valor predeterminado para guard_name
+            'guard_name' => 'web',
         ]);
 
         return redirect()->back()->with('success', 'Rol creado exitosamente.');
@@ -224,10 +223,10 @@ class AdminUsersController extends Controller
             'name' => 'required|string|max:255|unique:permissions',
         ]);
 
-        // Crear el permiso con el valor de 'guard_name'
+        
         Permission::create([
             'name' => $request->name,
-            'guard_name' => 'web', // Valor predeterminado para guard_name
+            'guard_name' => 'web', 
         ]);
 
         return redirect()->back()->with('success', 'Permiso creado exitosamente.');

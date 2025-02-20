@@ -1,8 +1,8 @@
-//datatable de usuarios
+
 $(document).ready(function () {
     $("#usersTable").DataTable().destroy();
     $("#usersTable").DataTable({
-        // Configuración de DataTable
+        
         language: {
             lengthMenu:
                 "Mostrar " +
@@ -48,27 +48,27 @@ $(document).ready(function () {
     });
 });
 
-// Boton Editar Usuario
+
 $(document).on("click", ".edit-user-btn", function () {
     const userId = $(this).data("id");
     const userName = $(this).data("name");
     const userEmail = $(this).data("email");
     const userPuesto = $(this).data("puesto");
 
-    // Llenar los campos del modal
+    
     $("#editUserId").val(userId);
     $("#editUserName").val(userName);
     $("#editUserEmail").val(userEmail);
     $("#editUserPuesto").val(userPuesto);
 });
 
-//Borrar Usuario
+
 document.addEventListener("DOMContentLoaded", function () {
     const deleteForms = document.querySelectorAll(".delete-user-form");
 
     deleteForms.forEach((form) => {
         form.addEventListener("submit", function (event) {
-            event.preventDefault(); // Evita el envío inmediato
+            event.preventDefault(); 
 
             Swal.fire({
                 title: "¿Estás seguro?",
@@ -81,100 +81,100 @@ document.addEventListener("DOMContentLoaded", function () {
                 cancelButtonText: "Cancelar",
             }).then((result) => {
                 if (result.isConfirmed) {
-                    form.submit(); // Envía el formulario si se confirma
+                    form.submit(); 
                 }
             });
         });
     });
 });
 
-// Actualizar Rol
+
 $(document).on("click", ".role-btn", function () {
-    // Obtener los valores del botón clicado
+    
     const userId = $(this).data("id");
     const userName = $(this).data("name");
     const userEmail = $(this).data("email");
 
-    // Rellenar el campo oculto con el ID del usuario
+    
     $("#modelIdRoleInput").val(userId);
 
-    // Rellenar el campo visible con el nombre y correo
+    
     $("#userNameEmailRoleInput").val(`${userName} - ${userEmail}`);
 });
 
-// Actualizar Area
+
 $(document).on("click", ".area-btn", function () {
-    // Obtener los valores del botón clicado
+    
     const userId = $(this).data("id");
     const userName = $(this).data("name");
     const userEmail = $(this).data("email");
 
-    // Rellenar el campo oculto con el ID del usuario
+    
     $("#modelIdInput").val(userId);
 
-    // Rellenar el campo visible con el nombre y correo
+    
     $("#userNameEmailInput").val(`${userName} - ${userEmail}`);
 });
 
-// Asignar Autorización
-$(document).on("click", ".authorization-btn", function () {
-    // Obtener los valores del botón clicado
-    const userId = $(this).data("id"); // ID del usuario
-    const userName = $(this).data("name"); // Nombre del usuario
-    const userEmail = $(this).data("email"); // Correo del usuario
 
-    // Rellenar el campo oculto con el ID del usuario
+$(document).on("click", ".authorization-btn", function () {
+    
+    const userId = $(this).data("id"); 
+    const userName = $(this).data("name"); 
+    const userEmail = $(this).data("email"); 
+
+    
     $("#modelIdAuthorization").val(userId);
 
-    // Rellenar el campo visible con el nombre y correo del usuario
+    
     $("#userNameAuthorization").val(`${userName} - ${userEmail}`);
 });
 
-// Crear usuario nuevo
+
 $(document).ready(function () {
     $("#create-user-form").on("submit", function (e) {
-        e.preventDefault(); // Evita recargar la página
+        e.preventDefault(); 
 
         const form = $(this);
         const submitBtn = $("#submit-btn");
 
-        // Deshabilitar el botón mientras se envía la solicitud
+        
         submitBtn.prop("disabled", true);
 
-        // Enviar los datos del formulario con AJAX
+        
         $.ajax({
             url: form.attr("action"),
             method: "POST",
-            data: form.serialize(), // Serializar los datos del formulario
+            data: form.serialize(), 
             success: function (response) {
-                // Mostrar alerta de éxito con SweetAlert2 solo al enviar correctamente
+                
                 Swal.fire({
                     icon: "success",
                     title: "Usuario creado",
                     text: "El usuario se ha creado correctamente.",
                     confirmButtonText: "Aceptar",
                 }).then(() => {
-                    // Recargar la página después de cerrar el mensaje
+                    
                     location.reload();
                 });
 
-                // Resetear el formulario
+                
                 form[0].reset();
 
-                // Ocultar el botón de envío nuevamente
+                
                 submitBtn.hide();
 
-                // Cerrar el modal después de crear el usuario
+                
                 $("#createUserModal").modal("hide");
             },
             error: function (xhr) {
-                // Manejo de errores
+                
                 const errors = xhr.responseJSON?.errors || {};
                 let errorMessage =
                     "Ocurrió un error. Por favor, inténtalo nuevamente.";
 
                 if (Object.keys(errors).length > 0) {
-                    // Construir mensaje de error a partir de los errores de validación
+                    
                     errorMessage = Object.values(errors).join("\n");
                 }
 
@@ -186,14 +186,14 @@ $(document).ready(function () {
                 });
             },
             complete: function () {
-                // Rehabilitar el botón
+                
                 submitBtn.prop("disabled", false);
             },
         });
     });
 });
 
-// validacion de correo en formulario
+
 $(document).ready(function () {
     $("#email").on("blur", function () {
         const email = $(this).val();
@@ -201,10 +201,10 @@ $(document).ready(function () {
 
         if (email) {
             $.ajax({
-                url: checkEmailUrl, // Usa la variable definida en el Blade
+                url: checkEmailUrl, 
                 type: "POST",
                 data: {
-                    _token: $('meta[name="csrf-token"]').attr("content"), // Asegúrate de tener el token CSRF
+                    _token: $('meta[name="csrf-token"]').attr("content"), 
                     email: email,
                 },
                 success: function (response) {
@@ -233,7 +233,7 @@ $(document).ready(function () {
     });
 });
 
-//validacion de formulario de nuevo usuario
+
 $(document).ready(function () {
     const emailField = $("#email");
     const nameField = $('input[name="name"]');
@@ -243,7 +243,7 @@ $(document).ready(function () {
     const feedback = $("#email-feedback");
     const submitBtn = $("#submit-btn");
 
-    // Función para verificar si todos los campos están llenos
+    
     function allFieldsFilled() {
         return (
             nameField.val().trim() !== "" &&
@@ -254,12 +254,12 @@ $(document).ready(function () {
         );
     }
 
-    // Verificar todos los campos al cambiar cualquier valor
+    
     $("input").on("input", function () {
         if (allFieldsFilled() && feedback.hasClass("text-success")) {
-            submitBtn.show(); // Mostrar el botón si todos los campos están llenos y el correo es válido
+            submitBtn.show(); 
         } else {
-            submitBtn.hide(); // Ocultar el botón si falta algún campo o el correo no es válido
+            submitBtn.hide(); 
         }
     });
 });
@@ -273,19 +273,19 @@ $(document).ready(function () {
     const feedback = $("#email-feedback");
     const submitBtn = $("#submit-btn");
 
-    // Elementos para mensajes de validación
+    
     const requirements = $("#password-requirements");
     const lengthReq = $("#length");
     const uppercaseReq = $("#uppercase");
     const numberReq = $("#number");
     const specialReq = $("#special");
 
-    // Expresiones regulares para validaciones de contraseña
+    
     const uppercaseRegex = /[A-Z]/;
     const numberRegex = /[0-9]/;
     const specialCharRegex = /[!@#$%^&*]/;
 
-    // Validar si todos los campos están llenos y correctos
+    
     function validateForm() {
         const emailValid = feedback.hasClass("text-success");
         const password = passwordField.val();
@@ -309,35 +309,35 @@ $(document).ready(function () {
         );
     }
 
-    // Habilitar o deshabilitar el botón
+    
     function toggleSubmitButton() {
         if (validateForm()) {
-            submitBtn.show(); // Mostrar el botón si todo está válido
+            submitBtn.show(); 
         } else {
-            submitBtn.hide(); // Ocultar el botón si algo no está válido
+            submitBtn.hide(); 
         }
     }
 
-    // Validar contraseña en tiempo real
+    
     passwordField.on("input", function () {
         const password = $(this).val();
 
-        // Validar longitud
+        
         lengthReq
             .toggleClass("text-success", password.length >= 8)
             .toggleClass("text-danger", password.length < 8);
 
-        // Validar mayúsculas
+        
         uppercaseReq
             .toggleClass("text-success", uppercaseRegex.test(password))
             .toggleClass("text-danger", !uppercaseRegex.test(password));
 
-        // Validar números
+        
         numberReq
             .toggleClass("text-success", numberRegex.test(password))
             .toggleClass("text-danger", !numberRegex.test(password));
 
-        // Validar caracteres especiales
+        
         specialReq
             .toggleClass("text-success", specialCharRegex.test(password))
             .toggleClass("text-danger", !specialCharRegex.test(password));
@@ -345,7 +345,7 @@ $(document).ready(function () {
         toggleSubmitButton();
     });
 
-    // Validar confirmación de contraseña
+    
     passwordConfirmField.on("input", function () {
         const password = passwordField.val();
         const confirmPassword = $(this).val();
@@ -366,7 +366,7 @@ $(document).ready(function () {
         toggleSubmitButton();
     });
 
-    // Validar todos los campos al escribir en cualquier input
+    
     $("input").on("input", toggleSubmitButton);
 });
 
@@ -374,48 +374,48 @@ $(document).ready(function () {
     const passwordField = $("#password");
     const submitBtn = $("#submit-btn");
 
-    // Elementos para mensajes de validación
+    
     const requirements = $("#password-requirements");
     const lengthReq = $("#length");
     const uppercaseReq = $("#uppercase");
     const numberReq = $("#number");
     const specialReq = $("#special");
 
-    // Expresiones regulares para validaciones
+    
     const uppercaseRegex = /[A-Z]/;
     const numberRegex = /[0-9]/;
     const specialCharRegex = /[!@#$%^&*]/;
 
-    // Mostrar los requisitos al interactuar con el campo
+    
     passwordField.on("focus", function () {
         requirements.removeClass("d-none");
     });
 
-    // Validar requisitos de la contraseña en tiempo real
+    
     passwordField.on("input", function () {
         const password = $(this).val();
 
-        // Validar longitud
+        
         lengthReq
             .toggleClass("text-success", password.length >= 8)
             .toggleClass("text-danger", password.length < 8);
 
-        // Validar mayúsculas
+        
         uppercaseReq
             .toggleClass("text-success", uppercaseRegex.test(password))
             .toggleClass("text-danger", !uppercaseRegex.test(password));
 
-        // Validar números
+        
         numberReq
             .toggleClass("text-success", numberRegex.test(password))
             .toggleClass("text-danger", !numberRegex.test(password));
 
-        // Validar caracteres especiales
+        
         specialReq
             .toggleClass("text-success", specialCharRegex.test(password))
             .toggleClass("text-danger", !specialCharRegex.test(password));
 
-        // Mostrar botón si todos los requisitos se cumplen
+        
         const allValid =
             password.length >= 8 &&
             uppercaseRegex.test(password) &&
@@ -424,7 +424,7 @@ $(document).ready(function () {
         submitBtn.toggle(allValid);
     });
 
-    // Ocultar los requisitos cuando el campo pierde el foco si todos están cumplidos
+    
     passwordField.on("blur", function () {
         const password = $(this).val();
 
@@ -445,7 +445,7 @@ $(document).ready(function () {
     const feedback = $("#password-feedback");
     const submitBtn = $("#submit-btn");
 
-    // Validar contraseñas dinámicamente
+    
     passwordConfirmField.on("input", function () {
         const password = passwordField.val();
         const confirmPassword = $(this).val();
@@ -457,19 +457,19 @@ $(document).ready(function () {
                 )
                 .addClass("text-danger")
                 .removeClass("text-success");
-            submitBtn.hide(); // Ocultar el botón si las contraseñas no coinciden
+            submitBtn.hide(); 
         } else {
             feedback
                 .text("Las contraseñas coinciden.")
                 .addClass("text-success")
                 .removeClass("text-danger");
             if (validateForm()) {
-                submitBtn.show(); // Mostrar el botón si todo está correcto
+                submitBtn.show(); 
             }
         }
     });
 
-    // Validar si todos los campos están llenos y correctos
+    
     function validateForm() {
         const password = passwordField.val();
         const confirmPassword = passwordConfirmField.val();
@@ -491,7 +491,7 @@ $(document).ready(function () {
     const feedback = $("#password-feedback");
     const submitBtn = $("#submit-btn");
 
-    // Validar contraseñas dinámicamente
+    
     passwordConfirmField.on("blur", function () {
         const password = passwordField.val();
         const confirmPassword = $(this).val();
@@ -501,22 +501,22 @@ $(document).ready(function () {
                 .text("Las contraseñas no coinciden.")
                 .addClass("text-danger")
                 .removeClass("text-success");
-            submitBtn.hide(); // Ocultar el botón si las contraseñas no coinciden
+            submitBtn.hide(); 
         } else if (password === "") {
             feedback.text("");
-            submitBtn.hide(); // Ocultar el botón si no se han llenado las contraseñas
+            submitBtn.hide(); 
         } else {
             feedback
                 .text("Las contraseñas coinciden.")
                 .addClass("text-success")
                 .removeClass("text-danger");
             if (allFieldsFilled()) {
-                submitBtn.show(); // Mostrar el botón si todo está correcto
+                submitBtn.show(); 
             }
         }
     });
 
-    // Verificar campos llenos (reutiliza la función si ya la tienes)
+    
     function allFieldsFilled() {
         return (
             $('input[name="name"]').val().trim() !== "" &&
@@ -527,7 +527,7 @@ $(document).ready(function () {
         );
     }
 
-    // Mostrar u ocultar el botón en tiempo real
+    
     $("input").on("input", function () {
         if (allFieldsFilled() && feedback.hasClass("text-success")) {
             submitBtn.show();
@@ -537,18 +537,18 @@ $(document).ready(function () {
     });
 });
 
-// Ver contrasenas escritas
+
 $(document).on("click", ".toggle-password", function () {
-    const target = $(this).data("target"); // Obtener el ID del campo de contraseña
+    const target = $(this).data("target"); 
     const input = $(target);
     const icon = $(this).find("i");
 
-    // Alternar entre 'password' y 'text'
+    
     if (input.attr("type") === "password") {
         input.attr("type", "text");
-        icon.removeClass("fa-eye").addClass("fa-eye-slash"); // Cambiar el ícono
+        icon.removeClass("fa-eye").addClass("fa-eye-slash"); 
     } else {
         input.attr("type", "password");
-        icon.removeClass("fa-eye-slash").addClass("fa-eye"); // Cambiar el ícono
+        icon.removeClass("fa-eye-slash").addClass("fa-eye"); 
     }
 });

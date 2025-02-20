@@ -8,7 +8,7 @@ class UsuarioController extends Controller
 {
     public function profile()
     {
-        // Lógica para mostrar el perfil del usuario
+        
         return view('profile');
     }
 }

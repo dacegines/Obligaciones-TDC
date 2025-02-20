@@ -39,8 +39,8 @@ class User extends Authenticatable
         'email',
         'password',
         'puesto',
-        
-        
+
+
     ];
 
     /**
@@ -77,31 +77,32 @@ class User extends Authenticatable
         ];
     }
 
-    public function adminlte_image(){
+    public function adminlte_image()
+    {
         return asset('img/images_user.png');
 
         //Imagen randon
         //return 'https://picsum.photos/300/300';
     }
 
-    public function adminlte_profile_url(){
+    public function adminlte_profile_url()
+    {
 
         return 'profile/username';
     }
 
     public function adminlte_desc()
     {
-        // Obtén el usuario autenticado
+
         $user = Auth::user();
-    
-        // Verifica si el usuario está autenticado
+
+
         if ($user) {
-            // Devuelve la ruta al perfil basada en el username del usuario autenticado
+
             return  $user->puesto;
         }
-    
-        // Devuelve un valor por defecto si el usuario no está autenticado
+
+
         return 'profile/guest';
     }
-    
 }

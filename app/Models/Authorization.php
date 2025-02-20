@@ -7,10 +7,10 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Authorization extends Model
 {
-    // Define la tabla asociada si el nombre no sigue la convención
+    
     protected $table = 'authorizations';
 
-    // Permitir asignación masiva en estos campos
+    // Permitir asignación en estos campos
     protected $fillable = [
         'name',
         'guard_name'

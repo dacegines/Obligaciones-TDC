@@ -64,7 +64,7 @@ class ObligacionesController extends Controller
         // Obtener los requisitos que el usuario puede ver según la tabla pivote
         $requisitosIds = ObligacionUsuario::where('user_id', $user->id)
         ->where('view', 1)
-        ->pluck('numero_evidencia') // Cambiado de numero_requisito a numero_evidencia
+        ->pluck('numero_evidencia') 
         ->toArray();
     
         if (!empty($requisitosIds)) {
@@ -126,7 +126,7 @@ class ObligacionesController extends Controller
             // Calcular el porcentaje completado
             $total_avance = ($completados * 100.0) / $totalRegistros;
 
-            // Redondear el total a 2 decimales y ajustar a 100% si está muy cerca de 100
+            
             $total_avance = round($total_avance, 2);
             if ($total_avance > 99.95 && $total_avance < 100.05) {
                 $total_avance = 100.00;
@@ -149,17 +149,17 @@ class ObligacionesController extends Controller
 
     public function getDetallesEvidencia(Request $request)
     {
-        // Validación de la entrada
+       
         $request->validate([
             'evidencia_id' => 'required|numeric|exists:requisitos,numero_evidencia',
-            'year' => 'nullable|numeric|min:2024|max:2040' // Año opcional
+            'year' => 'nullable|numeric|min:2024|max:2040' 
         ]);
 
         try {
             $evidenciaId = $request->evidencia_id;
-            $year = $request->year; // Año opcional
+            $year = $request->year; 
 
-            // Buscar el detalle asociado al numero_evidencia
+            
             $detalle = Requisito::where('numero_evidencia', $evidenciaId)->first();
 
             if ($detalle) {
@@ -195,7 +195,7 @@ class ObligacionesController extends Controller
 
     public function obtenerNotificaciones(Request $request)
     {
-        // Validación de la entrada
+        
         $request->validate([
             'id_notificaciones' => ['required', 'regex:/^[a-zA-Z]+\d+(\.\d+)?$/'],
         ]);
@@ -279,7 +279,7 @@ class ObligacionesController extends Controller
 
     public function cambiarEstado(Request $request)
     {
-        // Validación de la entrada (sin cambios)
+        
         $request->validate([
             'id' => 'required|integer|exists:requisitos,id',
         ]);
@@ -287,14 +287,14 @@ class ObligacionesController extends Controller
         try {
             $requisitoId = $request->id;
 
-            // Buscar el requisito (sin cambios)
+            // Buscar el requisito 
             $requisito = Requisito::find($requisitoId);
             if (!$requisito) {
                 $this->logInfo('Requisito no encontrado', ['requisito_id' => $requisitoId]);
                 return response()->json(['error' => 'Requisito no encontrado'], 404);
             }
 
-            // Cambiar el estado del requisito (sin cambios)
+            // Cambiar el estado del requisito 
             $requisito->approved = !$requisito->approved;
             $requisito->save();
 
@@ -311,7 +311,7 @@ class ObligacionesController extends Controller
             $destinatarios = array_merge($emailResponsables, $emailNotifications);
 
 
-            // Enviar correo a los responsables si hay destinatarios (sin cambios)
+            // Enviar correo a los responsables si hay destinatarios 
             if (count($destinatarios) > 0) {
                 Mail::to($destinatarios)->send(new EstadoEvidenciaCambiado(
                     $requisito->nombre,
@@ -363,18 +363,18 @@ class ObligacionesController extends Controller
     public function enviarCorreoDatosEvidencia(Request $request)
     {
         try {
-            // Validar que se haya recibido la evidencia
+            
             $request->validate([
                 'evidencia' => 'required|string'
             ]);
 
-            // Obtener todos los datos del request
+            
             $datos = $request->all();
 
-            // Buscar el requisito por la evidencia
+            
             $requisito = Requisito::where('evidencia', $datos['evidencia'])->first();
 
-            // Si no se encuentra el requisito, retornar error
+            
             if (!$requisito) {
                 $this->logWarning('No se encontró el requisito asociado a la evidencia', ['evidencia' => $datos['evidencia']]);
                 return response()->json(['error' => 'No se encontró el requisito asociado a la evidencia'], 404);
@@ -671,7 +671,7 @@ class ObligacionesController extends Controller
     public function obtenerUsuarios()
     {
         try {
-            // Obtener todos los usuarios con su nombre y puesto (ajusta los campos según lo que necesites)
+            // Obtener todos los usuarios con su nombre y puesto 
             $usuarios = DB::table('users')->select('id', 'name', 'puesto', 'email')->get();
 
             if ($usuarios->isEmpty()) {
@@ -687,7 +687,7 @@ class ObligacionesController extends Controller
 
     public function UsuarioNuevoTablaNotificaciones(Request $request)
     {
-        // Validación de los datos recibidos
+        
         $validatedData = $request->validate([
             'requisitoId' => 'required|integer|exists:requisitos,id',
             'numeroRequisito' => 'required|string|max:50',
@@ -699,7 +699,7 @@ class ObligacionesController extends Controller
         ]);
     
         try {
-            // Verificar si el registro ya existe
+            
             $existeRegistro = DB::table('notificaciones')->where([
                 ['requisito_id', $validatedData['numeroRequisito']],
                 ['numero_evidencia', $validatedData['evidenciaId']],
@@ -713,10 +713,10 @@ class ObligacionesController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'Ya existe esta notificación para este puesto.',
-                ], 200); // Código 200 para evitar errores de consola
+                ], 200); 
             }
     
-            // Insertar el registro si no existe
+            
             DB::table('notificaciones')->insert([
                 'requisito_id' => $validatedData['numeroRequisito'],
                 'numero_evidencia' => $validatedData['evidenciaId'],
@@ -731,9 +731,9 @@ class ObligacionesController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Usuario agregado a la tabla de notificaciones correctamente.',
-            ], 200); // Código 200: éxito
+            ], 200); 
         } catch (\Exception $e) {
-            // Registro de log en caso de error
+            
             Log::error('Error al guardar notificación: ', [
                 'error' => $e->getMessage(),
                 'datos' => $validatedData,
@@ -742,7 +742,7 @@ class ObligacionesController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Ocurrió un error al guardar el usuario en la tabla de notificaciones.',
-            ], 500); // Código 500: error del servidor
+            ], 500);
         }
     }
     
@@ -756,14 +756,14 @@ class ObligacionesController extends Controller
         ]);
     
         try {
-            // Buscar la notificación en la base de datos
+            
             $notificacion = DB::table('notificaciones')->where('id', $validatedData['id'])->first();
     
             if (is_null($notificacion)) {
                 return response()->json(['error' => 'La notificación no existe o ya fue eliminada.'], 404);
             }
     
-            // Eliminar la notificación
+            
             DB::table('notificaciones')->where('id', $validatedData['id'])->delete();
     
             return response()->json(['message' => 'La notificación se eliminó correctamente.'], 200);
