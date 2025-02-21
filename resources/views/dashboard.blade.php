@@ -54,7 +54,7 @@
             </div>
 
             <hr class="divider">
-            <div class="row text-center justify-content-center">
+            {{-- <div class="row text-center justify-content-center">
                 @foreach ([['icon' => 'fa-tasks', 'color' => 'primary', 'title' => 'Obligaciones', 'id' => 'total_obligaciones', 'value' => e($totalObligaciones), 'modal' => 'detailsModal'], ['icon' => 'fa-comments', 'color' => 'info', 'title' => 'Activas', 'id' => 'activas', 'value' => e($activas), 'modal' => 'detailsModalA'], ['icon' => 'fa-check', 'color' => 'success', 'title' => 'Completas', 'id' => 'completas', 'value' => e($completas), 'modal' => 'detailsModalC'], ['icon' => 'fa-times-circle', 'color' => 'danger', 'title' => 'Vencidas', 'id' => 'vencidas', 'value' => e($vencidas), 'modal' => 'detailsModalV'], ['icon' => 'fa-clock', 'color' => 'warning', 'title' => 'Por vencer', 'id' => 'por_vencer', 'value' => e($porVencer), 'modal' => 'detailsModalP']] as $card)
                     <div class="col-md-2">
                         <div class="card metric-card">
@@ -72,7 +72,89 @@
                         </div>
                     </div>
                 @endforeach
+            </div> --}}
+            <div class="row text-center justify-content-center">
+                <!-- Tarjeta de Obligaciones -->
+                <div class="col-lg col-6">
+                    <div class="small-box bg-primary">
+                        <div class="inner">
+                            <h3>{{ e($totalObligaciones) }}</h3>
+                            <p>Obligaciones</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                        <a href="#" class="small-box-footer" data-toggle="modal" data-target="#detailsModal">
+                            Ver Detalles <i class="fas fa-arrow-circle-right"></i>
+                        </a>
+                    </div>
+                </div>
+            
+                <!-- Tarjeta de Activas -->
+                <div class="col-lg col-6">
+                    <div class="small-box bg-info">
+                        <div class="inner">
+                            <h3>{{ e($activas) }}</h3>
+                            <p>Activas</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <a href="#" class="small-box-footer" data-toggle="modal" data-target="#detailsModalA">
+                            Ver Detalles <i class="fas fa-arrow-circle-right"></i>
+                        </a>
+                    </div>
+                </div>
+            
+                <!-- Tarjeta de Completas -->
+                <div class="col-lg col-6">
+                    <div class="small-box bg-success">
+                        <div class="inner">
+                            <h3>{{ e($completas) }}</h3>
+                            <p>Completas</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <a href="#" class="small-box-footer" data-toggle="modal" data-target="#detailsModalC">
+                            Ver Detalles <i class="fas fa-arrow-circle-right"></i>
+                        </a>
+                    </div>
+                </div>
+            
+                <!-- Tarjeta de Vencidas -->
+                <div class="col-lg col-6">
+                    <div class="small-box bg-danger">
+                        <div class="inner">
+                            <h3>{{ e($vencidas) }}</h3>
+                            <p>Vencidas</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                        <a href="#" class="small-box-footer" data-toggle="modal" data-target="#detailsModalV">
+                            Ver Detalles <i class="fas fa-arrow-circle-right"></i>
+                        </a>
+                    </div>
+                </div>
+            
+                <!-- Tarjeta de Por Vencer -->
+                <div class="col-lg col-6">
+                    <div class="small-box bg-warning">
+                        <div class="inner">
+                            <h3>{{ e($porVencer) }}</h3>
+                            <p>Por Vencer</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <a href="#" class="small-box-footer" data-toggle="modal" data-target="#detailsModalP">
+                            Ver Detalles <i class="fas fa-arrow-circle-right"></i>
+                        </a>
+                    </div>
+                </div>
             </div>
+            
             <div class="row">
                 <div class="col-md-6">
                     <div class="card">
@@ -108,6 +190,7 @@
                     </div>
                 </div>
             </div>
+            
         </div>
     </div>
 
@@ -241,12 +324,12 @@
 
     <script>
         window.chartData = {
-            fechas: @json($fechas),
-            vencidas: @json($vencidasG),
-            porVencer: @json($porVencerG),
-            completas: @json($completasG),
-            nombres: @json($nombres),
-            avancesTotales: @json($avancesTotales)
+            fechas: @json($fechasAgrupadas), // Usar $fechasAgrupadas en lugar de $fechas
+        vencidas: @json($vencidasAgrupadas),
+        porVencer: @json($porVencerAgrupadas),
+        completas: @json($completasAgrupadas),
+        nombres: @json($nombres),
+        avancesTotales: @json($avancesTotales)
         };
 
         // Ajuste de avances totales: redondear a 2 decimales y ajustar valores cercanos a 100%
@@ -372,74 +455,94 @@
             });
 
             // Estatus General Gráfico
-            new Chart(document.getElementById('vencidasPorVencerCompletasChart').getContext('2d'), {
-                type: 'line',
-                data: {
-                    labels: window.chartData.fechas,
-                    datasets: [{
-                            label: 'Vencidas',
-                            data: window.chartData.vencidas,
-                            borderColor: '#ff6384',
-                            backgroundColor: 'transparent',
-                            fill: false
-                        },
-                        {
-                            label: 'Por Vencer',
-                            data: window.chartData.porVencer,
-                            borderColor: '#ffcd56',
-                            backgroundColor: 'transparent',
-                            fill: false
-                        },
-                        {
-                            label: 'Completas',
-                            data: window.chartData.completas,
-                            borderColor: '#4bc0c0',
-                            backgroundColor: 'transparent',
-                            fill: false
-                        }
-                    ]
+
+
+new Chart(document.getElementById('vencidasPorVencerCompletasChart').getContext('2d'), {
+    type: 'line',
+    data: {
+        labels: @json($fechasAgrupadas), // Usar los meses agrupados
+        datasets: [
+            {
+                label: 'Vencidas',
+                data: @json($vencidasAgrupadas), // Datos agrupados por mes
+                borderColor: '#ff6384', // Color del borde (rojo)
+                backgroundColor: 'rgba(255, 99, 132, 0.2)', // Fondo semitransparente (rojo claro)
+                fill: true // Rellenar el área bajo la línea
+            },
+            {
+                label: 'Por Vencer',
+                data: @json($porVencerAgrupadas), // Datos agrupados por mes
+                borderColor: '#ffcd56', // Color del borde (amarillo)
+                backgroundColor: 'rgba(255, 205, 86, 0.2)', // Fondo semitransparente (amarillo claro)
+                fill: true // Rellenar el área bajo la línea
+            },
+            {
+                label: 'Completas',
+                data: @json($completasAgrupadas), // Datos agrupados por mes
+                borderColor: '#4bc0c0', // Color del borde (verde azulado)
+                backgroundColor: 'rgba(75, 192, 192, 0.2)', // Fondo semitransparente (verde azulado claro)
+                fill: true // Rellenar el área bajo la línea
+            }
+        ]
+    },
+    options: {
+        scales: {
+            x: {
+                ticks: {
+                    font: {
+                        size: 14 // Tamaño de fuente más pequeño para móviles
+                    }
                 },
-                options: {
-                    scales: {
-                        x: {
-                            ticks: {
-                                font: {
-                                    size: 18 // Ajusta el tamaño de fuente del eje X
-                                }
-                            },
-                            grid: {
-                                display: true
-                            }
-                        },
-                        y: {
-                            ticks: {
-                                font: {
-                                    size: 18 // Ajusta el tamaño de fuente del eje Y
-                                }
-                            },
-                            grid: {
-                                display: true
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top',
-                            labels: {
-                                font: {
-                                    size: 18 // Tamaño de fuente para las etiquetas de la leyenda
-                                }
-                            }
-                        },
-                        tooltip: {
-                            bodyFont: {
-                                size: 18 // Tamaño de fuente para el texto del tooltip
-                            }
-                        }
+                grid: {
+                    display: true
+                }
+            },
+            y: {
+                ticks: {
+                    font: {
+                        size: 14 // Tamaño de fuente más pequeño para móviles
+                    }
+                },
+                grid: {
+                    display: true
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top',
+                labels: {
+                    font: {
+                        size: 14 // Tamaño de fuente más pequeño para móviles
                     }
                 }
-            });
+            },
+            tooltip: {
+                bodyFont: {
+                    size: 14 // Tamaño de fuente más pequeño para móviles
+                }
+            },
+            datalabels: { // Configuración del plugin datalabels
+                anchor: 'end', // Posición de la etiqueta (final del punto)
+                align: 'top', // Alineación de la etiqueta
+                formatter: function(value, context) {
+                    return value; // Mostrar el valor del dato
+                },
+                color: '#000', // Color del texto
+                font: {
+                    size: 12, // Tamaño de la fuente
+                    weight: 'bold' // Negrita
+                }
+            }
+        },
+        animation: {
+            duration: 1000, // Duración de la animación en milisegundos
+            easing: 'easeInOutQuad' // Tipo de animación
+        }
+    },
+    plugins: [ChartDataLabels] // Habilitar el plugin
+});
 
             document.getElementById('tablasPeriodicidad').innerHTML = `
 <div class="row d-flex justify-content-center">
