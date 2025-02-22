@@ -34,7 +34,7 @@ class EstadoEvidenciaCambiado extends Mailable
     {
         return $this->view('emails.estado_evidencia')
         ->subject('Estado de la obligación actualizado')
-        ->from('noreply@tu-dominio.com', 'Sistema de Notificaciones TDC')
+        ->from('alertas.aws.supervia@supervia.mx')
         //->replyTo('soporte@tu-dominio.com', 'Soporte Técnico')
         //->cc('manager@tu-dominio.com', 'Manager')
         //->bcc('auditor@tu-dominio.com', 'Auditor')

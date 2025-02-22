@@ -35,7 +35,7 @@ class AlertaCorreo extends Mailable
     public function build()
     {
         return $this->subject("Alerta de Cumplimiento")
-                    ->from('noreply@tu-dominio.com', 'Sistema de Notificaciones TDC')
+                    ->from('alertas.aws.supervia@supervia.mx')
                     ->priority(1)
                     ->view('emails.alerta')
                     ->with([

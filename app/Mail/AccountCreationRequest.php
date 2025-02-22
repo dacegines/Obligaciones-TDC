@@ -30,7 +30,7 @@ class AccountCreationRequest extends Mailable
     public function build()
     {
         return $this->subject('Solicitud de Creación de Cuenta')
-                    ->from('noreply@tu-dominio.com', 'Sistema de Notificaciones TDC')
+                    ->from('alertas.aws.supervia@supervia.mx')
                     ->markdown('emails.account_creation_request')
                     ->priority(1)
                     ->with([

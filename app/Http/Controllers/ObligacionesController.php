@@ -331,11 +331,8 @@ class ObligacionesController extends Controller
 
             return response()->json(['success' => true, 'approved' => $requisito->approved]);
         } catch (\Exception $e) {
-            $this->logError('Error al cambiar el estado del requisito', [
-                'requisito_id' => $request->id ?? 'N/A',
-                'error' => $e->getMessage()
-            ]);
-            return response()->json(['error' => 'Ocurrió un error al cambiar el estado del requisito'], 500);
+            Log::error('Error al cambiar el estado del requisito: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 

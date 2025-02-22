@@ -24,7 +24,7 @@ class PasswordResetRequest extends Mailable
     public function build()
     {
         return $this->subject('Solicitud de Recuperación de Contraseña')
-                    ->from('noreply@tu-dominio.com', 'Sistema de Notificaciones TDC')
+                    ->from('alertas.aws.supervia@supervia.mx')
                     ->view('emails.password-reset-request')
                     ->priority(1)
                     ->with([

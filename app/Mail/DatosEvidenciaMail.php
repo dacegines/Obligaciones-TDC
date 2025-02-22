@@ -35,7 +35,7 @@ class DatosEvidenciaMail extends Mailable
     {
         $correo = $this->view('emails.datos_evidencia')
             ->subject('Nueva evidencia agregada.')
-            ->from('noreply@tu-dominio.com', 'Sistema de Notificaciones TDC')
+            ->from('alertas.aws.supervia@supervia.mx')
             ->priority(1)
             ->with([
                 'nombre' => $this->nombre,
