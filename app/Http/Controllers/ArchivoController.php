@@ -71,7 +71,9 @@ class ArchivoController extends Controller
                 $validatedData['fecha_limite_cumplimiento'],
                 $requisito->origen_obligacion,
                 $requisito->clausula_condicionante_articulo,
-                $rutaArchivo // Adjuntar el archivo recién subido
+                $rutaArchivo, 
+                $validatedData['usuario'], 
+                $validatedData['puesto'] 
             ));
 
             return response()->json(['success' => 'Archivo subido y correo enviado correctamente.']);

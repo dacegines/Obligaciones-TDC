@@ -17,10 +17,22 @@ class DatosEvidenciaMail extends Mailable
     public $fecha_limite_cumplimiento;
     public $origen_obligacion;
     public $clausula_condicionante_articulo;
-    public $rutaArchivo; // Ruta del archivo adjunto
+    public $rutaArchivo; 
+    public $usuario; 
+    public $puesto; 
 
-    public function __construct($nombre, $evidencia, $periodicidad, $responsable, $fecha_limite_cumplimiento, $origen_obligacion, $clausula_condicionante_articulo, $rutaArchivo = null)
-    {
+    public function __construct(
+        $nombre,
+        $evidencia,
+        $periodicidad,
+        $responsable,
+        $fecha_limite_cumplimiento,
+        $origen_obligacion,
+        $clausula_condicionante_articulo,
+        $rutaArchivo = null,
+        $usuario = null,
+        $puesto = null 
+    ) {
         $this->nombre = $nombre;
         $this->evidencia = $evidencia;
         $this->periodicidad = $periodicidad;
@@ -28,7 +40,9 @@ class DatosEvidenciaMail extends Mailable
         $this->fecha_limite_cumplimiento = $fecha_limite_cumplimiento;
         $this->origen_obligacion = $origen_obligacion;
         $this->clausula_condicionante_articulo = $clausula_condicionante_articulo;
-        $this->rutaArchivo = $rutaArchivo; // Asigna la ruta del archivo adjunto
+        $this->rutaArchivo = $rutaArchivo;
+        $this->usuario = $usuario; 
+        $this->puesto = $puesto; 
     }
 
     public function build()
@@ -45,6 +59,8 @@ class DatosEvidenciaMail extends Mailable
                 'fecha_limite_cumplimiento' => $this->fecha_limite_cumplimiento,
                 'origen_obligacion' => $this->origen_obligacion,
                 'clausula_condicionante_articulo' => $this->clausula_condicionante_articulo,
+                'usuario' => $this->usuario, 
+                'puesto' => $this->puesto, 
             ]);
 
         // Adjuntar el archivo si existe

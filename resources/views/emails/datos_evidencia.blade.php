@@ -53,9 +53,12 @@
 
 <body>
     <div class="container">
+        <p><strong>El usuario:</strong> {{ $usuario }} - {{ $puesto }}</p> 
         <div
             style="background-color: #dfd508; border: 1px solid black; color: white; padding: 15px; border-radius: 5px; font-size: 16px; color:black;">
-            <i class="fas fa-check"></i> Se ha subido una nueva evidencia a esta Obligación.
+            
+            
+            <i class="fas fa-check"></i> Ha subido una nueva evidencia a esta Obligación.
         </div>
         <br>
         <div class="header">
@@ -79,6 +82,7 @@
                     <div class="section-header">📜 Cláusula, condicionante, o artículo:</div>
                     <p style="text-align: justify;">{{ $clausula_condicionante_articulo }}</p>
                     <hr>
+
                 </div>
             </div>
         </div>
