@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resumen PDF</title>
+    <title>Resumen de Obligaciones TDC</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body { font-family: Arial, sans-serif; font-size: 5px; }
@@ -11,7 +11,7 @@
         h2, h3 { text-align: center; font-size: 18px; margin-top: 0px; }
         .content { margin: 20px; font-size: 16px; }
         .chart { text-align: center; margin-top: 10px; }
-        .chart img { width: 100%;  }
+        .chart img { width: 95%;  }
 
         /* Estilos para la tabla de estadísticas */
         .stats-table {
@@ -94,7 +94,7 @@
     <div class="header-logo">
         <img src="{{ public_path('img/logo_supervia.png') }}" alt="Logo">
     </div>
-    <h2>Resumen de Obligaciones del Año {{ $year }}</h2>
+    <h2>Resumen de Obligaciones TDC del Año {{ $year }}</h2>
 {{-- Validación para mostrar el puesto solo si no está en la lista especificada --}}
 @php
     $puestosExcluidos = [
