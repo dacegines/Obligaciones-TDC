@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use App\Models\EvidenceNotification;
 use App\Mail\DatosEvidenciaMail;
+use App\Mail\ArchivoEliminadoMail;
 
 class ArchivoController extends Controller
 {
@@ -135,13 +136,46 @@ class ArchivoController extends Controller
                 // 2. Insertar los datos en la tabla "deleted_files"
                 DeletedFile::create($datosArchivo);
     
-                // 3. Eliminar el archivo del almacenamiento
-                $rutaArchivo = 'public/' . $archivo->ruta_archivo;
-                if (Storage::exists($rutaArchivo)) {
-                    Storage::delete($rutaArchivo);
+                // 3. Enviar correo de notificación (antes de eliminar el archivo)
+                $requisito = Requisito::find($archivo->requisito_id);
+    
+                if ($requisito) {
+                    // Obtener destinatarios
+                    $emailNotifications = EvidenceNotification::where('type', 1)->pluck('email')->toArray();
+                    $emailResponsables = !empty($requisito->email) ? [$requisito->email] : [];
+                    $destinatarios = array_merge($emailResponsables, $emailNotifications);
+    
+                    if (!empty($destinatarios)) {
+                        // Ruta completa del archivo
+                        $rutaArchivo = storage_path('app/public/' . $archivo->ruta_archivo);
+    
+                        // Verificar si el archivo existe antes de adjuntarlo
+                        if (file_exists($rutaArchivo)) {
+                            Mail::to($destinatarios)->send(new ArchivoEliminadoMail(
+                                $requisito->nombre, // Nombre del requisito
+                                $requisito->evidencia, // Evidencia
+                                $requisito->periodicidad, // Periodicidad
+                                $requisito->responsable, // Responsable
+                                $archivo->fecha_limite_cumplimiento, // Fecha límite
+                                $requisito->origen_obligacion, // Origen de la obligación
+                                $requisito->clausula_condicionante_articulo, // Cláusula, condicionante o artículo
+                                $archivo->usuario, // Usuario que eliminó el archivo
+                                $archivo->puesto, // Puesto del usuario
+                                $rutaArchivo // Ruta del archivo adjunto
+                            ));
+                        } else {
+                            Log::error('El archivo no existe en la ruta: ' . $rutaArchivo);
+                        }
+                    }
                 }
     
-                // 4. Eliminar el registro de la tabla "archivos"
+                // 4. Eliminar el archivo del almacenamiento
+                $rutaArchivoStorage = 'public/' . $archivo->ruta_archivo;
+                if (Storage::exists($rutaArchivoStorage)) {
+                    Storage::delete($rutaArchivoStorage);
+                }
+    
+                // 5. Eliminar el registro de la tabla "archivos"
                 $archivo->delete();
     
                 return response()->json(['success' => true, 'message' => 'Archivo eliminado correctamente']);
