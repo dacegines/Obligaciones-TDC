@@ -908,6 +908,8 @@ function cargarArchivos(requisitoId, evidenciaId, fechaLimite) {
         })
         .then(function (response) {
             const archivos = response.data.archivos;
+            const currentUserId = response.data.currentUserId; // Obtener el ID del usuario actual
+
             let tableBody =
                 archivos.length > 0
                     ? archivos
@@ -944,11 +946,7 @@ function cargarArchivos(requisitoId, evidenciaId, fechaLimite) {
                         data-requisito-id="${sanitizeInput(requisitoId)}" 
                         data-evidencia-id="${sanitizeInput(evidenciaId)}" 
                         data-fecha-limite="${sanitizeInput(fechaLimite)}"
-                        ${
-                            ["admin", "superUsuario"].includes(userRole)
-                                ? ""
-                                : "disabled"
-                        }
+                        ${(["admin", "superUsuario"].includes(userRole) || archivo.user_id === currentUserId ? "" : "disabled")}
                     >
                         <i class="fas fa-trash-alt"></i>
                     </button>
@@ -972,6 +970,7 @@ function cargarArchivos(requisitoId, evidenciaId, fechaLimite) {
             document.getElementById("archivosTableBody").innerHTML = tableBody;
 
             agregarEventos();
+            console.log("archivo.user_id:", archivo.user_id, "currentUserId:", currentUserId); // Verificar valores
         })
         .catch(function (error) {
             console.error("Error al cargar los archivos:", error);

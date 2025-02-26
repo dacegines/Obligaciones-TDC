@@ -33,6 +33,7 @@ class ArchivoController extends Controller
 
             // Guardar el archivo en la base de datos
             $archivo = new Archivo();
+            $archivo->user_id = Auth::id();
             $archivo->nombre_archivo = $fileName;
             $archivo->ruta_archivo = $filePath;
             $archivo->requisito_id = $validatedData['requisito_id'];
@@ -87,15 +88,21 @@ class ArchivoController extends Controller
         $requisitoId = $request->input('requisito_id');
         $evidenciaId = $request->input('evidencia_id');
         $fechaLimite = $request->input('fecha_limite');
-
+    
         // Obtén los archivos relacionados con el requisito, la evidencia y la fecha límite
         $archivos = Archivo::where('requisito_id', $requisitoId)
             ->where('evidencia', $evidenciaId)
             ->whereDate('fecha_limite_cumplimiento', $fechaLimite) // Filtrar por la fecha límite
             ->get();
-
-        
-        return response()->json(['archivos' => $archivos]);
+    
+        // Obtener el ID del usuario actual
+        $currentUserId = Auth::id();
+    
+        // Devolver los archivos junto con el ID del usuario actual
+        return response()->json([
+            'archivos' => $archivos,
+            'currentUserId' => $currentUserId, // Incluir el ID del usuario actual
+        ]);
     }
 
 
