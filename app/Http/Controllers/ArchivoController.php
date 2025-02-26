@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth; // Para obtener el usuario autenticado
 use App\Mail\ArchivoSubidoMail;
 use App\Models\Requisito;
+use App\Models\DeletedFile;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use App\Models\EvidenceNotification;
@@ -113,25 +114,42 @@ class ArchivoController extends Controller
             'id' => 'required|integer|exists:archivos,id',
             'ruta_archivo' => 'required|string',
         ]);
-
+    
         $archivo = Archivo::find($validatedData['id']);
-
+    
         if ($archivo) {
             try {
+                // 1. Recuperar los datos del archivo
+                $datosArchivo = [
+                    'file_name' => $archivo->nombre_archivo,
+                    'file_path' => $archivo->ruta_archivo,
+                    'requirement_id' => $archivo->requisito_id,
+                    'evidence' => $archivo->evidencia,
+                    'compliance_deadline' => $archivo->fecha_limite_cumplimiento,
+                    'user_name' => $archivo->usuario,
+                    'user_position' => $archivo->puesto,
+                    'user_id' => $archivo->user_id,
+                    'deleted_by' => Auth::id(), // ID del usuario que eliminó el archivo
+                ];
+    
+                // 2. Insertar los datos en la tabla "deleted_files"
+                DeletedFile::create($datosArchivo);
+    
+                // 3. Eliminar el archivo del almacenamiento
                 $rutaArchivo = 'public/' . $archivo->ruta_archivo;
-
                 if (Storage::exists($rutaArchivo)) {
                     Storage::delete($rutaArchivo);
                 }
-
+    
+                // 4. Eliminar el registro de la tabla "archivos"
                 $archivo->delete();
-
+    
                 return response()->json(['success' => true, 'message' => 'Archivo eliminado correctamente']);
             } catch (\Exception $e) {
                 return response()->json(['success' => false, 'message' => 'Error al eliminar el archivo'], 500);
             }
         }
-
+    
         return response()->json(['success' => false, 'message' => 'Archivo no encontrado'], 404);
     }
 }
