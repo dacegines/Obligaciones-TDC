@@ -60,6 +60,7 @@ class ArchivoEliminadoMail extends Mailable
     public function build()
     {
         $correo = $this->subject('Eliminación de archivo adjunto')
+                       ->from('alertas.aws.supervia@supervia.mx')
                        ->view('emails.archivo_eliminado')
                        ->priority(1)
                        ->with([
