@@ -908,74 +908,124 @@ function cargarArchivos(requisitoId, evidenciaId, fechaLimite) {
         })
         .then(function (response) {
             const archivos = response.data.archivos;
-            const currentUserId = response.data.currentUserId; 
+            const currentUserId = response.data.currentUserId;
+            
+            let container = document.getElementById("archivosContainer");
+            container.innerHTML = ""; // Limpiar el contenedor antes de agregar contenido
 
-            let tableBody =
-                archivos.length > 0
-                    ? archivos
-                          .map(
-                              (archivo, index) => `
-            <tr>
-                <td>${index + 1}</td>
-                <td>${sanitizeInput(
-                    archivo.nombre_archivo.split("_").slice(1).join("_")
-                )}</td>
-                <td>${sanitizeInput(archivo.usuario)}</td>
-                <td>${sanitizeInput(archivo.puesto)}</td>
-                <td>${new Date(
-                    sanitizeInput(archivo.created_at)
-                ).toLocaleString()}</td>
-                <td>
-                    <button 
-                        class="btn btn-sm btn-info btn-ver-archivo" 
-                        data-url="${storageUploadsUrl}/${sanitizeInput(
-                                  archivo.nombre_archivo
-                              )}"
-                        ${userRole === "invitado" ? "disabled" : ""}
-                    >
-                        <i class="fas fa-eye"></i>
-                    </button>
-                </td>
-                <td>
-                    <button 
-                        class="btn btn-sm btn-danger btn-eliminar-archivo" 
-                        data-id="${sanitizeInput(archivo.id)}" 
-                        data-url="${storageUploadsUrl}/${sanitizeInput(
-                                  archivo.nombre_archivo
-                              )}"
-                        data-requisito-id="${sanitizeInput(requisitoId)}" 
-                        data-evidencia-id="${sanitizeInput(evidenciaId)}" 
-                        data-fecha-limite="${sanitizeInput(fechaLimite)}"
-                        ${(["admin", "superUsuario"].includes(userRole) || archivo.user_id === currentUserId ? "" : "disabled")}
-                    >
-                        <i class="fas fa-trash-alt"></i>
-                    </button>
-                </td>
-                <td>
-                    <button 
-                        class="btn btn-sm btn-success btn-descargar-archivo" 
-                        data-url="${storageUploadsUrl}/${sanitizeInput(
-                                  archivo.nombre_archivo
-                              )}"
-                        ${userRole === "invitado" ? "disabled" : ""}
-                    >
-                        <i class="fas fa-download"></i>
-                    </button>
-                </td>
-            </tr>`
-                          )
-                          .join("")
-                    : '<tr><td colspan="8">No hay archivos adjuntos</td></tr>';
+            if (archivos.length === 0) {
+                container.innerHTML = `<p class="text-center text-muted">No hay archivos adjuntos</p>`;
+                return;
+            }
 
-            document.getElementById("archivosTableBody").innerHTML = tableBody;
+            archivos.forEach((archivo, index) => {
+                let card = document.createElement("div");
+                card.classList.add("card", "mb-3", "shadow-sm", "position-relative");
+
+                card.innerHTML = `
+                    <div class="card-body">
+                        <!-- ID del archivo en la esquina superior derecha -->
+                        <span class="badge badge-secondary position-absolute" 
+                              style="top: 10px; right: 10px;">
+                              ID: ${sanitizeInput(archivo.id)}
+                        </span>
+
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="flex-grow-1">
+                                <h5 class="mb-1">
+                                    <i class="fas fa-file-alt"></i> 
+                                    ${sanitizeInput(archivo.nombre_archivo.split("_").slice(1).join("_"))}
+                                </h5>
+                                <p class="mb-1 text-muted">
+                                    <i class="fas fa-paperclip"></i> <strong>Archivo adjunto por:</strong> 
+                                    <i class="fas fa-user"></i> ${sanitizeInput(archivo.usuario)} - 
+                                    <i class="fas fa-briefcase"></i> ${sanitizeInput(archivo.puesto)}
+                                </p>
+                                <p class="mb-1 text-muted">
+                                    <i class="fas fa-calendar-alt"></i> ${new Date(sanitizeInput(archivo.created_at)).toLocaleString()}
+                                </p>
+                            </div>
+                            <div class="d-flex">
+                                <button 
+                                    class="btn btn-sm btn-info btn-ver-archivo mr-2" 
+                                    data-url="${storageUploadsUrl}/${sanitizeInput(archivo.nombre_archivo)}"
+                                    ${userRole === "invitado" ? "disabled" : ""}
+                                >
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button 
+                                    class="btn btn-sm btn-success btn-descargar-archivo mr-2" 
+                                    data-url="${storageUploadsUrl}/${sanitizeInput(archivo.nombre_archivo)}"
+                                    ${userRole === "invitado" ? "disabled" : ""}
+                                >
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                <button 
+                                    class="btn btn-sm btn-danger btn-eliminar-archivo" 
+                                    data-id="${sanitizeInput(archivo.id)}" 
+                                    data-url="${storageUploadsUrl}/${sanitizeInput(archivo.nombre_archivo)}"
+                                    data-requisito-id="${sanitizeInput(requisitoId)}" 
+                                    data-evidencia-id="${sanitizeInput(evidenciaId)}" 
+                                    data-fecha-limite="${sanitizeInput(fechaLimite)}"
+                                    ${(["admin", "superUsuario"].includes(userRole) || archivo.user_id === currentUserId ? "" : "disabled")}
+                                >
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Botones para mostrar comentarios -->
+                        <div class="mt-2 d-flex">
+                            <!-- Botón Collapse para comentarios -->
+                            <button class="btn btn-sm btn-secondary mr-2" data-toggle="collapse" 
+                                data-target="#comentarios-${archivo.id}" aria-expanded="false">
+                                <i class="fas fa-comments"></i>
+                                Comentarios (${archivo.comentarios ? archivo.comentarios.length : 0})
+                            </button>
+                        </div>
+
+                        <!-- Sección colapsable de Comentarios -->
+                        <div class="collapse mt-2" id="comentarios-${archivo.id}">
+                            <div class="card card-body bg-light p-2">
+                                <div id="lista-comentarios-${archivo.id}">
+                                    ${archivo.comentarios && archivo.comentarios.length > 0
+                                        ? archivo.comentarios.map(comentario => `
+                                            <div class="d-flex align-items-start mb-2">
+                                                <i class="fas fa-comment text-primary mr-2"></i>
+                                                <div>
+                                                    <strong>${sanitizeInput(comentario.usuario)}</strong>
+                                                    <p class="mb-1">${sanitizeInput(comentario.texto)}</p>
+                                                    <small class="text-muted">${new Date(sanitizeInput(comentario.fecha)).toLocaleString()}</small>
+                                                </div>
+                                            </div>
+                                        `).join("")
+                                        : `<p class="text-muted">No hay comentarios aún.</p>`
+                                    }
+                                </div>
+
+                                <!-- Formulario para agregar comentario -->
+                                <div class="mt-2">
+                                    <textarea class="form-control mb-2" rows="2" id="comentario-texto-${archivo.id}" placeholder="Escribe un comentario..."></textarea>
+                                    <button class="btn btn-sm btn-primary" onclick="agregarComentario(${archivo.id})">Enviar</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
 
             agregarEventos();
-            
         })
         .catch(function (error) {
             console.error("Error al cargar los archivos:", error);
         });
 }
+
+
+
 function agregarEventos() {
     document.querySelectorAll(".btn-ver-archivo").forEach((button) => {
         button.addEventListener("click", function () {
@@ -1035,7 +1085,7 @@ function agregarEventos() {
                             );
                             Swal.fire(
                                 "Error",
-                                "Ocurrió un problema al eliminar el archivo.",
+                                "Ocurrió un problema al intentar eliminar el archivo.<br>Póngase en contacto con el administrador del sistema.",
                                 "error"
                             );
                         });

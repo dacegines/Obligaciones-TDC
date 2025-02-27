@@ -313,24 +313,9 @@
                                         </p>
                                     @endif
 
-                                    <table class="table table-striped table-bordered text-center">
-                                        <thead class="thead-dark">
-                                            <tr>
-                                                <th>#</th>
-                                                <th>Nombre del Archivo</th>
-                                                <th>Usuario</th>
-                                                <th>Puesto</th>
-                                                <th>Fecha de Subida</th>
-                                                <th>Ver</th>
-                                                <th>Eliminar</th>
-                                                <th>Descargar</th>
-
-                                            </tr>
-                                        </thead>
-                                        <tbody id="archivosTableBody">
-                                            
-                                        </tbody>
-                                    </table>
+                                    <div id="archivosContainer" class="mt-3">
+                                        <!-- Aquí se insertarán las tarjetas dinámicamente desde cargarArchivos() -->
+                                    </div>
                                 </div>
                                 <hr>
                                 
