@@ -95,7 +95,7 @@ class ArchivoController extends Controller
         $archivos = Archivo::where('requisito_id', $requisitoId)
             ->where('evidencia', $evidenciaId)
             ->whereDate('fecha_limite_cumplimiento', $fechaLimite)
-            ->with(['comments.user']) // Asegura que se traigan los usuarios de los comentarios
+            ->with(['comments.user:id,name,puesto']) // Asegura que se traigan los usuarios de los comentarios
             ->withCount('comments')
             ->get();
     
@@ -117,74 +117,68 @@ class ArchivoController extends Controller
     
         $archivo = Archivo::find($validatedData['id']);
     
-        if ($archivo) {
-            try {
-                // 1. Recuperar los datos del archivo
-                $datosArchivo = [
-                    'file_name' => $archivo->nombre_archivo,
-                    'file_path' => $archivo->ruta_archivo,
-                    'requirement_id' => $archivo->requisito_id,
-                    'evidence' => $archivo->evidencia,
-                    'compliance_deadline' => $archivo->fecha_limite_cumplimiento,
-                    'user_name' => $archivo->usuario,
-                    'user_position' => $archivo->puesto,
-                    'user_id' => $archivo->user_id,
-                    'deleted_by' => Auth::id(), // ID del usuario que eliminó el archivo
-                ];
-    
-                // 2. Insertar los datos en la tabla "deleted_files"
-                DeletedFile::create($datosArchivo);
-    
-                // 3. Enviar correo de notificación (antes de eliminar el archivo)
-                $requisito = Requisito::find($archivo->requisito_id);
-    
-                if ($requisito) {
-                    // Obtener destinatarios
-                    $emailNotifications = EvidenceNotification::where('type', 1)->pluck('email')->toArray();
-                    $emailResponsables = !empty($requisito->email) ? [$requisito->email] : [];
-                    $destinatarios = array_merge($emailResponsables, $emailNotifications);
-    
-                    if (!empty($destinatarios)) {
-                        // Ruta completa del archivo
-                        $rutaArchivo = storage_path('app/public/' . $archivo->ruta_archivo);
-    
-                        // Verificar si el archivo existe antes de adjuntarlo
-                        if (file_exists($rutaArchivo)) {
-                            Mail::to($destinatarios)->send(new ArchivoEliminadoMail(
-                                $requisito->nombre, // Nombre del requisito
-                                $requisito->evidencia, // Evidencia
-                                $requisito->periodicidad, // Periodicidad
-                                $requisito->responsable, // Responsable
-                                $archivo->fecha_limite_cumplimiento, // Fecha límite
-                                $requisito->origen_obligacion, // Origen de la obligación
-                                $requisito->clausula_condicionante_articulo, // Cláusula, condicionante o artículo
-                                $archivo->usuario, // Usuario que eliminó el archivo
-                                $archivo->puesto, // Puesto del usuario
-                                $rutaArchivo // Ruta del archivo adjunto
-                            ));
-                        } else {
-                            Log::error('El archivo no existe en la ruta: ' . $rutaArchivo);
-                        }
-                    }
-                }
-    
-                // 4. Eliminar el archivo del almacenamiento
-                $rutaArchivoStorage = 'public/' . $archivo->ruta_archivo;
-                if (Storage::exists($rutaArchivoStorage)) {
-                    Storage::delete($rutaArchivoStorage);
-                }
-    
-                // 5. Eliminar el registro de la tabla "archivos"
-                $archivo->delete();
-    
-                return response()->json(['success' => true, 'message' => 'Archivo eliminado correctamente']);
-            } catch (\Exception $e) {
-                return response()->json(['success' => false, 'message' => 'Error al eliminar el archivo'], 500);
-            }
+        if (!$archivo) {
+            return response()->json(['success' => false, 'message' => 'Archivo no encontrado.'], 404);
         }
     
-        return response()->json(['success' => false, 'message' => 'Archivo no encontrado'], 404);
+        try {
+            // 1. Guardar información del archivo en la tabla "deleted_files"
+            DeletedFile::create([
+                'file_name' => $archivo->nombre_archivo,
+                'file_path' => $archivo->ruta_archivo,
+                'requirement_id' => $archivo->requisito_id,
+                'evidence' => $archivo->evidencia,
+                'compliance_deadline' => $archivo->fecha_limite_cumplimiento,
+                'user_name' => $archivo->usuario,
+                'user_position' => $archivo->puesto,
+                'user_id' => $archivo->user_id,
+                'deleted_by' => Auth::id(),
+            ]);
+    
+            // 2. Notificar por correo si es necesario
+            $requisito = Requisito::find($archivo->requisito_id);
+            if ($requisito) {
+                $emailNotifications = EvidenceNotification::where('type', 1)->pluck('email')->toArray();
+                $emailResponsables = !empty($requisito->email) ? [$requisito->email] : [];
+                $destinatarios = array_merge($emailResponsables, $emailNotifications);
+    
+                if (!empty($destinatarios)) {
+                    $rutaArchivo = storage_path('app/public/' . $archivo->ruta_archivo);
+                    if (file_exists($rutaArchivo)) {
+                        Mail::to($destinatarios)->send(new ArchivoEliminadoMail(
+                            $requisito->nombre,
+                            $requisito->evidencia,
+                            $requisito->periodicidad,
+                            $requisito->responsable,
+                            $archivo->fecha_limite_cumplimiento,
+                            $requisito->origen_obligacion,
+                            $requisito->clausula_condicionante_articulo,
+                            $archivo->usuario,
+                            $archivo->puesto,
+                            $rutaArchivo
+                        ));
+                    } else {
+                        Log::error('El archivo no existe en la ruta: ' . $rutaArchivo);
+                    }
+                }
+            }
+    
+            // 3. Eliminar el archivo del almacenamiento
+            $rutaArchivoStorage = 'public/' . $archivo->ruta_archivo;
+            if (Storage::exists($rutaArchivoStorage)) {
+                Storage::delete($rutaArchivoStorage);
+            }
+    
+            // 4. Eliminar el archivo (esto también eliminará los comentarios automáticamente)
+            $archivo->delete();
+    
+            return response()->json(['success' => true, 'message' => 'Archivo y comentarios eliminados correctamente.']);
+    
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Error al eliminar el archivo'], 500);
+        }
     }
+    
 
 
 
@@ -210,6 +204,7 @@ public function storeComment(Request $request)
             'id' => $comment->id,
             'archivo_id' => $comment->archivo_id,
             'user' => Auth::user()->name, // Obtener el nombre del usuario autenticado
+            'puesto' => Auth::user()->puesto,
             'text' => $comment->comment,
             'fecha' => now()->format('Y-m-d H:i:s')
         ]

@@ -63,6 +63,15 @@ public function storeComment(Request $request)
     ], 201);
 }
 
+    // Eliminar comentarios en cascada al eliminar un archivo
+    protected static function boot() {
+        parent::boot();
+
+        static::deleting(function ($archivo) {
+            $archivo->comments()->delete(); // Esto eliminará los comentarios asociados
+        });
+    }
+
 }
 
 

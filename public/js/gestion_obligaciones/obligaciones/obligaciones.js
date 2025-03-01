@@ -1009,16 +1009,17 @@ function cargarArchivos(requisitoId, evidenciaId, fechaLimite) {
                         <!-- Sección colapsable de Comentarios -->
                         <div class="collapse mt-2" id="comentarios-${archivo.id}">
                             <div class="card card-body bg-light p-2">
-                                <div id="lista-comentarios-${archivo.id}">
-                                    ${comentariosHTML}
-                                </div>
-
-                                <!-- Formulario para agregar un nuevo comentario -->
-                                <div class="mt-2">
+                                <!-- Formulario para agregar un nuevo comentario (ahora en la parte superior) -->
+                                <div class="mb-3">
                                     <textarea class="form-control mb-2" rows="2" id="comentario-texto-${archivo.id}" placeholder="Escribe un comentario..."></textarea>
                                     <button class="btn btn-sm btn-success" onclick="agregarComentario(${archivo.id})">
                                         <i class="fas fa-paper-plane"></i> Agregar comentario
                                     </button>
+                                </div>
+
+                                <!-- Lista de comentarios -->
+                                <div id="lista-comentarios-${archivo.id}">
+                                    ${comentariosHTML}
                                 </div>
                             </div>
                         </div>
@@ -1053,20 +1054,23 @@ function agregarComentario(archivoId) {
         let nuevoComentario = response.data.comment;
 
         // Construir el HTML del nuevo comentario
-        let comentarioHTML = `
-            <div class="mb-3 p-2 bg-light rounded" id="comentario-${nuevoComentario.id}">
-                <div class="d-flex align-items-center">
-                    <i class="fas fa-comment text-primary mr-2"></i>
-                    <strong>${nuevoComentario.user}</strong>
-                </div>
-                <p class="mb-1">${nuevoComentario.text}</p>
-                <small class="text-muted d-block">${nuevoComentario.fecha}</small>
-                <button class="btn btn-link text-danger p-0 mt-1" 
-                    onclick="eliminarComentario(${nuevoComentario.id}, ${archivoId})"
-                    style="font-size: 0.9rem; text-decoration: none;">
-                    <span class="text-danger">Eliminar comentario</span>
-                </button>
+        let comentarioHTML = document.createElement("div");
+        comentarioHTML.classList.add("mb-3", "p-2", "bg-light", "rounded");
+        comentarioHTML.id = `comentario-${nuevoComentario.id}`;
+        comentarioHTML.style.opacity = "0"; // 🔥 Iniciar con opacidad 0 para animación
+
+        comentarioHTML.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="fas fa-comment text-primary mr-2"></i>
+                <strong>${nuevoComentario.user}</strong> - <span class="text-muted">${nuevoComentario.puesto}</span>
             </div>
+            <p class="mb-1">${nuevoComentario.text}</p>
+            <small class="text-muted d-block">${nuevoComentario.fecha}</small>
+            <button class="btn btn-link text-danger p-0 mt-1" 
+                onclick="eliminarComentario(${nuevoComentario.id}, ${archivoId})"
+                style="font-size: 0.9rem; text-decoration: none;">
+                <span class="text-danger">Eliminar comentario</span>
+            </button>
         `;
 
         // Obtener el contenedor de comentarios
@@ -1077,8 +1081,13 @@ function agregarComentario(archivoId) {
             listaComentarios.innerHTML = ""; // Limpiar el mensaje
         }
 
-        // Agregar el nuevo comentario al contenedor
-        listaComentarios.innerHTML += comentarioHTML;
+        // Agregar el nuevo comentario con una animación de aparición
+        listaComentarios.prepend(comentarioHTML); // Agregar comentario al inicio
+
+        setTimeout(() => {
+            comentarioHTML.style.transition = "opacity 0.5s ease-in"; 
+            comentarioHTML.style.opacity = "1"; // 🔥 Aparecer lentamente
+        }, 50); // Un pequeño retraso para que la animación funcione
 
         // Actualizar el contador de comentarios
         actualizarContadorComentarios(archivoId, 1);
@@ -1095,24 +1104,32 @@ function agregarComentario(archivoId) {
 
 
 
+
 function eliminarComentario(comentarioId, archivoId) {
-    let url = eliminarComentarioUrl.replace(':id', comentarioId); // Reemplazar ":id" con el ID real
+    let url = eliminarComentarioUrl.replace(':id', comentarioId);
 
     axios.delete(url)
         .then(response => {
-            // Eliminar comentario del DOM
             let comentarioElemento = document.getElementById(`comentario-${comentarioId}`);
+
             if (comentarioElemento) {
-                comentarioElemento.remove();
-            }
+                
+                comentarioElemento.style.transition = "opacity 0.5s ease-out"; 
+                comentarioElemento.style.opacity = "0";
 
-            // Actualizar el contador de comentarios
-            actualizarContadorComentarios(archivoId, -1);
+                
+                setTimeout(() => {
+                    comentarioElemento.remove();
 
-            // Si no hay más comentarios, mostrar el mensaje "No hay comentarios aún"
-            let listaComentarios = document.getElementById(`lista-comentarios-${archivoId}`);
-            if (listaComentarios.children.length === 0) {
-                listaComentarios.innerHTML = `<p class="text-muted">No hay comentarios aún.</p>`;
+                    
+                    actualizarContadorComentarios(archivoId, -1);
+
+                    
+                    let listaComentarios = document.getElementById(`lista-comentarios-${archivoId}`);
+                    if (listaComentarios.children.length === 0) {
+                        listaComentarios.innerHTML = `<p class="text-muted">No hay comentarios aún.</p>`;
+                    }
+                }, 500); 
             }
         })
         .catch(error => {
@@ -1122,12 +1139,13 @@ function eliminarComentario(comentarioId, archivoId) {
 
 
 
+
 function actualizarContadorComentarios(archivoId, cambio) {
     let contadorComentarios = document.querySelector(`[data-target="#comentarios-${archivoId}"]`);
     if (contadorComentarios) {
-        let countTexto = contadorComentarios.innerText.match(/\d+/); // Extraer el número actual
-        let count = countTexto ? parseInt(countTexto[0]) : 0; // Convertir a número
-        let nuevoCount = Math.max(0, count + cambio); // Asegurarse de que no sea negativo
+        let countTexto = contadorComentarios.innerText.match(/\d+/); 
+        let count = countTexto ? parseInt(countTexto[0]) : 0; 
+        let nuevoCount = Math.max(0, count + cambio); 
         contadorComentarios.innerHTML = `<i class="fas fa-comments"></i> Comentarios (${nuevoCount})`;
     }
 }
