@@ -908,7 +908,7 @@ function cargarArchivos(requisitoId, evidenciaId, fechaLimite) {
         })
         .then(function (response) {
             const archivos = response.data.archivos;
-            const currentUserId = response.data.currentUserId; // ID del usuario autenticado
+            const currentUserId = response.data.currentUserId;
 
             let container = document.getElementById("archivosContainer");
             container.innerHTML = "";
@@ -924,27 +924,27 @@ function cargarArchivos(requisitoId, evidenciaId, fechaLimite) {
 
                 // Generar HTML de los comentarios existentes
                 let comentariosHTML = archivo.comments.length > 0 
-                ? archivo.comments.map(comentario => `
-                    <div class="mb-3 p-2 bg-light rounded" id="comentario-${comentario.id}">
-                        <div class="d-flex align-items-center">
-                            <i class="fas fa-comment text-primary mr-2"></i>
-                            <strong>${sanitizeInput(comentario.user.name)}</strong> - 
-                            <span class="text-muted">${sanitizeInput(comentario.user.puesto)}</span>
+                    ? archivo.comments.map(comentario => `
+                        <div class="mb-3 p-2 bg-light rounded" id="comentario-${comentario.id}">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-comment text-primary mr-2"></i>
+                                <strong>${sanitizeInput(comentario.user.name)}</strong> - 
+                                <span class="text-muted">${sanitizeInput(comentario.user.puesto)}</span>
+                            </div>
+                            <p class="mb-1">${sanitizeInput(comentario.comment)}</p>
+                            <small class="text-muted d-block">${new Date(sanitizeInput(comentario.created_at)).toLocaleString()}</small>
+                
+                            ${comentario.user_id === currentUserId ? `
+                                <button class="btn btn-link text-danger p-0 mt-1" 
+                                    onclick="eliminarComentario(${comentario.id}, ${archivo.id})"
+                                    style="font-size: 0.9rem; text-decoration: none;">
+                                    <span class="text-danger">Eliminar comentario</span>
+                                </button>` 
+                            : ""}
                         </div>
-                        <p class="mb-1">${sanitizeInput(comentario.comment)}</p>
-                        <small class="text-muted d-block">${new Date(sanitizeInput(comentario.created_at)).toLocaleString()}</small>
-            
-                        ${comentario.user_id === currentUserId ? `
-                            <button class="btn btn-link text-danger p-0 mt-1" 
-                                onclick="eliminarComentario(${comentario.id}, ${archivo.id})"
-                                style="font-size: 0.9rem; text-decoration: none;">
-                                <span class="text-danger">Eliminar comentario</span>
-                            </button>` 
-                        : ""}
-                    </div>
-                `).join("")
-                : `<p class="text-muted">No hay comentarios aún.</p>`;
-            
+                    `).join("")
+                    : `<p class="text-muted">No hay comentarios aún.</p>`;
+
                 card.innerHTML = `
                     <div class="card-body">
                         <span class="badge badge-secondary position-absolute" style="top: 10px; right: 10px;">
@@ -1028,6 +1028,8 @@ function cargarArchivos(requisitoId, evidenciaId, fechaLimite) {
                 container.appendChild(card);
             });
 
+            // **Asignar eventos a los botones después de cargar los archivos**
+            agregarEventos();
         })
         .catch(function (error) {
             console.error("Error al cargar los archivos:", error);
@@ -1137,6 +1139,7 @@ function actualizarContadorComentarios(archivoId, cambio) {
 
 
 function agregarEventos() {
+    // Evento para ver archivos
     document.querySelectorAll(".btn-ver-archivo").forEach((button) => {
         button.addEventListener("click", function () {
             const fileUrl = this.dataset.url;
@@ -1144,6 +1147,22 @@ function agregarEventos() {
         });
     });
 
+    // Evento para descargar archivos
+    document.querySelectorAll(".btn-descargar-archivo").forEach((button) => {
+        button.addEventListener("click", function () {
+            const fileUrl = this.dataset.url;
+            const fileName = fileUrl.split("/").pop();
+
+            const link = document.createElement("a");
+            link.href = fileUrl;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+    });
+
+    // Evento para eliminar archivos
     document.querySelectorAll(".btn-eliminar-archivo").forEach((button) => {
         button.addEventListener("click", function () {
             const archivoId = this.dataset.id;
@@ -1201,20 +1220,6 @@ function agregarEventos() {
                         });
                 }
             });
-        });
-    });
-
-    document.querySelectorAll(".btn-descargar-archivo").forEach((button) => {
-        button.addEventListener("click", function () {
-            const fileUrl = this.dataset.url;
-            const fileName = fileUrl.split("/").pop();
-
-            const link = document.createElement("a");
-            link.href = fileUrl;
-            link.download = fileName;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
         });
     });
 }
