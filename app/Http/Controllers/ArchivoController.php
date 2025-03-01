@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Log;
 use App\Models\EvidenceNotification;
 use App\Mail\DatosEvidenciaMail;
 use App\Mail\ArchivoEliminadoMail;
+use App\Models\FileComment;
 
 class ArchivoController extends Controller
 {
@@ -91,22 +92,20 @@ class ArchivoController extends Controller
         $evidenciaId = $request->input('evidencia_id');
         $fechaLimite = $request->input('fecha_limite');
     
-        // Obtén los archivos relacionados con el requisito, la evidencia y la fecha límite
         $archivos = Archivo::where('requisito_id', $requisitoId)
             ->where('evidencia', $evidenciaId)
-            ->whereDate('fecha_limite_cumplimiento', $fechaLimite) // Filtrar por la fecha límite
+            ->whereDate('fecha_limite_cumplimiento', $fechaLimite)
+            ->with(['comments.user']) // Asegura que se traigan los usuarios de los comentarios
+            ->withCount('comments')
             ->get();
     
-        // Obtener el ID del usuario actual
-        $currentUserId = Auth::id();
-    
-        // Devolver los archivos junto con el ID del usuario actual
         return response()->json([
             'archivos' => $archivos,
-            'currentUserId' => $currentUserId, // Incluir el ID del usuario actual
+            'currentUserId' => Auth::id(), // Asegura que este valor se envía
         ]);
     }
-
+    
+    
 
 
     public function eliminar(Request $request)
@@ -186,4 +185,54 @@ class ArchivoController extends Controller
     
         return response()->json(['success' => false, 'message' => 'Archivo no encontrado'], 404);
     }
+
+
+
+public function storeComment(Request $request)
+{
+    // Validar la solicitud
+    $request->validate([
+        'archivo_id' => 'required|exists:archivos,id',
+        'comment' => 'required|string|max:500'
+    ]);
+
+    // Guardar el comentario en la base de datos
+    $comment = FileComment::create([
+        'archivo_id' => $request->archivo_id,
+        'user_id' => Auth::id(), // ID del usuario autenticado
+        'comment' => $request->comment
+    ]);
+
+    // Retornar una respuesta JSON con el comentario creado
+    return response()->json([
+        'message' => 'Comentario agregado correctamente',
+        'comment' => [
+            'id' => $comment->id,
+            'archivo_id' => $comment->archivo_id,
+            'user' => Auth::user()->name, // Obtener el nombre del usuario autenticado
+            'text' => $comment->comment,
+            'fecha' => now()->format('Y-m-d H:i:s')
+        ]
+    ], 201);
+}
+
+public function eliminarComentario($id)
+{
+    $comentario = FileComment::find($id);
+
+    if (!$comentario) {
+        return response()->json(['message' => 'Comentario no encontrado.'], 404);
+    }
+
+    // Verificar si el usuario autenticado es el dueño del comentario
+    if ($comentario->user_id !== Auth::id()) {
+        return response()->json(['message' => 'No tienes permiso para eliminar este comentario.'], 403);
+    }
+
+    $comentario->delete();
+
+    return response()->json(['message' => 'Comentario eliminado correctamente.']);
+}
+
+
 }

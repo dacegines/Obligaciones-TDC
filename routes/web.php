@@ -95,6 +95,11 @@ Route::middleware([
     Route::post('/archivos/subir', [ArchivoController::class, 'subirArchivo'])->name('archivos.subir');
     Route::post('/archivos/listar', [ArchivoController::class, 'listarArchivos'])->name('archivos.listar');
     Route::post('/archivos/eliminar', [ArchivoController::class, 'eliminar'])->name('archivos.eliminar');
+    Route::post('/guardar-comentario', [ArchivoController::class, 'storeComment'])->name('guardar.comentario');
+    Route::delete('/comentarios/{id}', [ArchivoController::class, 'eliminarComentario'])
+    ->middleware('auth') // Solo usuarios autenticados pueden eliminar comentarios
+    ->name('comentarios.eliminar');
+
 
     // Rutas de AdminUsuarios
 

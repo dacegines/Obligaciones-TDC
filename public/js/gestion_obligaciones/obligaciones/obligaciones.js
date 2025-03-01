@@ -908,26 +908,47 @@ function cargarArchivos(requisitoId, evidenciaId, fechaLimite) {
         })
         .then(function (response) {
             const archivos = response.data.archivos;
-            const currentUserId = response.data.currentUserId;
-            
+            const currentUserId = response.data.currentUserId; // ID del usuario autenticado
+
             let container = document.getElementById("archivosContainer");
-            container.innerHTML = ""; // Limpiar el contenedor antes de agregar contenido
+            container.innerHTML = "";
 
             if (archivos.length === 0) {
                 container.innerHTML = `<p class="text-center text-muted">No hay archivos adjuntos</p>`;
                 return;
             }
 
-            archivos.forEach((archivo, index) => {
+            archivos.forEach((archivo) => {
                 let card = document.createElement("div");
                 card.classList.add("card", "mb-3", "shadow-sm", "position-relative");
 
+                // Generar HTML de los comentarios existentes
+                let comentariosHTML = archivo.comments.length > 0 
+                ? archivo.comments.map(comentario => `
+                    <div class="mb-3 p-2 bg-light rounded" id="comentario-${comentario.id}">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-comment text-primary mr-2"></i>
+                            <strong>${sanitizeInput(comentario.user.name)}</strong> - 
+                            <span class="text-muted">${sanitizeInput(comentario.user.puesto)}</span>
+                        </div>
+                        <p class="mb-1">${sanitizeInput(comentario.comment)}</p>
+                        <small class="text-muted d-block">${new Date(sanitizeInput(comentario.created_at)).toLocaleString()}</small>
+            
+                        ${comentario.user_id === currentUserId ? `
+                            <button class="btn btn-link text-danger p-0 mt-1" 
+                                onclick="eliminarComentario(${comentario.id}, ${archivo.id})"
+                                style="font-size: 0.9rem; text-decoration: none;">
+                                <span class="text-danger">Eliminar comentario</span>
+                            </button>` 
+                        : ""}
+                    </div>
+                `).join("")
+                : `<p class="text-muted">No hay comentarios aún.</p>`;
+            
                 card.innerHTML = `
                     <div class="card-body">
-                        <!-- ID del archivo en la esquina superior derecha -->
-                        <span class="badge badge-secondary position-absolute" 
-                              style="top: 10px; right: 10px;">
-                              ID: ${sanitizeInput(archivo.id)}
+                        <span class="badge badge-secondary position-absolute" style="top: 10px; right: 10px;">
+                            ID: ${sanitizeInput(archivo.id)}
                         </span>
 
                         <div class="d-flex align-items-center justify-content-between">
@@ -945,6 +966,8 @@ function cargarArchivos(requisitoId, evidenciaId, fechaLimite) {
                                     <i class="fas fa-calendar-alt"></i> ${new Date(sanitizeInput(archivo.created_at)).toLocaleString()}
                                 </p>
                             </div>
+                            
+                            <!-- Botones de archivo (Ver, Descargar, Eliminar) -->
                             <div class="d-flex">
                                 <button 
                                     class="btn btn-sm btn-info btn-ver-archivo mr-2" 
@@ -974,13 +997,12 @@ function cargarArchivos(requisitoId, evidenciaId, fechaLimite) {
                             </div>
                         </div>
 
-                        <!-- Botones para mostrar comentarios -->
+                        <!-- Botón para mostrar comentarios -->
                         <div class="mt-2 d-flex">
-                            <!-- Botón Collapse para comentarios -->
                             <button class="btn btn-sm btn-secondary mr-2" data-toggle="collapse" 
                                 data-target="#comentarios-${archivo.id}" aria-expanded="false">
                                 <i class="fas fa-comments"></i>
-                                Comentarios (${archivo.comentarios ? archivo.comentarios.length : 0})
+                                Comentarios (${archivo.comments_count}) 
                             </button>
                         </div>
 
@@ -988,41 +1010,129 @@ function cargarArchivos(requisitoId, evidenciaId, fechaLimite) {
                         <div class="collapse mt-2" id="comentarios-${archivo.id}">
                             <div class="card card-body bg-light p-2">
                                 <div id="lista-comentarios-${archivo.id}">
-                                    ${archivo.comentarios && archivo.comentarios.length > 0
-                                        ? archivo.comentarios.map(comentario => `
-                                            <div class="d-flex align-items-start mb-2">
-                                                <i class="fas fa-comment text-primary mr-2"></i>
-                                                <div>
-                                                    <strong>${sanitizeInput(comentario.usuario)}</strong>
-                                                    <p class="mb-1">${sanitizeInput(comentario.texto)}</p>
-                                                    <small class="text-muted">${new Date(sanitizeInput(comentario.fecha)).toLocaleString()}</small>
-                                                </div>
-                                            </div>
-                                        `).join("")
-                                        : `<p class="text-muted">No hay comentarios aún.</p>`
-                                    }
+                                    ${comentariosHTML}
                                 </div>
 
-                                <!-- Formulario para agregar comentario -->
+                                <!-- Formulario para agregar un nuevo comentario -->
                                 <div class="mt-2">
                                     <textarea class="form-control mb-2" rows="2" id="comentario-texto-${archivo.id}" placeholder="Escribe un comentario..."></textarea>
-                                    <button class="btn btn-sm btn-primary" onclick="agregarComentario(${archivo.id})">Enviar</button>
+                                    <button class="btn btn-sm btn-success" onclick="agregarComentario(${archivo.id})">
+                                        <i class="fas fa-paper-plane"></i> Agregar comentario
+                                    </button>
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 `;
 
                 container.appendChild(card);
             });
 
-            agregarEventos();
         })
         .catch(function (error) {
             console.error("Error al cargar los archivos:", error);
         });
 }
+
+
+function agregarComentario(archivoId) {
+    let comentarioTexto = document.getElementById(`comentario-texto-${archivoId}`).value;
+
+    if (!comentarioTexto.trim()) {
+        alert("El comentario no puede estar vacío.");
+        return;
+    }
+
+    axios.post(guardarComentarioUrl, { 
+        archivo_id: archivoId,
+        comment: comentarioTexto
+    })
+    .then(response => {
+        let nuevoComentario = response.data.comment;
+
+        // Construir el HTML del nuevo comentario
+        let comentarioHTML = `
+            <div class="mb-3 p-2 bg-light rounded" id="comentario-${nuevoComentario.id}">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-comment text-primary mr-2"></i>
+                    <strong>${nuevoComentario.user}</strong>
+                </div>
+                <p class="mb-1">${nuevoComentario.text}</p>
+                <small class="text-muted d-block">${nuevoComentario.fecha}</small>
+                <button class="btn btn-link text-danger p-0 mt-1" 
+                    onclick="eliminarComentario(${nuevoComentario.id}, ${archivoId})"
+                    style="font-size: 0.9rem; text-decoration: none;">
+                    <span class="text-danger">Eliminar comentario</span>
+                </button>
+            </div>
+        `;
+
+        // Agregar el comentario a la lista
+        document.getElementById(`lista-comentarios-${archivoId}`).innerHTML += comentarioHTML;
+
+        // **Actualizar el contador de comentarios correctamente**
+        let contadorComentarios = document.querySelector(`[data-target="#comentarios-${archivoId}"]`);
+        if (contadorComentarios) {
+            let countTexto = contadorComentarios.innerText.match(/\d+/); // Extrae el número actual
+            let count = countTexto ? parseInt(countTexto[0]) : 0;
+            let nuevoCount = count + 1; // Incrementar el número
+            contadorComentarios.innerHTML = `<i class="fas fa-comments"></i> Comentarios (${nuevoCount})`;
+        }
+
+        // Limpiar el textarea
+        document.getElementById(`comentario-texto-${archivoId}`).value = '';
+
+    })
+    .catch(error => {
+        console.error("Error al agregar el comentario:", error);
+        alert("Ocurrió un error al agregar el comentario. Inténtalo de nuevo.");
+    });
+}
+
+
+
+
+function eliminarComentario(comentarioId, archivoId) {
+    let url = eliminarComentarioUrl.replace(':id', comentarioId); // Reemplazar ":id" con el ID real
+
+    axios.delete(url)
+        .then(response => {
+            // Eliminar comentario del DOM sin recargar
+            let comentarioElemento = document.getElementById(`comentario-${comentarioId}`);
+            if (comentarioElemento) {
+                comentarioElemento.style.transition = "opacity 0.3s ease-out";
+                comentarioElemento.style.opacity = "0"; // Desvanecer el comentario
+                setTimeout(() => comentarioElemento.remove(), 300); // Eliminar después de la animación
+            }
+
+            // **Actualizar el contador de comentarios correctamente**
+            let contadorComentarios = document.querySelector(`[data-target="#comentarios-${archivoId}"]`);
+            if (contadorComentarios) {
+                let countTexto = contadorComentarios.innerText.match(/\d+/); // Extrae el número actual
+                let count = countTexto ? parseInt(countTexto[0]) : 0;
+                let nuevoCount = count > 0 ? count - 1 : 0; // Evita números negativos
+                contadorComentarios.innerHTML = `<i class="fas fa-comments"></i> Comentarios (${nuevoCount})`;
+            }
+        })
+        .catch(error => {
+            console.error("Error al eliminar el comentario:", error);
+        });
+}
+
+
+
+
+function actualizarContadorComentarios(archivoId, cambio) {
+    let contadorComentarios = document.querySelector(`[data-target="#comentarios-${archivoId}"]`);
+    if (contadorComentarios) {
+        let count = parseInt(contadorComentarios.getAttribute("data-count")) || 0;
+        let nuevoCount = Math.max(0, count + cambio);
+        contadorComentarios.setAttribute("data-count", nuevoCount);
+        contadorComentarios.innerHTML = `<i class="fas fa-comments"></i> Comentarios (${nuevoCount})`;
+    }
+}
+
+
 
 
 

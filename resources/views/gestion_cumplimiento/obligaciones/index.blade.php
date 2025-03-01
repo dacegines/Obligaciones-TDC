@@ -367,6 +367,9 @@
         const usuariosUrl = "{{ route('obligaciones.usuarios') }}"
         const guardarNotificacionUrl = "{{ route('guardar.usuario.notificacion') }}";
         const eliminarNotificacionUrl = "{{ route('eliminar.usuario.notificacion') }}";
+        const guardarComentarioUrl = "{{ route('guardar.comentario') }}";
+        const eliminarComentarioUrl = "{{ route('comentarios.eliminar', ':id') }}";
+
 
         
     </script>
