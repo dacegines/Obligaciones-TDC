@@ -1069,21 +1069,22 @@ function agregarComentario(archivoId) {
             </div>
         `;
 
-        // Agregar el comentario a la lista
-        document.getElementById(`lista-comentarios-${archivoId}`).innerHTML += comentarioHTML;
+        // Obtener el contenedor de comentarios
+        let listaComentarios = document.getElementById(`lista-comentarios-${archivoId}`);
 
-        // **Actualizar el contador de comentarios correctamente**
-        let contadorComentarios = document.querySelector(`[data-target="#comentarios-${archivoId}"]`);
-        if (contadorComentarios) {
-            let countTexto = contadorComentarios.innerText.match(/\d+/); // Extrae el número actual
-            let count = countTexto ? parseInt(countTexto[0]) : 0;
-            let nuevoCount = count + 1; // Incrementar el número
-            contadorComentarios.innerHTML = `<i class="fas fa-comments"></i> Comentarios (${nuevoCount})`;
+        // Si el mensaje "No hay comentarios aún" está visible, eliminarlo
+        if (listaComentarios.innerHTML.includes("No hay comentarios aún")) {
+            listaComentarios.innerHTML = ""; // Limpiar el mensaje
         }
+
+        // Agregar el nuevo comentario al contenedor
+        listaComentarios.innerHTML += comentarioHTML;
+
+        // Actualizar el contador de comentarios
+        actualizarContadorComentarios(archivoId, 1);
 
         // Limpiar el textarea
         document.getElementById(`comentario-texto-${archivoId}`).value = '';
-
     })
     .catch(error => {
         console.error("Error al agregar el comentario:", error);
@@ -1099,21 +1100,19 @@ function eliminarComentario(comentarioId, archivoId) {
 
     axios.delete(url)
         .then(response => {
-            // Eliminar comentario del DOM sin recargar
+            // Eliminar comentario del DOM
             let comentarioElemento = document.getElementById(`comentario-${comentarioId}`);
             if (comentarioElemento) {
-                comentarioElemento.style.transition = "opacity 0.3s ease-out";
-                comentarioElemento.style.opacity = "0"; // Desvanecer el comentario
-                setTimeout(() => comentarioElemento.remove(), 300); // Eliminar después de la animación
+                comentarioElemento.remove();
             }
 
-            // **Actualizar el contador de comentarios correctamente**
-            let contadorComentarios = document.querySelector(`[data-target="#comentarios-${archivoId}"]`);
-            if (contadorComentarios) {
-                let countTexto = contadorComentarios.innerText.match(/\d+/); // Extrae el número actual
-                let count = countTexto ? parseInt(countTexto[0]) : 0;
-                let nuevoCount = count > 0 ? count - 1 : 0; // Evita números negativos
-                contadorComentarios.innerHTML = `<i class="fas fa-comments"></i> Comentarios (${nuevoCount})`;
+            // Actualizar el contador de comentarios
+            actualizarContadorComentarios(archivoId, -1);
+
+            // Si no hay más comentarios, mostrar el mensaje "No hay comentarios aún"
+            let listaComentarios = document.getElementById(`lista-comentarios-${archivoId}`);
+            if (listaComentarios.children.length === 0) {
+                listaComentarios.innerHTML = `<p class="text-muted">No hay comentarios aún.</p>`;
             }
         })
         .catch(error => {
@@ -1123,17 +1122,15 @@ function eliminarComentario(comentarioId, archivoId) {
 
 
 
-
 function actualizarContadorComentarios(archivoId, cambio) {
     let contadorComentarios = document.querySelector(`[data-target="#comentarios-${archivoId}"]`);
     if (contadorComentarios) {
-        let count = parseInt(contadorComentarios.getAttribute("data-count")) || 0;
-        let nuevoCount = Math.max(0, count + cambio);
-        contadorComentarios.setAttribute("data-count", nuevoCount);
+        let countTexto = contadorComentarios.innerText.match(/\d+/); // Extraer el número actual
+        let count = countTexto ? parseInt(countTexto[0]) : 0; // Convertir a número
+        let nuevoCount = Math.max(0, count + cambio); // Asegurarse de que no sea negativo
         contadorComentarios.innerHTML = `<i class="fas fa-comments"></i> Comentarios (${nuevoCount})`;
     }
 }
-
 
 
 
