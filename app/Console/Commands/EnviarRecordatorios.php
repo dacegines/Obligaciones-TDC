@@ -18,8 +18,8 @@ class EnviarRecordatorios extends Command
         // Definir los tipos de notificación y días restantes
         $notificaciones = [
             'primera_notificacion' => 30,
-            'segunda_notificacion' => 5,
-            'tercera_notificacion' => 17,
+            'segunda_notificacion' => 58,
+            'tercera_notificacion' => 5,
         ];
 
         foreach ($notificaciones as $tipo => $dias) {
@@ -59,13 +59,13 @@ class EnviarRecordatorios extends Command
     private function obtenerColorNotificacion($tipo_notificacion, $dias_restantes)
     {
         if ($tipo_notificacion == 'primera_notificacion' && $dias_restantes == 30) {
-            return '#90ee90'; // Verde claro
-        } elseif ($tipo_notificacion == 'segunda_notificacion' && $dias_restantes == 5) {
-            return '#ffff99'; // Amarillo claro
-        } elseif ($tipo_notificacion == 'tercera_notificacion' && $dias_restantes == 17) {
-            return '#ffcc99'; // Naranja claro
+            return '#90ee90'; 
+        } elseif ($tipo_notificacion == 'segunda_notificacion' && $dias_restantes == 58) {
+            return '#ffff99'; 
+        } elseif ($tipo_notificacion == 'tercera_notificacion' && $dias_restantes == 5) {
+            return '#ffcc99'; 
         } else {
-            return '#ced4da'; // Gris claro por defecto
+            return '#ced4da';
         }
     }
 }
