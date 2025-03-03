@@ -363,7 +363,6 @@
         const actualizarPorcentajeUrl = "{{ route('actualizar.porcentaje') }}";
         const actualizarSumaPorcentajeUrl = "{{ route('actualizar.suma.porcentaje') }}";
         const eliminarArchivoUrl = "{{ route('archivos.eliminar') }}";
-        const enviarCorreoAlertaUrl = `{{ url('/enviar-correo-alerta') }}`;
         const usuariosUrl = "{{ route('obligaciones.usuarios') }}"
         const guardarNotificacionUrl = "{{ route('guardar.usuario.notificacion') }}";
         const eliminarNotificacionUrl = "{{ route('eliminar.usuario.notificacion') }}";

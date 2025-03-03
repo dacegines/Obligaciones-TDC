@@ -840,7 +840,7 @@ function handleFileUpload(formSelector) {
 
     Swal.fire({
         title: "¿Estás seguro?",
-        html: "Al subir este archivo se enviará una notificación vía correo a: <br>Gerente Jurídico, <br>Jefa de Cumplimiento.",
+        html: "Al subir este archivo se enviará una notificación vía correo al personal responsable para su aprobación",
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
@@ -922,7 +922,7 @@ function cargarArchivos(requisitoId, evidenciaId, fechaLimite) {
                 let card = document.createElement("div");
                 card.classList.add("card", "mb-3", "shadow-sm", "position-relative");
 
-                // Generar HTML de los comentarios existentes
+                
                 let comentariosHTML = archivo.comments.length > 0 
                     ? archivo.comments.map(comentario => `
                         <div class="mb-3 p-2 bg-light rounded" id="comentario-${comentario.id}">
@@ -1029,7 +1029,7 @@ function cargarArchivos(requisitoId, evidenciaId, fechaLimite) {
                 container.appendChild(card);
             });
 
-            // **Asignar eventos a los botones después de cargar los archivos**
+            
             agregarEventos();
         })
         .catch(function (error) {
@@ -1053,11 +1053,11 @@ function agregarComentario(archivoId) {
     .then(response => {
         let nuevoComentario = response.data.comment;
 
-        // Construir el HTML del nuevo comentario
+        
         let comentarioHTML = document.createElement("div");
         comentarioHTML.classList.add("mb-3", "p-2", "bg-light", "rounded");
         comentarioHTML.id = `comentario-${nuevoComentario.id}`;
-        comentarioHTML.style.opacity = "0"; // 🔥 Iniciar con opacidad 0 para animación
+        comentarioHTML.style.opacity = "0"; 
 
         comentarioHTML.innerHTML = `
             <div class="d-flex align-items-center">
@@ -1073,26 +1073,26 @@ function agregarComentario(archivoId) {
             </button>
         `;
 
-        // Obtener el contenedor de comentarios
+        
         let listaComentarios = document.getElementById(`lista-comentarios-${archivoId}`);
 
-        // Si el mensaje "No hay comentarios aún" está visible, eliminarlo
+        
         if (listaComentarios.innerHTML.includes("No hay comentarios aún")) {
-            listaComentarios.innerHTML = ""; // Limpiar el mensaje
+            listaComentarios.innerHTML = ""; 
         }
 
-        // Agregar el nuevo comentario con una animación de aparición
-        listaComentarios.prepend(comentarioHTML); // Agregar comentario al inicio
+        
+        listaComentarios.prepend(comentarioHTML); 
 
         setTimeout(() => {
             comentarioHTML.style.transition = "opacity 0.5s ease-in"; 
-            comentarioHTML.style.opacity = "1"; // 🔥 Aparecer lentamente
-        }, 50); // Un pequeño retraso para que la animación funcione
+            comentarioHTML.style.opacity = "1"; 
+        }, 50); 
 
-        // Actualizar el contador de comentarios
+        
         actualizarContadorComentarios(archivoId, 1);
 
-        // Limpiar el textarea
+        
         document.getElementById(`comentario-texto-${archivoId}`).value = '';
     })
     .catch(error => {
@@ -1154,7 +1154,7 @@ function actualizarContadorComentarios(archivoId, cambio) {
 
 
 function agregarEventos() {
-    // Evento para ver archivos
+    
     document.querySelectorAll(".btn-ver-archivo").forEach((button) => {
         button.addEventListener("click", function () {
             const fileUrl = this.dataset.url;
@@ -1162,7 +1162,7 @@ function agregarEventos() {
         });
     });
 
-    // Evento para descargar archivos
+    
     document.querySelectorAll(".btn-descargar-archivo").forEach((button) => {
         button.addEventListener("click", function () {
             const fileUrl = this.dataset.url;
@@ -1177,7 +1177,7 @@ function agregarEventos() {
         });
     });
 
-    // Evento para eliminar archivos
+    
     document.querySelectorAll(".btn-eliminar-archivo").forEach((button) => {
         button.addEventListener("click", function () {
             const archivoId = this.dataset.id;
@@ -1507,24 +1507,4 @@ $("#modalDetalleContent").on("hidden.bs.modal", function () {
     $(".modal").removeAttr("inert");
 });
 
-function enviarAlertaCorreo(diasRestantes) {
-    axios
-        .post(enviarCorreoAlertaUrl, {
-            dias_restantes: diasRestantes,
-        })
-        .then((response) => {
-            Swal.fire({
-                title: "Correo Enviado",
-                text: `Se ha enviado un correo para la alerta de ${diasRestantes} días.`,
-                icon: "success",
-            });
-        })
-        .catch((error) => {
-            console.error("Error al enviar el correo:", error);
-            Swal.fire({
-                title: "Error",
-                text: "Hubo un problema al enviar el correo.",
-                icon: "error",
-            });
-        });
-}
+

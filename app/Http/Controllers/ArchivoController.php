@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Archivo;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Auth; // Para obtener el usuario autenticado
+use Illuminate\Support\Facades\Auth; 
 use App\Mail\ArchivoSubidoMail;
 use App\Models\Requisito;
 use App\Models\DeletedFile;
@@ -95,13 +95,13 @@ class ArchivoController extends Controller
         $archivos = Archivo::where('requisito_id', $requisitoId)
             ->where('evidencia', $evidenciaId)
             ->whereDate('fecha_limite_cumplimiento', $fechaLimite)
-            ->with(['comments.user:id,name,puesto']) // Asegura que se traigan los usuarios de los comentarios
+            ->with(['comments.user:id,name,puesto']) 
             ->withCount('comments')
             ->get();
     
         return response()->json([
             'archivos' => $archivos,
-            'currentUserId' => Auth::id(), // Asegura que este valor se envía
+            'currentUserId' => Auth::id(), 
         ]);
     }
     
@@ -122,7 +122,7 @@ class ArchivoController extends Controller
         }
     
         try {
-            // 1. Guardar información del archivo en la tabla "deleted_files"
+            
             DeletedFile::create([
                 'file_name' => $archivo->nombre_archivo,
                 'file_path' => $archivo->ruta_archivo,
@@ -135,7 +135,7 @@ class ArchivoController extends Controller
                 'deleted_by' => Auth::id(),
             ]);
     
-            // 2. Notificar por correo si es necesario
+            
             $requisito = Requisito::find($archivo->requisito_id);
             if ($requisito) {
                 $emailNotifications = EvidenceNotification::where('type', 1)->pluck('email')->toArray();
@@ -163,13 +163,13 @@ class ArchivoController extends Controller
                 }
             }
     
-            // 3. Eliminar el archivo del almacenamiento
+            
             $rutaArchivoStorage = 'public/' . $archivo->ruta_archivo;
             if (Storage::exists($rutaArchivoStorage)) {
                 Storage::delete($rutaArchivoStorage);
             }
     
-            // 4. Eliminar el archivo (esto también eliminará los comentarios automáticamente)
+            
             $archivo->delete();
     
             return response()->json(['success' => true, 'message' => 'Archivo y comentarios eliminados correctamente.']);
@@ -184,26 +184,26 @@ class ArchivoController extends Controller
 
 public function storeComment(Request $request)
 {
-    // Validar la solicitud
+    
     $request->validate([
         'archivo_id' => 'required|exists:archivos,id',
         'comment' => 'required|string|max:500'
     ]);
 
-    // Guardar el comentario en la base de datos
+    
     $comment = FileComment::create([
         'archivo_id' => $request->archivo_id,
-        'user_id' => Auth::id(), // ID del usuario autenticado
+        'user_id' => Auth::id(), 
         'comment' => $request->comment
     ]);
 
-    // Retornar una respuesta JSON con el comentario creado
+    
     return response()->json([
         'message' => 'Comentario agregado correctamente',
         'comment' => [
             'id' => $comment->id,
             'archivo_id' => $comment->archivo_id,
-            'user' => Auth::user()->name, // Obtener el nombre del usuario autenticado
+            'user' => Auth::user()->name, 
             'puesto' => Auth::user()->puesto,
             'text' => $comment->comment,
             'fecha' => now()->format('Y-m-d H:i:s')
@@ -219,7 +219,7 @@ public function eliminarComentario($id)
         return response()->json(['message' => 'Comentario no encontrado.'], 404);
     }
 
-    // Verificar si el usuario autenticado es el dueño del comentario
+    
     if ($comentario->user_id !== Auth::id()) {
         return response()->json(['message' => 'No tienes permiso para eliminar este comentario.'], 403);
     }

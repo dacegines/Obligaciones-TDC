@@ -21,13 +21,13 @@ use Illuminate\Support\Facades\Auth;
 // Ruta de inicio
 Route::get('/', function () {
     if (Auth::check()) {
-        Auth::logout();  // Cierra la sesión si el usuario está autenticado
-        request()->session()->invalidate();  // Invalida la sesión actual
-        request()->session()->regenerateToken();  // Regenera el token CSRF para seguridad
+        Auth::logout();  
+        request()->session()->invalidate();  
+        request()->session()->regenerateToken();  
     }
-    return view('auth.login');  // Redirige al login
+    return view('auth.login');  
 });
-// Grupo de middleware para autenticación, sesión y verificación de correo
+
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
@@ -35,7 +35,7 @@ Route::middleware([
 ])->group(function () {
 
     Route::get('/register', function () {
-        return redirect('/'); // Redirige a la página de inicio
+        return redirect('/'); 
     })->name('register');
 
     Route::get('/inicio', [InicioController::class, 'index'])->name('inicio');
@@ -68,7 +68,6 @@ Route::middleware([
     Route::post('/obtener-responsables', [ObligacionesController::class, 'obtenerResponsables'])->name('obtener.responsables');
     Route::post('/filtrar-obligaciones', [ObligacionesController::class, 'filtrarObligaciones'])->name('filtrar.obligaciones');
     Route::post('/approved-result', [ObligacionesController::class, 'obtenerEstadoApproved'])->name('approved.resul');
-    Route::post('/enviar-correo-alerta', [ObligacionesController::class, 'enviarCorreoAlerta']);
     
 
     Route::get('/obligaciones/usuarios', [ObligacionesController::class, 'obtenerUsuarios'])->name('obligaciones.usuarios');

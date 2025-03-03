@@ -33,8 +33,6 @@ class ObligacionesController extends Controller
             }
     
             $currentYear = Carbon::now()->year;
-    
-            // Obtener los puestos de usuarios asociados con authorization_id = 7
             $puestosExcluidos = DB::table('users')
                 ->join('model_has_authorizations', 'users.id', '=', 'model_has_authorizations.model_id')
                 ->where('model_has_authorizations.authorization_id', 7)
@@ -42,7 +40,7 @@ class ObligacionesController extends Controller
                 ->pluck('users.puesto')
                 ->toArray();
     
-            // Obtener los requisitos con avance y filtro de la tabla pivote
+            // Obtener los requisitos con avance y filtro de la tabla obligacion_usuario
             $requisitos = $this->obtenerRequisitosConAvance($currentYear, $user, $puestosExcluidos);
     
             $this->logInfo('Requisitos cargados correctamente', ['user_id' => $user->id, 'total_requisitos' => $requisitos->count()]);
@@ -55,96 +53,88 @@ class ObligacionesController extends Controller
     }
     
 
-
-
-    private function obtenerRequisitosConAvance($year, $user, $puestosExcluidos)
+    private function obtenerRequisitosConAvance($year, $user)
     {
         $query = Requisito::with('archivos')->porAno($year);
     
-        // Obtener los requisitos que el usuario puede ver según la tabla pivote
         $requisitosIds = ObligacionUsuario::where('user_id', $user->id)
-        ->where('view', 1)
-        ->pluck('numero_evidencia') 
-        ->toArray();
+            ->where('view', 1)
+            ->pluck('numero_evidencia')
+            ->toArray();
     
         if (!empty($requisitosIds)) {
             $query->whereIn('numero_evidencia', $requisitosIds);
-        }
-    
-        if (!in_array($user->puesto, $puestosExcluidos)) {
-            $query->permitirVisualizacion($user);
         }
     
         return $query->get()
             ->filter(fn($requisito) => !empty($requisito->responsable))
             ->each(
                 fn($requisito) =>
-                $requisito->total_avance = $this->getTotalAvance($requisito->numero_requisito, $user->puesto, $year)
+                $requisito->total_avance = $this->getTotalAvance($requisito->numero_requisito, $year, $requisitosIds)
             );
     }
     
-    public function getTotalAvance($numero_requisito, $puesto, $year)
+    public function getTotalAvance($numero_requisito, $year, $requisitosIds = [])
     {
         try {
             if (empty($numero_requisito)) {
                 $this->logWarning('Número de requisito vacío al intentar calcular el total de avance.');
                 return 0;
             }
+    
+            
+            if (!is_array($requisitosIds)) {
+                $requisitosIds = [];
+            }
+    
 
-            // Obtener los puestos de usuarios asociados con authorization_id = 7
-            $puestosExcluidos = DB::table('users')
-                ->join('model_has_authorizations', 'users.id', '=', 'model_has_authorizations.model_id')
-                ->where('model_has_authorizations.authorization_id', 7)
-                ->distinct()
-                ->pluck('users.puesto')
-                ->toArray();
-
-            // Crear una consulta base para filtrar por numero_requisito y año
             $query = Requisito::where('numero_requisito', $numero_requisito)
                 ->whereYear('fecha_limite_cumplimiento', $year);
+    
 
-            // Aplicar el filtro de puesto si no está en los puestos excluidos
-            if (!in_array($puesto, $puestosExcluidos)) {
-                $query->where('responsable', $puesto);
+            if (!empty($requisitosIds)) {
+                $query->whereIn('numero_evidencia', $requisitosIds);
             }
+    
 
-            // Obtener el total de registros aplicando los filtros
+    
+  
             $totalRegistros = $query->count();
-
+    
             if ($totalRegistros === 0) {
-                $this->logWarning('No se encontraron registros para el número de requisito, año y puesto especificado.', [
+                $this->logWarning('No se encontraron registros para el número de requisito y año especificado.', [
                     'numero_requisito' => $numero_requisito,
-                    'puesto' => $puesto,
                     'year' => $year,
+                    'requisitosIds' => $requisitosIds, 
                 ]);
                 return 0;
             }
+    
 
-            // Calcular el número de registros completados (donde porcentaje es 100)
             $completados = $query->where('porcentaje', 100)->count();
+    
 
-            // Calcular el porcentaje completado
-            $total_avance = ($completados * 100.0) / $totalRegistros;
-
+    
             
+            $total_avance = ($completados * 100.0) / $totalRegistros;
+    
+           
             $total_avance = round($total_avance, 2);
             if ($total_avance > 99.95 && $total_avance < 100.05) {
                 $total_avance = 100.00;
             }
 
+    
             return $total_avance;
         } catch (\Exception $e) {
             $this->logError('Error al calcular el total de avance', [
                 'numero_requisito' => $numero_requisito,
-                'puesto' => $puesto,
                 'year' => $year,
                 'error' => $e->getMessage()
             ]);
             return 0;
         }
     }
-
-
 
 
     public function getDetallesEvidencia(Request $request)
@@ -163,7 +153,7 @@ class ObligacionesController extends Controller
             $detalle = Requisito::where('numero_evidencia', $evidenciaId)->first();
 
             if ($detalle) {
-                // Obtener todas las fechas límite filtradas por año si existe
+                // Obtener todas las fechas límite filtradas por año
                 $fechasLimite = Requisito::where('numero_evidencia', $evidenciaId)
                     ->when($year, function ($query) use ($year) {
                         return $query->whereYear('fecha_limite_cumplimiento', $year);
@@ -226,7 +216,7 @@ class ObligacionesController extends Controller
     {
         $idNotificaciones = $request->input('id_notificaciones');
 
-        // Consulta con ordenamiento por tipo_notificacion de manera personalizada
+        
         $notificaciones = DB::table('notificaciones')
             ->where('id_notificacion', $idNotificaciones)
             ->orderByRaw("FIELD(tipo_notificacion, 'primera_notificacion', 'segunda_notificacion', 'tercera_notificacion', 'notificacion_carga_vobo')")
@@ -274,9 +264,6 @@ class ObligacionesController extends Controller
         return response()->json($resultado);
     }
 
-
-
-
     public function cambiarEstado(Request $request)
     {
         
@@ -306,7 +293,7 @@ class ObligacionesController extends Controller
             //Obtener correos de evidence_notifications con type = 1 ***
             $emailNotifications = EvidenceNotification::where('type', 1)->pluck('email')->toArray();
 
-            // Combinar los correos del requisito actual con los de la tabla evidence_notifications
+            
             $emailResponsables = !empty($requisito->email) ? [$requisito->email] : [];
             $destinatarios = array_merge($emailResponsables, $emailNotifications);
 
@@ -376,8 +363,6 @@ class ObligacionesController extends Controller
                 $this->logWarning('No se encontró el requisito asociado a la evidencia', ['evidencia' => $datos['evidencia']]);
                 return response()->json(['error' => 'No se encontró el requisito asociado a la evidencia'], 404);
             }
-
-            // Agregar la lógica que necesites, pero sin enviar correos
 
             return response()->json(['success' => true, 'message' => 'Procesamiento completado sin envío de correo.']);
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -635,40 +620,11 @@ class ObligacionesController extends Controller
         }
     }
 
-    public function enviarCorreoAlerta(Request $request)
-    {
-        $diasRestantes = $request->input('dias_restantes');
-
-        // Definir el color de fondo según los días restantes
-        switch ($diasRestantes) {
-            case 30:
-                $colorFondo = '#90ee90'; // Verde claro
-                break;
-            case 15:
-                $colorFondo = '#ffff99'; // Amarillo claro
-                break;
-            case 5:
-                $colorFondo = '#ffcc99'; // Naranja claro
-                break;
-            case 2:
-            case 1:
-                $colorFondo = '#ff9999'; // Rojo claro
-                break;
-            default:
-                $colorFondo = '#ffffff'; // Color por defecto (blanco)
-                break;
-        }
-
-        // Enviar el correo
-        Mail::to('daniel.cervantes@supervia.mx')->send(new AlertaCorreo($diasRestantes, $colorFondo));
-
-        return response()->json(['success' => true, 'message' => "Correo de alerta enviado correctamente."]);
-    }
 
     public function obtenerUsuarios()
     {
         try {
-            // Obtener todos los usuarios con su nombre y puesto 
+            
             $usuarios = DB::table('users')->select('id', 'name', 'puesto', 'email')->get();
 
             if ($usuarios->isEmpty()) {
