@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
 use App\Http\Controllers\ObligacionesController;
 use App\Http\Controllers\ArchivoController;
 use App\Http\Controllers\DetallesController;
@@ -14,9 +13,7 @@ use App\Http\Controllers\AdminUsersController;
 use App\Http\Controllers\NotificacionController;
 use App\Http\Controllers\InicioController;
 use App\Http\Controllers\CalendarController;
-
 use Illuminate\Support\Facades\Auth;
-
 
 // Ruta de inicio
 Route::get('/', function () {
@@ -43,7 +40,6 @@ Route::middleware([
     Route::get('/profile', [UsuarioController::class, 'profile']);
 
     // Rutas de DashboardController
-
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/api/resumen-obligaciones', [DashboardController::class, 'obtenerDatosGrafico']);
     Route::post('/api/obtener-avance-total', [DashboardController::class, 'obtenerAvanceTotal'])->name('api.obtenerAvanceTotal');
@@ -68,7 +64,6 @@ Route::middleware([
     Route::post('/obtener-responsables', [ObligacionesController::class, 'obtenerResponsables'])->name('obtener.responsables');
     Route::post('/filtrar-obligaciones', [ObligacionesController::class, 'filtrarObligaciones'])->name('filtrar.obligaciones');
     Route::post('/approved-result', [ObligacionesController::class, 'obtenerEstadoApproved'])->name('approved.resul');
-    
 
     Route::get('/obligaciones/usuarios', [ObligacionesController::class, 'obtenerUsuarios'])->name('obligaciones.usuarios');
     Route::post('/guardar-usuario-notificacion', [ObligacionesController::class, 'UsuarioNuevoTablaNotificaciones'])->name('guardar.usuario.notificacion');
@@ -91,48 +86,45 @@ Route::middleware([
     Route::post('/api/obtener-avance-periodicidad', [ResumenController::class, 'obtenerAvancePorPeriodicidad']);
 
     // Rutas de ArchivoController
-    Route::post('/archivos/subir', [ArchivoController::class, 'subirArchivo'])->name('archivos.subir');
+    Route::middleware(['throttle:uploads'])->group(function () {
+        Route::post('/archivos/subir', [ArchivoController::class, 'subirArchivo'])->name('archivos.subir');
+        Route::post('/archivos/eliminar', [ArchivoController::class, 'eliminar'])->name('archivos.eliminar');
+    });
     Route::post('/archivos/listar', [ArchivoController::class, 'listarArchivos'])->name('archivos.listar');
-    Route::post('/archivos/eliminar', [ArchivoController::class, 'eliminar'])->name('archivos.eliminar');
     Route::post('/guardar-comentario', [ArchivoController::class, 'storeComment'])->name('guardar.comentario');
     Route::delete('/comentarios/{id}', [ArchivoController::class, 'eliminarComentario'])
-    ->middleware('auth') // Solo usuarios autenticados pueden eliminar comentarios
-    ->name('comentarios.eliminar');
-
+        ->middleware('auth') // Solo usuarios autenticados pueden eliminar comentarios
+        ->name('comentarios.eliminar');
 
     // Rutas de AdminUsuarios
-
     Route::get('/admin-usuarios', [AdminUsersController::class, 'index'])->name('adminUsuarios');
-
     Route::post('/adminUsuarios/register', [AdminUsersController::class, 'register'])->name('adminUsuarios.register');
     Route::post('/check-email', [AdminUsersController::class, 'checkEmail'])->name('check.email');
     Route::post('/permissions/store', [AdminUsersController::class, 'storePermission'])->name('permissions.store');
     Route::post('/roles/store', [AdminUsersController::class, 'storeRole'])->name('roles.store');
     Route::post('/admin-usuarios/{id}/delete', [AdminUsersController::class, 'destroy'])->name('adminUsuarios.destroy');
     Route::put('/adminUsuarios/update', [AdminUsersController::class, 'update'])->name('adminUsuarios.update');
-    // Ruta para crear roles
     Route::post('/admin-roles/create', [AdminUsersController::class, 'createRole'])->name('adminRoles.create');
-
-    // Ruta para crear áreas
     Route::post('/admin-permissions/create', [AdminUsersController::class, 'createPermission'])->name('adminPermissions.create');
-
     Route::delete('/admin-roles/delete/{id}', [AdminUsersController::class, 'deleteRole'])->name('adminRoles.delete');
     Route::delete('/admin-permissions/delete/{id}', [AdminUsersController::class, 'deletePermission'])->name('adminPermissions.delete');
-
-    // Ruta para crear autorización
     Route::post('/authorizations/store', [AdminUsersController::class, 'storeAuthorization'])->name('authorizations.store');
     Route::post('/admin/authorizations/create', [AdminUsersController::class, 'createAuthorization'])->name('adminAuthorizations.create');
     Route::delete('/admin/authorizations/delete/{id}', [AdminUsersController::class, 'deleteAuthorization'])->name('adminAuthorizations.delete');
 
-
     // Rutas de Notificaciones
     Route::get('/admin-notificaciones', [NotificacionController::class, 'index'])->name('admin.notificaciones');
 
-    //Rutas de Calendario
+    // Rutas de Calendario
     Route::get('/gestion-cumplimiento/calendario', [CalendarController::class, 'index'])->name('gestion.calendario');
     Route::get('/api/requisitos', [CalendarController::class, 'fetchRequisitos'])->name('api.requisitos');
-    
 
+    // Aplicar throttle:global a rutas específicas
+    Route::middleware(['throttle:global'])->group(function () {
+        Route::post('/api/resumen-obligaciones', [DashboardController::class, 'obtenerDatosGrafico']);
+        Route::post('/api/obtener-avance-total', [DashboardController::class, 'obtenerAvanceTotal'])->name('api.obtenerAvanceTotal');
+        Route::post('/filtrar-requisitos', [DashboardController::class, 'filtrarRequisitos'])->name('filtrar-requisitos');
+    });
 });
 
 // Rutas de CustomPasswordResetController

@@ -20,53 +20,65 @@ class ArchivoController extends Controller
 {
     public function subirArchivo(Request $request)
     {
+        // Validaciones estrictas
         $validatedData = $request->validate([
-            'archivo' => 'required|file|max:20480',
-            'requisito_id' => 'required|integer',
+            'archivo' => 'required|file|mimes:pdf,jpg,jpeg,png,gif,doc,docx,xls,xlsx,ppt,pptx,txt,zip,rar|max:20480',
+            'requisito_id' => 'required|integer|exists:requisitos,id',
             'evidencia' => 'required|string',
             'fecha_limite_cumplimiento' => 'required|date',
             'usuario' => 'required|string',
             'puesto' => 'required|string',
         ]);
-
-        if ($request->hasFile('archivo')) {
-            $file = $request->file('archivo');
-            $fileName = time() . '_' . str_replace(' ', '_', $file->getClientOriginalName());
-            $filePath = $file->storeAs('uploads', $fileName, 'public');
-
-            // Guardar el archivo en la base de datos
-            $archivo = new Archivo();
-            $archivo->user_id = Auth::id();
-            $archivo->nombre_archivo = $fileName;
-            $archivo->ruta_archivo = $filePath;
-            $archivo->requisito_id = $validatedData['requisito_id'];
-            $archivo->evidencia = $validatedData['evidencia'];
-            $archivo->fecha_limite_cumplimiento = $validatedData['fecha_limite_cumplimiento'];
-            $archivo->usuario = $validatedData['usuario'];
-            $archivo->puesto = $validatedData['puesto'];
-            $archivo->fecha_subida = now(); 
-            $archivo->save();
-
-            // Buscar el requisito relacionado
-            $requisito = Requisito::find($validatedData['requisito_id']);
-
-            if (!$requisito) {
-                return response()->json(['error' => 'No se encontró el requisito asociado.'], 404);
-            }
-
-            // Obtener destinatarios
-            $emailNotifications = EvidenceNotification::where('type', 1)->pluck('email')->toArray();
-            $emailResponsables = !empty($requisito->email) ? [$requisito->email] : [];
-            $destinatarios = array_merge($emailResponsables, $emailNotifications);
-
-            if (empty($destinatarios)) {
-                return response()->json(['error' => 'No se encontraron destinatarios para el correo.'], 400);
-            }
-
-            // Ruta completa del archivo
-            $rutaArchivo = storage_path("app/public/{$filePath}");
-
-            // Enviar correo con el archivo adjunto
+    
+        if (!$request->hasFile('archivo')) {
+            return response()->json(['error' => 'No se envió un archivo.'], 400);
+        }
+    
+        $file = $request->file('archivo');
+    
+        // Generar un nombre seguro para el archivo
+        $fileName = time() . '_' . preg_replace('/[^A-Za-z0-9_\-\.]/', '_', $file->getClientOriginalName());
+        $filePath = $file->storeAs('uploads', $fileName, 'public');
+    
+        // Verificar si el archivo se guardó correctamente
+        if (!$filePath) {
+            return response()->json(['error' => 'Error al guardar el archivo.'], 500);
+        }
+    
+        // Guardar en la base de datos
+        $archivo = new Archivo();
+        $archivo->user_id = Auth::id();
+        $archivo->nombre_archivo = $fileName;
+        $archivo->ruta_archivo = $filePath;
+        $archivo->requisito_id = $validatedData['requisito_id'];
+        $archivo->evidencia = $validatedData['evidencia'];
+        $archivo->fecha_limite_cumplimiento = $validatedData['fecha_limite_cumplimiento'];
+        $archivo->usuario = $validatedData['usuario'];
+        $archivo->puesto = $validatedData['puesto'];
+        $archivo->fecha_subida = now();
+        $archivo->save();
+    
+        // Buscar el requisito relacionado
+        $requisito = Requisito::find($validatedData['requisito_id']);
+    
+        if (!$requisito) {
+            return response()->json(['error' => 'No se encontró el requisito asociado.'], 404);
+        }
+    
+        // Obtener destinatarios del correo
+        $emailNotifications = EvidenceNotification::where('type', 1)->pluck('email')->toArray();
+        $emailResponsables = !empty($requisito->email) ? [$requisito->email] : [];
+        $destinatarios = array_merge($emailResponsables, $emailNotifications);
+    
+        if (empty($destinatarios)) {
+            return response()->json(['error' => 'No se encontraron destinatarios para el correo.'], 400);
+        }
+    
+        // Ruta completa del archivo
+        $rutaArchivo = storage_path("app/public/{$filePath}");
+    
+        try {
+            // Enviar correo con archivo adjunto
             Mail::to($destinatarios)->send(new DatosEvidenciaMail(
                 $requisito->nombre,
                 $requisito->evidencia,
@@ -77,14 +89,15 @@ class ArchivoController extends Controller
                 $requisito->clausula_condicionante_articulo,
                 $rutaArchivo, 
                 $validatedData['usuario'], 
-                $validatedData['puesto'] 
+                $validatedData['puesto']
             ));
-
-            return response()->json(['success' => 'Archivo subido y correo enviado correctamente.']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'El archivo fue subido, pero hubo un error enviando el correo: ' . $e->getMessage()], 500);
         }
-
-        return response()->json(['error' => 'No se pudo subir el archivo.'], 422);
+    
+        return response()->json(['success' => 'Archivo subido y correo enviado correctamente.']);
     }
+    
 
     public function listarArchivos(Request $request)
     {
