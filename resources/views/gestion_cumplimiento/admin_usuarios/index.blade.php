@@ -110,13 +110,19 @@
                                             Autorización
                                         </button>
 
-                                        <form action="{{ route('adminUsuarios.destroy', $user->id) }}" method="POST"
-                                            class="d-inline delete-user-form">
-                                            @csrf
-                                            <button type="submit" class="btn btn-danger btn-sm m-1 delete-user-btn">
+                                        @if ($user->id != 1)
+                                            <form action="{{ route('adminUsuarios.destroy', $user->id) }}" method="POST"
+                                                class="d-inline delete-user-form">
+                                                @csrf
+                                                <button type="submit" class="btn btn-danger btn-sm m-1 delete-user-btn">
+                                                    Borrar
+                                                </button>
+                                            </form>
+                                        @else
+                                            <button class="btn btn-danger btn-sm m-1" disabled>
                                                 Borrar
                                             </button>
-                                        </form>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
@@ -409,6 +415,14 @@
                             <label for="editUserPuesto">Puesto</label>
                             <input type="text" name="puesto" id="editUserPuesto" class="form-control" required>
                         </div>
+                        
+                        <div class="container mt-3 p-3 bg-light rounded border">
+                            <h4 class="text-center font-weight-bold mb-4">Asignar obligaciones a este usuario</h3>
+                            <div class="row text-center container" id="switchContainer">
+                                
+                            </div>
+                        </div>
+                        <br>
 
                         <button type="submit" class="btn btn-success">Guardar Cambios</button>
                     </form>
@@ -611,7 +625,10 @@
 @section('js')
 
     <script>
-        const checkEmailUrl = "{{ url('check-email') }}";
+        const getObligacionesUrl = "{{ url('get-obligaciones') }}";
+        const getObligacionesUsuarioUrl = "{{ url('get-obligaciones-usuario') }}";
+        const toggleObligacionUrl = "{{ url('toggle-obligacion') }}";
+        const getColumnsUrl = "{{ url('get-columns') }}";
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/parsley.js/2.9.3/parsley.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

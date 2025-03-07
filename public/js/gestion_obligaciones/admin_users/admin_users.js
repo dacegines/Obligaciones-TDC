@@ -49,18 +49,7 @@ $(document).ready(function () {
 });
 
 
-$(document).on("click", ".edit-user-btn", function () {
-    const userId = $(this).data("id");
-    const userName = $(this).data("name");
-    const userEmail = $(this).data("email");
-    const userPuesto = $(this).data("puesto");
 
-    
-    $("#editUserId").val(userId);
-    $("#editUserName").val(userName);
-    $("#editUserEmail").val(userEmail);
-    $("#editUserPuesto").val(userPuesto);
-});
 
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -551,4 +540,128 @@ $(document).on("click", ".toggle-password", function () {
         input.attr("type", "password");
         icon.removeClass("fa-eye-slash").addClass("fa-eye"); 
     }
+});
+
+
+$(document).ready(function () {
+    $(document).on("click", ".edit-user-btn", function () {
+        const userId = $(this).data("id");
+        const userName = $(this).data("name");
+        const userEmail = $(this).data("email");
+        const userPuesto = $(this).data("puesto");
+
+        
+        $("#editUserId").val(userId);
+        $("#editUserName").val(userName);
+        $("#editUserEmail").val(userEmail);
+        $("#editUserPuesto").val(userPuesto);
+
+        
+        cargarObligaciones(userId);
+
+        
+        $("#editUserModal").modal("show");
+    });
+});
+
+function cargarObligaciones(userId) {
+    $.ajax({
+        url: `${getObligacionesUsuarioUrl}/${userId}`,
+        type: "GET",
+        dataType: "json",
+        success: function (obligaciones) {
+            const container = $("#switchContainer");
+            container.empty();
+
+            let groupedObligaciones = {};
+
+            
+            obligaciones.forEach(obligacion => {
+                if (!groupedObligaciones[obligacion.nombre]) {
+                    groupedObligaciones[obligacion.nombre] = [];
+                }
+                groupedObligaciones[obligacion.nombre].push(obligacion);
+            });
+
+            Object.keys(groupedObligaciones).forEach((nombre, index) => {
+                let obligacionesGrupo = groupedObligaciones[nombre];
+                let collapseId = `collapse-${index}`;
+
+                
+                let button = $(`
+                    <button class="btn btn-secondary  btn-block text-center mb-3 border rounded p-2 font-weight-bold shadow-sm" 
+                        type="button" data-toggle="collapse" data-target="#${collapseId}" aria-expanded="false" aria-controls="${collapseId}">
+                        ${nombre}
+                    </button>
+                `);
+
+                
+                let collapseDiv = $(`<div class="collapse border rounded p-3 bg-white shadow-sm mb-3" id="${collapseId}"></div>`);
+                let rowDiv = $("<div>").addClass("row w-100");
+
+                obligacionesGrupo.forEach((obligacion) => {
+                    let numeroEvidencia = obligacion.numero_evidencia;
+                    let evidenciaTexto = `${numeroEvidencia} - ${obligacion.evidencia}`;
+                    let isChecked = obligacion.view == 1 ? "checked" : ""; 
+
+                    let colDiv = $("<div>").addClass("col-md-6 d-flex flex-column align-items-center mb-3");
+
+                    colDiv.html(`
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox" class="custom-control-input toggle-switch" id="switch-${numeroEvidencia}" 
+                                name="${numeroEvidencia}" data-user="${userId}" ${isChecked}>
+                            <label class="custom-control-label font-weight-bold" for="switch-${numeroEvidencia}">${evidenciaTexto}</label>
+                        </div>
+                    `);
+
+                    rowDiv.append(colDiv);
+                });
+
+                if (obligacionesGrupo.length % 2 !== 0) {
+                    let emptyCol = $("<div>").addClass("col-md-6");
+                    rowDiv.append(emptyCol);
+                }
+
+                collapseDiv.append(rowDiv);
+                container.append(button);
+                container.append(collapseDiv);
+            });
+
+            
+            setTimeout(() => {
+                $(".toggle-switch").each(function () {
+                    let isChecked = $(this).attr("checked") ? true : false;
+                    $(this).prop("checked", isChecked);
+                    console.log(`Switch ${$(this).attr("id")}: ${isChecked}`);
+                });
+            }, 300); 
+        },
+        error: function (xhr, status, error) {
+            console.error("Error cargando obligaciones:", error);
+        }
+    });
+}
+
+
+$(document).on("change", ".toggle-switch", function () {
+    const numeroEvidencia = $(this).attr("id").replace("switch-", "");
+    const checked = $(this).is(":checked") ? 1 : 0;
+    const userId = $("#editUserId").val();
+
+    $.ajax({
+        url: toggleObligacionUrl,
+        type: "POST",
+        data: {
+            _token: $('meta[name="csrf-token"]').attr("content"),
+            user_id: userId,
+            numero_evidencia: numeroEvidencia,
+            checked: checked
+        },
+        success: function (response) {
+            console.log("Actualización correcta:", response);
+        },
+        error: function (xhr, status, error) {
+            console.error("Error al actualizar:", error);
+        }
+    });
 });

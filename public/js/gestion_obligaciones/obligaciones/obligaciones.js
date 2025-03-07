@@ -1039,10 +1039,14 @@ function cargarArchivos(requisitoId, evidenciaId, fechaLimite) {
 
 
 function agregarComentario(archivoId) {
-    let comentarioTexto = document.getElementById(`comentario-texto-${archivoId}`).value;
+    let comentarioTexto = document.getElementById(`comentario-texto-${archivoId}`).value.trim();
 
-    if (!comentarioTexto.trim()) {
-        alert("El comentario no puede estar vacío.");
+    if (!comentarioTexto) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Oops...',
+            text: 'El comentario no puede estar vacío.'
+        });
         return;
     }
 
@@ -1053,7 +1057,7 @@ function agregarComentario(archivoId) {
     .then(response => {
         let nuevoComentario = response.data.comment;
 
-        
+        // Crear el contenedor del comentario
         let comentarioHTML = document.createElement("div");
         comentarioHTML.classList.add("mb-3", "p-2", "bg-light", "rounded");
         comentarioHTML.id = `comentario-${nuevoComentario.id}`;
@@ -1064,7 +1068,7 @@ function agregarComentario(archivoId) {
                 <i class="fas fa-comment text-primary mr-2"></i>
                 <strong>${nuevoComentario.user}</strong> - <span class="text-muted">${nuevoComentario.puesto}</span>
             </div>
-            <p class="mb-1">${nuevoComentario.text}</p>
+            <p class="mb-1"></p> 
             <small class="text-muted d-block">${nuevoComentario.fecha}</small>
             <button class="btn btn-link text-danger p-0 mt-1" 
                 onclick="eliminarComentario(${nuevoComentario.id}, ${archivoId})"
@@ -1073,33 +1077,46 @@ function agregarComentario(archivoId) {
             </button>
         `;
 
-        
+        // Agregar el texto del comentario de forma segura
+        comentarioHTML.querySelector("p").textContent = nuevoComentario.text;
+
         let listaComentarios = document.getElementById(`lista-comentarios-${archivoId}`);
 
-        
+        // Si hay un mensaje de "No hay comentarios", lo eliminamos
         if (listaComentarios.innerHTML.includes("No hay comentarios aún")) {
             listaComentarios.innerHTML = ""; 
         }
 
-        
         listaComentarios.prepend(comentarioHTML); 
 
+        // Animación de aparición
         setTimeout(() => {
             comentarioHTML.style.transition = "opacity 0.5s ease-in"; 
             comentarioHTML.style.opacity = "1"; 
         }, 50); 
 
-        
+        // Actualizar el contador de comentarios
         actualizarContadorComentarios(archivoId, 1);
 
-        
+        // Limpiar el campo de texto
         document.getElementById(`comentario-texto-${archivoId}`).value = '';
     })
     .catch(error => {
-        console.error("Error al agregar el comentario:", error);
-        alert("Ocurrió un error al agregar el comentario. Inténtalo de nuevo.");
+        let errorMessage = 'Ocurrió un error al agregar el comentario. Inténtalo de nuevo.';
+        
+        // Si hay un mensaje de error en la respuesta del servidor, úsalo
+        if (error.response && error.response.data.message) {
+            errorMessage = error.response.data.message;
+        }
+
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: errorMessage
+        });
     });
 }
+
 
 
 

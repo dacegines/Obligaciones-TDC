@@ -57,7 +57,7 @@ class FortifyServiceProvider extends ServiceProvider
             $credentials = $request->only('email', 'password');
 
             if (Auth::attempt($credentials)) {
-                // Regenerar sesión para prevenir Session Hijacking
+                // Regenerar sesión 
                 $request->session()->regenerate();
                 return Auth::user();
             }

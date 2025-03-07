@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Role;
 use App\Models\Permission;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Requisito;
+use App\Models\ObligacionUsuario;
+use Illuminate\Support\Facades\Schema;
 
 
 
@@ -300,4 +303,65 @@ class AdminUsersController extends Controller
 
         return redirect()->back()->with('success', 'Autorización eliminada correctamente.');
     }
+
+    public function getObligaciones()
+    {
+        // Obtener registros únicos con numero_evidencia y evidencia
+        $obligaciones = Requisito::select('nombre', 'numero_evidencia', 'evidencia')
+            ->distinct()
+            ->get();
+    
+        return response()->json($obligaciones);
+    }
+    
+    public function toggleObligacionUsuario(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'numero_evidencia' => 'required|string',
+            'checked' => 'required|boolean',
+        ]);
+    
+        if ($request->checked) {
+            
+            ObligacionUsuario::updateOrCreate(
+                [
+                    'user_id' => $request->user_id,
+                    'numero_evidencia' => $request->numero_evidencia,
+                ],
+                ['view' => 1]
+            );
+        } else {
+            
+            ObligacionUsuario::where('user_id', $request->user_id)
+                ->where('numero_evidencia', $request->numero_evidencia)
+                ->delete();
+        }
+    
+        return response()->json(['success' => true]);
+    }
+    
+    public function getObligacionesUsuario($userId)
+    {
+        // Obtener todas las obligaciones
+        $obligaciones = Requisito::select('nombre', 'numero_evidencia', 'evidencia')
+            ->distinct()
+            ->get();
+    
+        // Obtener los registros que están marcados con 'view' = 1 para este usuario
+        $obligacionesUsuario = ObligacionUsuario::where('user_id', $userId)
+            ->pluck('view', 'numero_evidencia'); // Devuelve un array con clave = numero_evidencia y valor = view
+    
+        // Mapear las obligaciones y agregar el estado 'view'
+        $obligaciones->transform(function ($obligacion) use ($obligacionesUsuario) {
+            $obligacion->view = $obligacionesUsuario->get($obligacion->numero_evidencia, 0); // Si no existe, poner 0
+            return $obligacion;
+        });
+    
+        return response()->json($obligaciones);
+    }
+    
+ 
+
+    
 }

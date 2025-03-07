@@ -111,6 +111,11 @@ Route::middleware([
     Route::post('/authorizations/store', [AdminUsersController::class, 'storeAuthorization'])->name('authorizations.store');
     Route::post('/admin/authorizations/create', [AdminUsersController::class, 'createAuthorization'])->name('adminAuthorizations.create');
     Route::delete('/admin/authorizations/delete/{id}', [AdminUsersController::class, 'deleteAuthorization'])->name('adminAuthorizations.delete');
+    Route::get('/get-obligaciones', [AdminUsersController::class, 'getObligaciones']);
+    Route::post('/toggle-obligacion', [AdminUsersController::class, 'toggleObligacionUsuario']);
+    Route::get('/get-obligaciones-usuario/{userId}', [AdminUsersController::class, 'getObligacionesUsuario']);
+
+
 
     // Rutas de Notificaciones
     Route::get('/admin-notificaciones', [NotificacionController::class, 'index'])->name('admin.notificaciones');
