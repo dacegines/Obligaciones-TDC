@@ -10,6 +10,7 @@ class EstadoEvidenciaCambiado extends Mailable
 {
     use Queueable, SerializesModels;
     public $nombre;
+    public $numero_evidencia;
     public $titulo;
     public $periodicidad;
     public $responsable;
@@ -18,9 +19,10 @@ class EstadoEvidenciaCambiado extends Mailable
     public $clausula;
     public $approved;
 
-    public function __construct($nombre, $titulo, $periodicidad, $responsable, $fecha_limite, $origen_obligacion, $clausula, $approved)
+    public function __construct($nombre, $numero_evidencia, $titulo, $periodicidad, $responsable, $fecha_limite, $origen_obligacion, $clausula, $approved)
     {
         $this->nombre = $nombre;
+        $this->numero_evidencia = $numero_evidencia;
         $this->titulo = $titulo;
         $this->periodicidad = $periodicidad;
         $this->responsable = $responsable;
@@ -45,6 +47,7 @@ class EstadoEvidenciaCambiado extends Mailable
         ])*/
                     ->with([
                         'nombre' => $this->nombre,
+                        'numero_evidencia' => $this->numero_evidencia,
                         'titulo' => $this->titulo,
                         'periodicidad' => $this->periodicidad,
                         'responsable' => $this->responsable,

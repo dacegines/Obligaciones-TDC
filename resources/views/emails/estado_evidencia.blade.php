@@ -70,7 +70,7 @@
         </div>
         <br>
         <div class="header">
-            {{ $nombre }}
+            <span> {{ $numero_evidencia }} - {{ $nombre }} - {{ $fecha_limite }}</span>
         </div>
         <div class="details-card">
             <div class="info-section">
@@ -78,7 +78,7 @@
 
                     <hr>
                     <div class="section-header">📝 Obligación:</div>
-                    <p>{{ $titulo }}</p>
+                    <p><span> {{ $numero_evidencia }} - </span> {{ $titulo }}</p>
                     <div class="section-header">🗓 Periodicidad:</div>
                     <p>{{ $periodicidad }}</p>
                     <div class="section-header">👤 Responsable:</div>

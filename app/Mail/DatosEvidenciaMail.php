@@ -20,6 +20,7 @@ class DatosEvidenciaMail extends Mailable
     public $rutaArchivo; 
     public $usuario; 
     public $puesto; 
+    public $numeroEvidencia;
 
     public function __construct(
         $nombre,
@@ -31,7 +32,8 @@ class DatosEvidenciaMail extends Mailable
         $clausula_condicionante_articulo,
         $rutaArchivo = null,
         $usuario = null,
-        $puesto = null 
+        $puesto = null,
+        $numeroEvidencia = null // Nuevo parámetro
     ) {
         $this->nombre = $nombre;
         $this->evidencia = $evidencia;
@@ -41,10 +43,11 @@ class DatosEvidenciaMail extends Mailable
         $this->origen_obligacion = $origen_obligacion;
         $this->clausula_condicionante_articulo = $clausula_condicionante_articulo;
         $this->rutaArchivo = $rutaArchivo;
-        $this->usuario = $usuario; 
-        $this->puesto = $puesto; 
+        $this->usuario = $usuario;
+        $this->puesto = $puesto;
+        $this->numeroEvidencia = $numeroEvidencia; // Asignar el nuevo parámetro
     }
-
+    
     public function build()
     {
         $correo = $this->view('emails.datos_evidencia')
@@ -59,23 +62,24 @@ class DatosEvidenciaMail extends Mailable
                 'fecha_limite_cumplimiento' => $this->fecha_limite_cumplimiento,
                 'origen_obligacion' => $this->origen_obligacion,
                 'clausula_condicionante_articulo' => $this->clausula_condicionante_articulo,
-                'usuario' => $this->usuario, 
-                'puesto' => $this->puesto, 
+                'usuario' => $this->usuario,
+                'puesto' => $this->puesto,
+                'numeroEvidencia' => $this->numeroEvidencia, // Pasar el número de evidencia a la vista
             ]);
-
+    
         // Adjuntar el archivo si existe
         if ($this->rutaArchivo && file_exists($this->rutaArchivo)) {
             $fileName = basename($this->rutaArchivo);
-
+    
             // Extraer todo después del primer "_"
             $fileNameTrimmed = substr($fileName, strpos($fileName, '_') + 1);
-
+    
             $correo->attach($this->rutaArchivo, [
                 'as' => $fileNameTrimmed, // Nombre ajustado del archivo
                 'mime' => mime_content_type($this->rutaArchivo),
             ]);
         }
-
+    
         return $correo;
     }
 }

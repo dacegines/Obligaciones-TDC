@@ -87,15 +87,23 @@ class ArchivoController extends Controller
                 $validatedData['fecha_limite_cumplimiento'],
                 $requisito->origen_obligacion,
                 $requisito->clausula_condicionante_articulo,
-                $rutaArchivo, 
-                $validatedData['usuario'], 
-                $validatedData['puesto']
+                $rutaArchivo,
+                $validatedData['usuario'],
+                $validatedData['puesto'],
+                $requisito->numero_evidencia // Agregar número de evidencia
             ));
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'El archivo fue subido, pero hubo un error enviando el correo: ' . $e->getMessage()], 500);
-        }
     
-        return response()->json(['success' => 'Archivo subido y correo enviado correctamente.']);
+            return response()->json(['success' => 'Archivo subido y correo enviado correctamente.']);
+        } catch (\Exception $e) {
+            // Log del error
+            Log::error('Error al enviar el correo: ' . $e->getMessage());
+    
+            // Respuesta en caso de error
+            return response()->json([
+                'error' => 'El archivo fue subido, pero hubo un error enviando el correo.',
+                'details' => $e->getMessage(),
+            ], 500);
+        }
     }
     
 
@@ -135,7 +143,7 @@ class ArchivoController extends Controller
         }
     
         try {
-            
+            // Registrar el archivo eliminado en la tabla DeletedFile
             DeletedFile::create([
                 'file_name' => $archivo->nombre_archivo,
                 'file_path' => $archivo->ruta_archivo,
@@ -148,9 +156,10 @@ class ArchivoController extends Controller
                 'deleted_by' => Auth::id(),
             ]);
     
-            
+            // Buscar el requisito relacionado
             $requisito = Requisito::find($archivo->requisito_id);
             if ($requisito) {
+                // Obtener destinatarios del correo
                 $emailNotifications = EvidenceNotification::where('type', 1)->pluck('email')->toArray();
                 $emailResponsables = !empty($requisito->email) ? [$requisito->email] : [];
                 $destinatarios = array_merge($emailResponsables, $emailNotifications);
@@ -158,6 +167,7 @@ class ArchivoController extends Controller
                 if (!empty($destinatarios)) {
                     $rutaArchivo = storage_path('app/public/' . $archivo->ruta_archivo);
                     if (file_exists($rutaArchivo)) {
+                        // Enviar correo con archivo adjunto
                         Mail::to($destinatarios)->send(new ArchivoEliminadoMail(
                             $requisito->nombre,
                             $requisito->evidencia,
@@ -168,7 +178,8 @@ class ArchivoController extends Controller
                             $requisito->clausula_condicionante_articulo,
                             $archivo->usuario,
                             $archivo->puesto,
-                            $rutaArchivo
+                            $rutaArchivo,
+                            $requisito->numero_evidencia // Agregar número de evidencia
                         ));
                     } else {
                         Log::error('El archivo no existe en la ruta: ' . $rutaArchivo);
@@ -176,18 +187,21 @@ class ArchivoController extends Controller
                 }
             }
     
-            
+            // Eliminar el archivo del almacenamiento
             $rutaArchivoStorage = 'public/' . $archivo->ruta_archivo;
             if (Storage::exists($rutaArchivoStorage)) {
                 Storage::delete($rutaArchivoStorage);
             }
     
-            
+            // Eliminar el registro del archivo de la base de datos
             $archivo->delete();
     
             return response()->json(['success' => true, 'message' => 'Archivo y comentarios eliminados correctamente.']);
     
         } catch (\Exception $e) {
+            // Log del error
+            Log::error('Error al eliminar el archivo: ' . $e->getMessage());
+    
             return response()->json(['success' => false, 'message' => 'Error al eliminar el archivo'], 500);
         }
     }

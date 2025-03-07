@@ -289,7 +289,7 @@ class AdminUsersController extends Controller
         // Crear la autorización con un valor predeterminado para 'guard_name'
         DB::table('authorizations')->insert([
             'name' => $request->input('name'),
-            'guard_name' => 'web', // Valor por defecto para guard_name
+            'guard_name' => 'web', 
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -306,7 +306,7 @@ class AdminUsersController extends Controller
 
     public function getObligaciones()
     {
-        // Obtener registros únicos con numero_evidencia y evidencia
+
         $obligaciones = Requisito::select('nombre', 'numero_evidencia', 'evidencia')
             ->distinct()
             ->get();
@@ -343,18 +343,18 @@ class AdminUsersController extends Controller
     
     public function getObligacionesUsuario($userId)
     {
-        // Obtener todas las obligaciones
+
         $obligaciones = Requisito::select('nombre', 'numero_evidencia', 'evidencia')
             ->distinct()
             ->get();
     
-        // Obtener los registros que están marcados con 'view' = 1 para este usuario
+
         $obligacionesUsuario = ObligacionUsuario::where('user_id', $userId)
-            ->pluck('view', 'numero_evidencia'); // Devuelve un array con clave = numero_evidencia y valor = view
+            ->pluck('view', 'numero_evidencia'); 
     
-        // Mapear las obligaciones y agregar el estado 'view'
+
         $obligaciones->transform(function ($obligacion) use ($obligacionesUsuario) {
-            $obligacion->view = $obligacionesUsuario->get($obligacion->numero_evidencia, 0); // Si no existe, poner 0
+            $obligacion->view = $obligacionesUsuario->get($obligacion->numero_evidencia, 0); 
             return $obligacion;
         });
     

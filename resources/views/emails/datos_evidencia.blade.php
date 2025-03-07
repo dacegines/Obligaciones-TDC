@@ -62,7 +62,7 @@
         </div>
         <br>
         <div class="header">
-            {{ $nombre }}
+            <span>{{ $numeroEvidencia }} - {{ $nombre }} - {{ $fecha_limite_cumplimiento }}</span>
         </div>
         <div class="details-card">
             <div class="info-section">

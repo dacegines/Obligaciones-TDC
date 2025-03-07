@@ -12,9 +12,7 @@ use App\Mail\EstadoEvidenciaCambiado;
 use App\Models\EvidenceNotification;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-use App\Mail\DatosEvidenciaMail;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\AlertaCorreo;
 
 
 class ObligacionesController extends Controller
@@ -55,7 +53,9 @@ class ObligacionesController extends Controller
 
     private function obtenerRequisitosConAvance($year, $user)
     {
-        $query = Requisito::with('archivos')->porAno($year);
+        $query = Requisito::with('archivos')
+            ->porAno($year)
+            ->orderBy('numero_evidencia', 'asc'); // Ordenar por numero_evidencia de forma ascendente
     
         $requisitosIds = ObligacionUsuario::where('user_id', $user->id)
             ->where('view', 1)
@@ -302,6 +302,7 @@ class ObligacionesController extends Controller
             if (count($destinatarios) > 0) {
                 Mail::to($destinatarios)->send(new EstadoEvidenciaCambiado(
                     $requisito->nombre,
+                    $requisito->numero_evidencia,
                     $requisito->evidencia,
                     $requisito->periodicidad,
                     $requisito->responsable,
@@ -541,14 +542,15 @@ class ObligacionesController extends Controller
             ->pluck('users.puesto')
             ->toArray();
     
-        // Obtener los requisitos que el usuario puede ver según la tabla pivote
+        
         $requisitosIds = ObligacionUsuario::where('user_id', $user->id)
             ->where('view', 1)
             ->pluck('numero_evidencia')
             ->toArray();
     
         $query = Requisito::porAno($year)
-            ->with('archivos');
+            ->with('archivos')
+            ->orderBy('numero_evidencia', 'asc'); 
     
         if (!empty($requisitosIds)) {
             $query->whereIn('numero_evidencia', $requisitosIds);
