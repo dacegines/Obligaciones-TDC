@@ -69,7 +69,7 @@
 
 
             <div class="divider"></div>
-            <button class="btn btn-success" onclick="location.reload();">Actualizar Obligaciones</button>
+            <button class="btn btn-success" onclick="location.reload();">Actualizar porcentaje de obligaciones</button>
             <div class="row text-center justify-content-center" id="cajaContainer">
                 @if (Auth::user()->hasRole('invitado'))
                     <!-- Mostrar solo 3 registros si el usuario es 'invitado' -->

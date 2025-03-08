@@ -542,30 +542,33 @@ class ObligacionesController extends Controller
             ->pluck('users.puesto')
             ->toArray();
     
-        
+        // Obtener los IDs de requisitos que el usuario puede ver
         $requisitosIds = ObligacionUsuario::where('user_id', $user->id)
             ->where('view', 1)
             ->pluck('numero_evidencia')
             ->toArray();
     
+        // Construir la consulta base
         $query = Requisito::porAno($year)
             ->with('archivos')
-            ->orderBy('numero_evidencia', 'asc'); 
+            ->orderBy('numero_evidencia', 'asc');
     
+        // Filtrar por requisitos que el usuario puede ver
         if (!empty($requisitosIds)) {
             $query->whereIn('numero_evidencia', $requisitosIds);
         }
     
+        // Aplicar restricciones de visualización si el puesto no está excluido
         if (!in_array($user->puesto, $puestosExcluidos)) {
             $query->permitirVisualizacion($user);
         }
     
+        // Obtener los requisitos y calcular el avance
         $requisitos = $query->get()
             ->filter(fn($requisito) => !empty($requisito->responsable))
-            ->each(
-                fn($requisito) =>
-                $requisito->total_avance = $this->getTotalAvance($requisito->numero_requisito, $user->puesto, $year)
-            );
+            ->each(function ($requisito) use ($year, $requisitosIds) {
+                $requisito->total_avance = $this->getTotalAvance($requisito->numero_requisito, $year, $requisitosIds);
+            });
     
         return view('gestion_cumplimiento.obligaciones.index', compact('requisitos', 'user', 'year'));
     }
