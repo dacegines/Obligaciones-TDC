@@ -18,17 +18,44 @@ class DetallesController extends Controller
         if (!Auth::user()->can('superUsuario') && !Auth::user()->can('obligaciones de concesión') && !Auth::user()->can('obligaciones de concesión limitado')) {
             abort(403, 'No tienes permiso para acceder a esta página.');
         }
-
+    
         if (!Auth::check()) {
             return redirect()->route('login');
         }
-
+    
         $user = Auth::user();
         $year = \Carbon\Carbon::now()->year;
-
+    
+        // Verificar si el usuario tiene autorización (authorization_id = 7)
+        $tieneAutorizacion = DB::table('model_has_authorizations')
+            ->where('authorization_id', 7)
+            ->where('model_id', $user->id)
+            ->exists();
+    
+        if (!$tieneAutorizacion) {
+            // Si no tiene autorización, no mostrar nada
+            return view('gestion_cumplimiento.detalles.index', [
+                'requisitos' => collect(), // Colección vacía
+                'year' => $year
+            ])->with('info', 'No tienes autorización para ver detalles.');
+        }
+    
+        // Verificar si el usuario tiene obligaciones con view = 1
+        $tieneObligaciones = ObligacionUsuario::where('user_id', $user->id)
+            ->where('view', 1)
+            ->exists();
+    
+        if (!$tieneObligaciones) {
+            // Si no tiene obligaciones con view = 1, no mostrar nada
+            return view('gestion_cumplimiento.detalles.index', [
+                'requisitos' => collect(), // Colección vacía
+                'year' => $year
+            ])->with('info', 'No tienes obligaciones para mostrar.');
+        }
+    
         // Construir consulta base
         $requisitos = $this->getRequisitos($year, $user);
-
+    
         return view('gestion_cumplimiento.detalles.index', compact('requisitos', 'year'));
     }
 
@@ -38,12 +65,40 @@ class DetallesController extends Controller
         $validatedData = $request->validate([
             'year' => 'required|integer|min:2024|max:2040',
         ]);
-
+    
         $year = $validatedData['year'];
         $user = Auth::user();
-
+    
+        // Verificar si el usuario tiene autorización (authorization_id = 7)
+        $tieneAutorizacion = DB::table('model_has_authorizations')
+            ->where('authorization_id', 7)
+            ->where('model_id', $user->id)
+            ->exists();
+    
+        if (!$tieneAutorizacion) {
+            // Si no tiene autorización, no mostrar nada
+            return view('gestion_cumplimiento.detalles.index', [
+                'requisitos' => collect(), // Colección vacía
+                'year' => $year
+            ])->with('info', 'No tienes autorización para ver detalles.');
+        }
+    
+        // Verificar si el usuario tiene obligaciones con view = 1
+        $tieneObligaciones = ObligacionUsuario::where('user_id', $user->id)
+            ->where('view', 1)
+            ->exists();
+    
+        if (!$tieneObligaciones) {
+            // Si no tiene obligaciones con view = 1, no mostrar nada
+            return view('gestion_cumplimiento.detalles.index', [
+                'requisitos' => collect(), // Colección vacía
+                'year' => $year
+            ])->with('info', 'No tienes obligaciones para mostrar.');
+        }
+    
+        // Construir consulta base
         $requisitos = $this->getRequisitos($year, $user);
-
+    
         return view('gestion_cumplimiento.detalles.index', compact('requisitos', 'year'));
     }
 
@@ -93,7 +148,28 @@ class DetallesController extends Controller
             return redirect()->route('login');
         }
     
-        // Obtener los requisitos que el usuario puede ver según la tabla pivote
+        // Verificar si el usuario tiene autorización (authorization_id = 7)
+        $tieneAutorizacion = DB::table('model_has_authorizations')
+            ->where('authorization_id', 7)
+            ->where('model_id', $user->id)
+            ->exists();
+    
+        if (!$tieneAutorizacion) {
+            // Si no tiene autorización, no generar el PDF
+            return redirect()->back()->with('info', 'No tienes autorización para descargar el PDF.');
+        }
+    
+        // Verificar si el usuario tiene obligaciones con view = 1
+        $tieneObligaciones = ObligacionUsuario::where('user_id', $user->id)
+            ->where('view', 1)
+            ->exists();
+    
+        if (!$tieneObligaciones) {
+            // Si no tiene obligaciones con view = 1, no generar el PDF
+            return redirect()->back()->with('info', 'No tienes obligaciones para descargar el PDF.');
+        }
+    
+        // Obtener los IDs de requisitos que el usuario puede ver
         $requisitosIds = ObligacionUsuario::where('user_id', $user->id)
             ->where('view', 1)
             ->pluck('numero_evidencia')
@@ -144,8 +220,8 @@ class DetallesController extends Controller
         $requisitos = $requisitosQuery->get();
     
         // Verificar si hay resultados antes de generar el PDF
-        if ($requisitos->isEmpty() && $search) {
-            return redirect()->back()->with('error', 'No se encontraron registros para el filtro aplicado.');
+        if ($requisitos->isEmpty()) {
+            return redirect()->back()->with('info', 'No hay registros para descargar.');
         }
     
         // Generar el PDF
@@ -159,16 +235,27 @@ class DetallesController extends Controller
     // Método privado para construir la consulta de requisitos
     private function getRequisitos($year, $user, $search = null)
     {
-        // Obtener el authorization_id del usuario autenticado
-        $authorizationId = DB::table('model_has_authorizations')
+        // Verificar si el usuario tiene autorización (authorization_id = 7)
+        $tieneAutorizacion = DB::table('model_has_authorizations')
+            ->where('authorization_id', 7)
             ->where('model_id', $user->id)
-            ->value('authorization_id');
+            ->exists();
+    
+        if (!$tieneAutorizacion) {
+            // Si no tiene autorización, retornar una colección vacía
+            return collect();
+        }
     
         // Obtener los requisitos que el usuario puede ver según la tabla pivote
         $requisitosIds = ObligacionUsuario::where('user_id', $user->id)
             ->where('view', 1)
             ->pluck('numero_evidencia')
             ->toArray();
+    
+        // Si no hay obligaciones con view = 1, retornar una colección vacía
+        if (empty($requisitosIds)) {
+            return collect();
+        }
     
         // Construir la consulta base
         $query = DB::table('requisitos as r')
@@ -200,6 +287,10 @@ class DetallesController extends Controller
         }
     
         // Aplicar lógica según authorization_id
+        $authorizationId = DB::table('model_has_authorizations')
+            ->where('model_id', $user->id)
+            ->value('authorization_id');
+    
         if ($authorizationId == 8) {
             $query->where('r.responsable', $user->puesto);
         }

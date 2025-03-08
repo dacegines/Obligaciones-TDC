@@ -31,6 +31,43 @@ class ObligacionesController extends Controller
             }
     
             $currentYear = Carbon::now()->year;
+    
+            // Verificar si el usuario tiene un registro en model_has_authorizations con authorization_id = 7
+            $tieneAutorizacion = DB::table('model_has_authorizations')
+                ->where('authorization_id', 7)
+                ->where('model_id', $user->id)
+                ->exists();
+    
+            if (!$tieneAutorizacion) {
+                // Si el usuario no tiene autorización, no mostrar obligaciones
+                $this->logInfo('El usuario no tiene autorización con authorization_id = 7, no se mostrarán obligaciones', ['user_id' => $user->id]);
+                return view('gestion_cumplimiento.obligaciones.index', [
+                    'requisitos' => collect(), // Colección vacía
+                    'user' => $user,
+                    'currentYear' => $currentYear,
+                    'puestosExcluidos' => []
+                ])->with('info', 'No tienes autorización para ver obligaciones.');
+            }
+    
+            // Obtener los IDs de requisitos que el usuario puede ver
+            $requisitosIds = ObligacionUsuario::where('user_id', $user->id)
+                ->where('view', 1)
+                ->pluck('numero_evidencia')
+                ->toArray();
+    
+            // Verificar si el usuario tiene al menos una obligación con view = 1
+            if (empty($requisitosIds)) {
+                // Si no tiene obligaciones con view = 1, no mostrar nada
+                $this->logInfo('El usuario no tiene obligaciones con view = 1, no se mostrarán obligaciones', ['user_id' => $user->id]);
+                return view('gestion_cumplimiento.obligaciones.index', [
+                    'requisitos' => collect(), // Colección vacía
+                    'user' => $user,
+                    'currentYear' => $currentYear,
+                    'puestosExcluidos' => []
+                ])->with('info', 'No tienes obligaciones para mostrar.');
+            }
+    
+            // Obtener los puestos excluidos
             $puestosExcluidos = DB::table('users')
                 ->join('model_has_authorizations', 'users.id', '=', 'model_has_authorizations.model_id')
                 ->where('model_has_authorizations.authorization_id', 7)
@@ -534,18 +571,47 @@ class ObligacionesController extends Controller
             return back()->withErrors(['error' => 'No se encontró el puesto del usuario autenticado']);
         }
     
+        // Verificar si el usuario tiene un registro en model_has_authorizations con authorization_id = 7
+        $tieneAutorizacion = DB::table('model_has_authorizations')
+            ->where('authorization_id', 7)
+            ->where('model_id', $user->id)
+            ->exists();
+    
+        if (!$tieneAutorizacion) {
+            // Si el usuario no tiene autorización, no mostrar obligaciones
+            $this->logInfo('El usuario no tiene autorización con authorization_id = 7, no se mostrarán obligaciones', ['user_id' => $user->id]);
+            return view('gestion_cumplimiento.obligaciones.index', [
+                'requisitos' => collect(), // Colección vacía
+                'user' => $user,
+                'year' => $year,
+                'puestosExcluidos' => []
+            ])->with('info', 'No tienes autorización para ver obligaciones.');
+        }
+    
+        // Obtener los IDs de requisitos que el usuario puede ver
+        $requisitosIds = ObligacionUsuario::where('user_id', $user->id)
+            ->where('view', 1)
+            ->pluck('numero_evidencia')
+            ->toArray();
+    
+        // Verificar si el usuario tiene al menos una obligación con view = 1
+        if (empty($requisitosIds)) {
+            // Si no tiene obligaciones con view = 1, no mostrar nada
+            $this->logInfo('El usuario no tiene obligaciones con view = 1, no se mostrarán obligaciones', ['user_id' => $user->id]);
+            return view('gestion_cumplimiento.obligaciones.index', [
+                'requisitos' => collect(), // Colección vacía
+                'user' => $user,
+                'year' => $year,
+                'puestosExcluidos' => []
+            ])->with('info', 'No tienes obligaciones para mostrar.');
+        }
+    
         // Obtener los puestos de usuarios asociados con authorization_id = 7
         $puestosExcluidos = DB::table('users')
             ->join('model_has_authorizations', 'users.id', '=', 'model_has_authorizations.model_id')
             ->where('model_has_authorizations.authorization_id', 7)
             ->distinct()
             ->pluck('users.puesto')
-            ->toArray();
-    
-        // Obtener los IDs de requisitos que el usuario puede ver
-        $requisitosIds = ObligacionUsuario::where('user_id', $user->id)
-            ->where('view', 1)
-            ->pluck('numero_evidencia')
             ->toArray();
     
         // Construir la consulta base
@@ -570,7 +636,7 @@ class ObligacionesController extends Controller
                 $requisito->total_avance = $this->getTotalAvance($requisito->numero_requisito, $year, $requisitosIds);
             });
     
-        return view('gestion_cumplimiento.obligaciones.index', compact('requisitos', 'user', 'year'));
+        return view('gestion_cumplimiento.obligaciones.index', compact('requisitos', 'user', 'year', 'puestosExcluidos'));
     }
     
     

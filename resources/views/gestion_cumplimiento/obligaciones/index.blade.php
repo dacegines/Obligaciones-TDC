@@ -328,7 +328,8 @@
     @else
         
         <div class="text-center mt-4">
-            <h5>Este usuario no tiene obligaciones registradas o el año no contiene obligaciones registradas.</h5>
+            <h5>Este usuario no tiene obligaciones registradas, permisos para ver las obligaciones o el año no contiene obligaciones.</h5>
+            <h5>Favor de validarlo con el administrador del sistema.</h5>
         </div>
     @endif
 
