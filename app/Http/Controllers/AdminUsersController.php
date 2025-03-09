@@ -361,7 +361,50 @@ class AdminUsersController extends Controller
         return response()->json($obligaciones);
     }
     
- 
+    public function removeUserRole(Request $request)
+    {
+        $request->validate([
+            'model_id' => 'required|exists:users,id',
+            'model_type' => 'required|string',
+        ]);
+    
+        // Eliminar el rol del usuario
+        DB::table('model_has_roles')
+            ->where('model_id', $request->input('model_id'))
+            ->delete();
+    
+        return response()->json(['success' => true]);
+    }
+
+    public function removeUserPermission(Request $request)
+    {
+        $request->validate([
+            'model_id' => 'required|exists:users,id',
+            'model_type' => 'required|string',
+        ]);
+    
+        // Eliminar el permiso del usuario
+        DB::table('model_has_permissions')
+            ->where('model_id', $request->input('model_id'))
+            ->delete();
+    
+        return response()->json(['success' => true]);
+    }
+
+    public function removeUserAuthorization(Request $request)
+{
+    $request->validate([
+        'model_id' => 'required|exists:users,id',
+        'model_type' => 'required|string',
+    ]);
+
+    // Eliminar la autorización del usuario
+    DB::table('model_has_authorizations')
+        ->where('model_id', $request->input('model_id'))
+        ->delete();
+
+    return response()->json(['success' => true]);
+}
 
     
 }

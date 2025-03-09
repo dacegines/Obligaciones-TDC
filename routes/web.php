@@ -114,6 +114,9 @@ Route::middleware([
     Route::get('/get-obligaciones', [AdminUsersController::class, 'getObligaciones']);
     Route::post('/toggle-obligacion', [AdminUsersController::class, 'toggleObligacionUsuario']);
     Route::get('/get-obligaciones-usuario/{userId}', [AdminUsersController::class, 'getObligacionesUsuario']);
+    Route::post('/roles/remove', [AdminUsersController::class, 'removeUserRole'])->name('roles.remove');
+    Route::post('/permissions/remove', [AdminUsersController::class, 'removeUserPermission'])->name('permissions.remove');
+    Route::post('/authorizations/remove', [AdminUsersController::class, 'removeUserAuthorization'])->name('authorizations.remove');
 
 
 

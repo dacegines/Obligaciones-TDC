@@ -445,19 +445,14 @@
                 <div class="modal-body">
                     <form id="roleForm" action="{{ route('roles.store') }}" method="POST">
                         @csrf
-
                         <input type="hidden" name="model_type" value="App\Models\User">
-
-
                         <input type="hidden" name="model_id" id="modelIdRoleInput">
-
-
+    
                         <div class="form-group">
                             <label for="userNameEmailRoleInput">Usuario</label>
                             <input type="text" id="userNameEmailRoleInput" class="form-control" readonly>
                         </div>
-
-
+    
                         <div class="form-group">
                             <label for="roleSelect">Seleccionar Rol</label>
                             <select id="roleSelect" name="role_id" class="form-control">
@@ -466,9 +461,14 @@
                                 @endforeach
                             </select>
                         </div>
-
+    
                         <button type="submit" class="btn btn-success">Guardar</button>
                     </form>
+    
+                    <!-- Botón para eliminar el rol actual -->
+                    <button type="button" class="btn btn-danger mt-3" id="deleteRole">
+                        Eliminar Rol Actual
+                    </button>
                 </div>
             </div>
         </div>
@@ -512,6 +512,10 @@
 
                         <button type="submit" class="btn btn-success">Guardar</button>
                     </form>
+                                    <!-- Botón para eliminar el permiso actual -->
+                <button type="button" class="btn btn-danger mt-3" id="deletePermissionButton">
+                    Eliminar Permiso Actual
+                </button>
                 </div>
             </div>
         </div>
@@ -533,10 +537,11 @@
                     <form id="createAuthorizationForm" action="{{ route('adminAuthorizations.create') }}"
                         method="POST">
                         @csrf
-
+                        
                         <div class="form-group">
                             <label for="authorizationName">Nombre de la Autorización</label>
                             <input type="text" name="name" id="authorizationName" class="form-control" required>
+                            
                         </div>
 
                         <button type="submit" class="btn btn-success">Guardar Autorización</button>
@@ -598,6 +603,7 @@
                         <div class="form-group">
                             <label for="userNameAuthorization">Usuario</label>
                             <input type="text" id="userNameAuthorization" class="form-control" readonly>
+                            
                         </div>
 
 
@@ -612,6 +618,11 @@
 
                         <button type="submit" class="btn btn-success">Guardar</button>
                     </form>
+
+                                    <!-- Botón para eliminar la autorización actual -->
+                <button type="button" class="btn btn-danger mt-3" id="deleteAuthorizationButton">
+                    Eliminar Autorización Actual
+                </button>
                 </div>
             </div>
         </div>
@@ -628,6 +639,9 @@
         const getObligacionesUrl = "{{ url('get-obligaciones') }}";
         const getObligacionesUsuarioUrl = "{{ url('get-obligaciones-usuario') }}";
         const toggleObligacionUrl = "{{ url('toggle-obligacion') }}";
+        const removeRoleUrl = "{{ url('roles/remove') }}";
+        const removePermissionUrl = "{{ url('permissions/remove') }}";
+        const removeAuthorizationUrl = "{{ url('authorizations/remove') }}";
         const getColumnsUrl = "{{ url('get-columns') }}";
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/parsley.js/2.9.3/parsley.min.js"></script>

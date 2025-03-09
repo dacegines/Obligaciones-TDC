@@ -210,7 +210,7 @@ $(document).ready(function () {
                     }
                 },
                 error: function (xhr) {
-                    console.error(xhr.responseText);
+                    
                     feedback
                         .text("Ocurrió un error al validar el correo.")
                         .addClass("text-danger");
@@ -632,7 +632,7 @@ function cargarObligaciones(userId) {
                 $(".toggle-switch").each(function () {
                     let isChecked = $(this).attr("checked") ? true : false;
                     $(this).prop("checked", isChecked);
-                    console.log(`Switch ${$(this).attr("id")}: ${isChecked}`);
+                    
                 });
             }, 300); 
         },
@@ -658,10 +658,176 @@ $(document).on("change", ".toggle-switch", function () {
             checked: checked
         },
         success: function (response) {
-            console.log("Actualización correcta:", response);
+            
         },
         error: function (xhr, status, error) {
-            console.error("Error al actualizar:", error);
+            
         }
     });
 });
+
+
+$(document).on("click", "#deleteRole", function () {
+    // Obtener el ID del usuario desde el input oculto en el modal
+    const userId = $("#modelIdRoleInput").val();
+
+    // Confirmar antes de eliminar usando SweetAlert2
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: "¿Deseas eliminar el rol actual de este usuario?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Si el usuario confirma, hacer la solicitud AJAX
+            $.ajax({
+                url: removeRoleUrl, // Usar la URL definida
+                type: "POST",
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr("content"), // Token CSRF
+                    model_id: userId, // ID del usuario
+                    model_type: "App\Models\User" // Tipo de modelo
+                },
+                success: function (response) {
+                    if (response.success) {
+                        // Mostrar alerta de éxito con SweetAlert2
+                        Swal.fire({
+                            title: '¡Éxito!',
+                            text: 'Rol eliminado correctamente.',
+                            icon: 'success',
+                            confirmButtonText: 'Aceptar'
+                        }).then(() => {
+                            location.reload(); // Recargar la página para ver los cambios
+                        });
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error al eliminar el rol:", error);
+                    // Mostrar alerta de error con SweetAlert2
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Hubo un error al eliminar el rol. Por favor, inténtalo de nuevo.',
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar'
+                    });
+                }
+            });
+        }
+    });
+});
+
+// Definir la URL para eliminar el permiso
+
+
+$(document).on("click", "#deletePermissionButton", function () {
+    // Obtener el ID del usuario desde el input oculto en el modal
+    const userId = $("#modelIdInput").val();
+    
+    // Confirmar antes de eliminar usando SweetAlert2
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: "¿Deseas eliminar el permiso actual de este usuario?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Si el usuario confirma, hacer la solicitud AJAX
+            $.ajax({
+                url: removePermissionUrl, // Usar la URL definida
+                type: "POST",
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr("content"), // Token CSRF
+                    model_id: userId, // ID del usuario
+                    model_type: "App\Models\User" // Tipo de modelo
+                },
+                success: function (response) {
+                    if (response.success) {
+                        // Mostrar alerta de éxito con SweetAlert2
+                        Swal.fire({
+                            title: '¡Éxito!',
+                            text: 'Permiso eliminado correctamente.',
+                            icon: 'success',
+                            confirmButtonText: 'Aceptar'
+                        }).then(() => {
+                            location.reload(); // Recargar la página para ver los cambios
+                        });
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error al eliminar el permiso:", error);
+                    // Mostrar alerta de error con SweetAlert2
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Hubo un error al eliminar el permiso. Por favor, inténtalo de nuevo.',
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar'
+                    });
+                }
+            });
+        }
+    });
+});
+
+$(document).on("click", "#deleteAuthorizationButton", function () {
+    // Obtener el ID del usuario desde el input oculto en el modal
+    const userId = $("#modelIdAuthorization").val();
+
+    console.log('User ID:', userId); // Verificar que el ID no sea undefined
+
+    // Confirmar antes de eliminar usando SweetAlert2
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: "¿Deseas eliminar la autorización actual de este usuario?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Si el usuario confirma, hacer la solicitud AJAX
+            $.ajax({
+                url: removeAuthorizationUrl, // Usar la URL definida
+                type: "POST",
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr("content"), // Token CSRF
+                    model_id: userId, // ID del usuario
+                    model_type: "App\Models\User" // Tipo de modelo
+                },
+                success: function (response) {
+                    if (response.success) {
+                        // Mostrar alerta de éxito con SweetAlert2
+                        Swal.fire({
+                            title: '¡Éxito!',
+                            text: 'Autorización eliminada correctamente.',
+                            icon: 'success',
+                            confirmButtonText: 'Aceptar'
+                        }).then(() => {
+                            location.reload(); // Recargar la página para ver los cambios
+                        });
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error al eliminar la autorización:", error);
+                    // Mostrar alerta de error con SweetAlert2
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Hubo un error al eliminar la autorización. Por favor, inténtalo de nuevo.',
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar'
+                    });
+                }
+            });
+        }
+    });
+});
+
