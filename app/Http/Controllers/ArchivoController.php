@@ -15,6 +15,7 @@ use App\Models\EvidenceNotification;
 use App\Mail\DatosEvidenciaMail;
 use App\Mail\ArchivoEliminadoMail;
 use App\Models\FileComment;
+use Carbon\Carbon;
 
 class ArchivoController extends Controller
 {
@@ -22,7 +23,7 @@ class ArchivoController extends Controller
     {
         // Validaciones estrictas
         $validatedData = $request->validate([
-            'archivo' => 'required|file|mimes:pdf,jpg,jpeg,png,gif,doc,docx,xls,xlsx,ppt,pptx,txt,zip,rar|max:20480',
+            'archivo' => 'required|file|mimes:pdf,jpg,jpeg,png,doc,docx,xls,xlsx,ppt,pptx,txt|max:40960',
             'requisito_id' => 'required|integer|exists:requisitos,id',
             'evidencia' => 'required|string',
             'fecha_limite_cumplimiento' => 'required|date',
@@ -84,7 +85,7 @@ class ArchivoController extends Controller
                 $requisito->evidencia,
                 $requisito->periodicidad,
                 $requisito->responsable,
-                $validatedData['fecha_limite_cumplimiento'],
+                Carbon::parse($validatedData['fecha_limite_cumplimiento'])->format('d/m/Y'),
                 $requisito->origen_obligacion,
                 $requisito->clausula_condicionante_articulo,
                 $rutaArchivo,
@@ -179,7 +180,7 @@ class ArchivoController extends Controller
                             $archivo->usuario,
                             $archivo->puesto,
                             $rutaArchivo,
-                            $requisito->numero_evidencia // Agregar número de evidencia
+                            $requisito->numero_evidencia 
                         ));
                     } else {
                         Log::error('El archivo no existe en la ruta: ' . $rutaArchivo);

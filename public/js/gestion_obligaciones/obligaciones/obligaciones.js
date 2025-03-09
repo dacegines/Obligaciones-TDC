@@ -794,7 +794,7 @@ function handleFileUpload(formSelector) {
         return;
     }
 
-    const maxFileSize = 20 * 1024 * 1024;
+    const maxFileSize = 40 * 1024 * 1024;
     if (archivoAdjunto.size > maxFileSize) {
         Swal.fire(
             "Error",
@@ -805,24 +805,21 @@ function handleFileUpload(formSelector) {
     }
 
     const validFileTypes = [
-        "application/pdf",
-        "image/jpeg",
-        "image/png",
-        "image/gif",
-        "application/msword",
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "application/vnd.ms-excel",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        "application/vnd.ms-powerpoint",
-        "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-        "text/plain",
-        "application/zip",
-        "application/x-rar-compressed",
+        "application/pdf", 
+        "image/jpeg", 
+        "image/png", 
+        "application/msword", 
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document", 
+        "application/vnd.ms-excel", 
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", 
+        "application/vnd.ms-powerpoint", 
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation", 
+        "text/plain" 
     ];
     if (!validFileTypes.includes(archivoAdjunto.type)) {
         Swal.fire(
             "Error",
-            "Tipo de archivo no permitido. Los formatos permitidos son PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT, JPEG, PNG, GIF, ZIP y RAR.",
+            "Tipo de archivo no permitido. Los formatos permitidos son: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT, JPG, JPEG y PNG.",
             "warning"
         );
         return;
