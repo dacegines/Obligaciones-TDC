@@ -1,4 +1,5 @@
 $(document).ready(function () {
+
     let table = $("#detallesTable").DataTable({
         language: {
             lengthMenu:
@@ -34,12 +35,12 @@ $(document).ready(function () {
                 extend: "excelHtml5",
                 text: '<i class="fas fa-file-excel"></i>',
                 className: "btn btn-success",
-                titleAttr: "Exportar Excel", 
+                titleAttr: "Exportar Excel",
             },
             {
                 text: '<i class="fas fa-file-pdf"></i>',
                 className: "btn btn-danger",
-                titleAttr: "Exportar PDF", 
+                titleAttr: "Exportar PDF",
                 action: function (e, dt, node, config) {
                     const searchValue = table.search().trim();
                     const year = $("#year-select").val();
@@ -68,6 +69,8 @@ $(document).ready(function () {
                     $("body").append(form);
                     form.submit();
                 },
+                enabled: mostrarBotonPDF, 
+                visible: mostrarBotonPDF, 
             },
         ],
         lengthMenu: [
@@ -77,6 +80,5 @@ $(document).ready(function () {
         pageLength: -1,
     });
 
-    
     $('[data-toggle="tooltip"]').tooltip();
 });

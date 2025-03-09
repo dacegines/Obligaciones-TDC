@@ -32,12 +32,20 @@
             </div>
             <div class="container-fluit text-center">
                 @if (Auth::user()->hasRole('invitado'))
-                    <p class="text-center text-muted" style="font-size: 1.0rem;"><b>Actualmente eres un usuario invitado y
-                            solo tienes acceso a esta información.</b></p>
+                    <p class="text-center text-muted" style="font-size: 1.0rem;">
+                        <b>Actualmente eres un usuario invitado y solo tienes acceso a esta información.</b>
+                    </p>
                 @endif
+
             </div>
             <div class="divider"></div>
 
+            @if (isset($error))
+                <div class="text-center mt-4">
+                    <h5>{{ $error }}</h5>
+                    <br>
+                </div>
+            @endif
             <div class="table-responsive">
                 <table id="detallesTable" class="table table-striped table-bordered text-center">
                     <thead class="thead-dark">
@@ -128,7 +136,7 @@
     <script src="{{ asset('js/gestion_obligaciones/detalles/detalles.js') }}"></script>
     <script>
         $(document).ready(function() {
-            // Inicializar DataTables
+
             $('.adjuntos-link').on('click', function() {
                 const fechaLimite = $(this).data('fecha');
 
@@ -138,11 +146,11 @@
                         $('#lista-archivos').empty();
                         if (archivos.length > 0) {
                             archivos.forEach((archivo, index) => {
-                                // Extraer la parte después del primer guion bajo
+
                                 const nombreVisible = archivo.nombre_archivo.substring(archivo
                                     .nombre_archivo.indexOf('_') + 1);
 
-                                // Agregar enlace que abra el archivo en una nueva pestaña
+
                                 $('#lista-archivos').append(`
                         <li>
                             <a href="{{ asset('storage') }}/${archivo.ruta_archivo}" target="_blank" style="color: blue; text-decoration: underline;">
@@ -165,6 +173,10 @@
         });
     </script>
     <script>
+        const mostrarBotonPDF =
+            @json($mostrarBotonPDF ?? false);
+
+
         const descargarPdfUrl = "{{ route('descargar.pdf') }}";
     </script>
 @stop

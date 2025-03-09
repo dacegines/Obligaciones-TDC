@@ -19,54 +19,73 @@ class ObligacionesController extends Controller
 {
     public function index()
     {
-        if (!Auth::user()->can('superUsuario') && !Auth::user()->can('obligaciones de concesión')  && !Auth::user()->can('obligaciones de concesión limitado')) {
+        // Verificar permisos del usuario
+        if (!Auth::user()->can('superUsuario') && !Auth::user()->can('obligaciones de concesión') && !Auth::user()->can('obligaciones de concesión limitado')) {
             abort(403, 'No tienes permiso para acceder a esta página.');
         }
-    
+
         try {
             $user = Auth::user();
-            if (!$user || !$user->puesto) {
-                $this->logWarning('Usuario autenticado sin puesto definido', ['user_id' => $user->id ?? null]);
-                return back()->withErrors(['error' => 'No se encontró el puesto del usuario autenticado']);
-            }
-    
             $currentYear = Carbon::now()->year;
-    
-            // Verificar si el usuario tiene un registro en model_has_authorizations con authorization_id = 7
+
+            // Verificar si el usuario tiene un rol asignado
+            if (!$user->roles->count()) {
+                $this->logInfo('El usuario no tiene un rol asignado', ['user_id' => $user->id]);
+                return view('gestion_cumplimiento.obligaciones.index', [
+                    'requisitos' => collect(), // Colección vacía
+                    'user' => $user,
+                    'currentYear' => $currentYear,
+                    'puestosExcluidos' => [],
+                    'error' => 'No tienes un rol asignado. Favor de validarlo con el administrador del sistema.'
+                ]);
+            }
+
+            // Verificar si el usuario tiene un puesto asignado
+            if (!$user->puesto) {
+                $this->logWarning('Usuario autenticado sin puesto definido', ['user_id' => $user->id ?? null]);
+                return view('gestion_cumplimiento.obligaciones.index', [
+                    'requisitos' => collect(), // Colección vacía
+                    'user' => $user,
+                    'currentYear' => $currentYear,
+                    'puestosExcluidos' => [],
+                    'error' => 'No se encontró el puesto del usuario. Favor de validarlo con el administrador del sistema.'
+                ]);
+            }
+
+            // Verificar si el usuario tiene autorización (authorization_id = 7)
             $tieneAutorizacion = DB::table('model_has_authorizations')
                 ->where('authorization_id', 7)
                 ->where('model_id', $user->id)
                 ->exists();
-    
+
             if (!$tieneAutorizacion) {
-                // Si el usuario no tiene autorización, no mostrar obligaciones
-                $this->logInfo('El usuario no tiene autorización con authorization_id = 7, no se mostrarán obligaciones', ['user_id' => $user->id]);
+                $this->logInfo('El usuario no tiene autorización con authorization_id = 7', ['user_id' => $user->id]);
                 return view('gestion_cumplimiento.obligaciones.index', [
                     'requisitos' => collect(), // Colección vacía
                     'user' => $user,
                     'currentYear' => $currentYear,
-                    'puestosExcluidos' => []
-                ])->with('info', 'No tienes autorización para ver obligaciones.');
+                    'puestosExcluidos' => [],
+                    'error' => 'No tienes autorización para ver estas obligaciones. Favor de validarlo con el administrador del sistema.'
+                ]);
             }
-    
-            // Obtener los IDs de requisitos que el usuario puede ver
+
+            // Verificar si el usuario tiene obligaciones con view = 1
             $requisitosIds = ObligacionUsuario::where('user_id', $user->id)
                 ->where('view', 1)
                 ->pluck('numero_evidencia')
                 ->toArray();
-    
-            // Verificar si el usuario tiene al menos una obligación con view = 1
+
             if (empty($requisitosIds)) {
-                // Si no tiene obligaciones con view = 1, no mostrar nada
-                $this->logInfo('El usuario no tiene obligaciones con view = 1, no se mostrarán obligaciones', ['user_id' => $user->id]);
+                $this->logInfo('El usuario no tiene obligaciones con view = 1', ['user_id' => $user->id]);
                 return view('gestion_cumplimiento.obligaciones.index', [
                     'requisitos' => collect(), // Colección vacía
                     'user' => $user,
                     'currentYear' => $currentYear,
-                    'puestosExcluidos' => []
-                ])->with('info', 'No tienes obligaciones para mostrar.');
+                    'puestosExcluidos' => [],
+                    'error' => 'No tienes obligaciones asignadas. Favor de validarlo con el administrador del sistema.'
+                ]);
             }
-    
+
             // Obtener los puestos excluidos
             $puestosExcluidos = DB::table('users')
                 ->join('model_has_authorizations', 'users.id', '=', 'model_has_authorizations.model_id')
@@ -74,35 +93,41 @@ class ObligacionesController extends Controller
                 ->distinct()
                 ->pluck('users.puesto')
                 ->toArray();
-    
+
             // Obtener los requisitos con avance y filtro de la tabla obligacion_usuario
             $requisitos = $this->obtenerRequisitosConAvance($currentYear, $user, $puestosExcluidos);
-    
+
             $this->logInfo('Requisitos cargados correctamente', ['user_id' => $user->id, 'total_requisitos' => $requisitos->count()]);
-    
+
             return view('gestion_cumplimiento.obligaciones.index', compact('requisitos', 'user', 'currentYear', 'puestosExcluidos'));
         } catch (\Exception $e) {
             $this->logError('Error al cargar las obligaciones', ['error' => $e->getMessage(), 'user_id' => $user->id ?? null]);
-            return back()->withErrors(['error' => 'Ocurrió un error al cargar las obligaciones.']);
+            return view('gestion_cumplimiento.obligaciones.index', [
+                'requisitos' => collect(), // Colección vacía
+                'user' => $user,
+                'currentYear' => Carbon::now()->year,
+                'puestosExcluidos' => [],
+                'error' => 'Ocurrió un error al cargar las obligaciones. Favor de contactar al administrador del sistema.'
+            ]);
         }
     }
-    
+
 
     private function obtenerRequisitosConAvance($year, $user)
     {
         $query = Requisito::with('archivos')
             ->porAno($year)
             ->orderBy('numero_evidencia', 'asc'); // Ordenar por numero_evidencia de forma ascendente
-    
+
         $requisitosIds = ObligacionUsuario::where('user_id', $user->id)
             ->where('view', 1)
             ->pluck('numero_evidencia')
             ->toArray();
-    
+
         if (!empty($requisitosIds)) {
             $query->whereIn('numero_evidencia', $requisitosIds);
         }
-    
+
         return $query->get()
             ->filter(fn($requisito) => !empty($requisito->responsable))
             ->each(
@@ -110,7 +135,7 @@ class ObligacionesController extends Controller
                 $requisito->total_avance = $this->getTotalAvance($requisito->numero_requisito, $year, $requisitosIds)
             );
     }
-    
+
     public function getTotalAvance($numero_requisito, $year, $requisitosIds = [])
     {
         try {
@@ -118,50 +143,50 @@ class ObligacionesController extends Controller
                 $this->logWarning('Número de requisito vacío al intentar calcular el total de avance.');
                 return 0;
             }
-    
-            
+
+
             if (!is_array($requisitosIds)) {
                 $requisitosIds = [];
             }
-    
+
 
             $query = Requisito::where('numero_requisito', $numero_requisito)
                 ->whereYear('fecha_limite_cumplimiento', $year);
-    
+
 
             if (!empty($requisitosIds)) {
                 $query->whereIn('numero_evidencia', $requisitosIds);
             }
-    
 
-    
-  
+
+
+
             $totalRegistros = $query->count();
-    
+
             if ($totalRegistros === 0) {
                 $this->logWarning('No se encontraron registros para el número de requisito y año especificado.', [
                     'numero_requisito' => $numero_requisito,
                     'year' => $year,
-                    'requisitosIds' => $requisitosIds, 
+                    'requisitosIds' => $requisitosIds,
                 ]);
                 return 0;
             }
-    
+
 
             $completados = $query->where('porcentaje', 100)->count();
-    
 
-    
-            
+
+
+
             $total_avance = ($completados * 100.0) / $totalRegistros;
-    
-           
+
+
             $total_avance = round($total_avance, 2);
             if ($total_avance > 99.95 && $total_avance < 100.05) {
                 $total_avance = 100.00;
             }
 
-    
+
             return $total_avance;
         } catch (\Exception $e) {
             $this->logError('Error al calcular el total de avance', [
@@ -176,17 +201,17 @@ class ObligacionesController extends Controller
 
     public function getDetallesEvidencia(Request $request)
     {
-       
+
         $request->validate([
             'evidencia_id' => 'required|numeric|exists:requisitos,numero_evidencia',
-            'year' => 'nullable|numeric|min:2024|max:2040' 
+            'year' => 'nullable|numeric|min:2024|max:2040'
         ]);
 
         try {
             $evidenciaId = $request->evidencia_id;
-            $year = $request->year; 
+            $year = $request->year;
 
-            
+
             $detalle = Requisito::where('numero_evidencia', $evidenciaId)->first();
 
             if ($detalle) {
@@ -222,7 +247,7 @@ class ObligacionesController extends Controller
 
     public function obtenerNotificaciones(Request $request)
     {
-        
+
         $request->validate([
             'id_notificaciones' => ['required', 'regex:/^[a-zA-Z]+\d+(\.\d+)?$/'],
         ]);
@@ -253,7 +278,7 @@ class ObligacionesController extends Controller
     {
         $idNotificaciones = $request->input('id_notificaciones');
 
-        
+
         $notificaciones = DB::table('notificaciones')
             ->where('id_notificacion', $idNotificaciones)
             ->orderByRaw("FIELD(tipo_notificacion, 'primera_notificacion', 'segunda_notificacion', 'tercera_notificacion', 'notificacion_carga_vobo')")
@@ -303,7 +328,7 @@ class ObligacionesController extends Controller
 
     public function cambiarEstado(Request $request)
     {
-        
+
         $request->validate([
             'id' => 'required|integer|exists:requisitos,id',
         ]);
@@ -330,7 +355,7 @@ class ObligacionesController extends Controller
             //Obtener correos de evidence_notifications con type = 1 ***
             $emailNotifications = EvidenceNotification::where('type', 1)->pluck('email')->toArray();
 
-            
+
             $emailResponsables = !empty($requisito->email) ? [$requisito->email] : [];
             $destinatarios = array_merge($emailResponsables, $emailNotifications);
 
@@ -385,18 +410,18 @@ class ObligacionesController extends Controller
     public function enviarCorreoDatosEvidencia(Request $request)
     {
         try {
-            
+
             $request->validate([
                 'evidencia' => 'required|string'
             ]);
 
-            
+
             $datos = $request->all();
 
-            
+
             $requisito = Requisito::where('evidencia', $datos['evidencia'])->first();
 
-            
+
             if (!$requisito) {
                 $this->logWarning('No se encontró el requisito asociado a la evidencia', ['evidencia' => $datos['evidencia']]);
                 return response()->json(['error' => 'No se encontró el requisito asociado a la evidencia'], 404);
@@ -566,80 +591,98 @@ class ObligacionesController extends Controller
     {
         $year = $request->input('year');
         $user = Auth::user();
-    
-        if (!$user || !$user->puesto) {
-            return back()->withErrors(['error' => 'No se encontró el puesto del usuario autenticado']);
+
+        // Verificar si el usuario tiene un rol asignado
+        if (!$user->roles->count()) {
+            $this->logInfo('El usuario no tiene un rol asignado', ['user_id' => $user->id]);
+            return view('gestion_cumplimiento.obligaciones.index', [
+                'requisitos' => collect(), // Colección vacía
+                'user' => $user,
+                'year' => $year,
+                'puestosExcluidos' => [],
+                'error' => 'No tienes un rol asignado. Favor de validarlo con el administrador del sistema.'
+            ]);
         }
-    
-        // Verificar si el usuario tiene un registro en model_has_authorizations con authorization_id = 7
+
+        // Verificar si el usuario tiene un puesto asignado
+        if (!$user->puesto) {
+            $this->logWarning('Usuario autenticado sin puesto definido', ['user_id' => $user->id ?? null]);
+            return view('gestion_cumplimiento.obligaciones.index', [
+                'requisitos' => collect(), // Colección vacía
+                'user' => $user,
+                'year' => $year,
+                'puestosExcluidos' => [],
+                'error' => 'No se encontró el puesto del usuario. Favor de validarlo con el administrador del sistema.'
+            ]);
+        }
+
+        // Verificar si el usuario tiene autorización (authorization_id = 7)
         $tieneAutorizacion = DB::table('model_has_authorizations')
             ->where('authorization_id', 7)
             ->where('model_id', $user->id)
             ->exists();
-    
+
         if (!$tieneAutorizacion) {
-            // Si el usuario no tiene autorización, no mostrar obligaciones
-            $this->logInfo('El usuario no tiene autorización con authorization_id = 7, no se mostrarán obligaciones', ['user_id' => $user->id]);
+            $this->logInfo('El usuario no tiene autorización con authorization_id = 7', ['user_id' => $user->id]);
             return view('gestion_cumplimiento.obligaciones.index', [
                 'requisitos' => collect(), // Colección vacía
                 'user' => $user,
                 'year' => $year,
-                'puestosExcluidos' => []
-            ])->with('info', 'No tienes autorización para ver obligaciones.');
+                'puestosExcluidos' => [],
+                'error' => 'No tienes autorización para ver estas obligaciones. Favor de validarlo con el administrador del sistema.'
+            ]);
         }
-    
-        // Obtener los IDs de requisitos que el usuario puede ver
+
+        // Verificar si el usuario tiene obligaciones con view = 1
         $requisitosIds = ObligacionUsuario::where('user_id', $user->id)
             ->where('view', 1)
             ->pluck('numero_evidencia')
             ->toArray();
-    
-        // Verificar si el usuario tiene al menos una obligación con view = 1
+
         if (empty($requisitosIds)) {
-            // Si no tiene obligaciones con view = 1, no mostrar nada
-            $this->logInfo('El usuario no tiene obligaciones con view = 1, no se mostrarán obligaciones', ['user_id' => $user->id]);
+            $this->logInfo('El usuario no tiene obligaciones con view = 1', ['user_id' => $user->id]);
             return view('gestion_cumplimiento.obligaciones.index', [
                 'requisitos' => collect(), // Colección vacía
                 'user' => $user,
                 'year' => $year,
-                'puestosExcluidos' => []
-            ])->with('info', 'No tienes obligaciones para mostrar.');
+                'puestosExcluidos' => [],
+                'error' => 'No tienes obligaciones asignadas. Favor de validarlo con el administrador del sistema.'
+            ]);
         }
-    
-        // Obtener los puestos de usuarios asociados con authorization_id = 7
+
+        // Obtener los puestos excluidos
         $puestosExcluidos = DB::table('users')
             ->join('model_has_authorizations', 'users.id', '=', 'model_has_authorizations.model_id')
             ->where('model_has_authorizations.authorization_id', 7)
             ->distinct()
             ->pluck('users.puesto')
             ->toArray();
-    
+
         // Construir la consulta base
         $query = Requisito::porAno($year)
             ->with('archivos')
             ->orderBy('numero_evidencia', 'asc');
-    
+
         // Filtrar por requisitos que el usuario puede ver
         if (!empty($requisitosIds)) {
             $query->whereIn('numero_evidencia', $requisitosIds);
         }
-    
+
         // Aplicar restricciones de visualización si el puesto no está excluido
         if (!in_array($user->puesto, $puestosExcluidos)) {
             $query->permitirVisualizacion($user);
         }
-    
+
         // Obtener los requisitos y calcular el avance
         $requisitos = $query->get()
             ->filter(fn($requisito) => !empty($requisito->responsable))
             ->each(function ($requisito) use ($year, $requisitosIds) {
                 $requisito->total_avance = $this->getTotalAvance($requisito->numero_requisito, $year, $requisitosIds);
             });
-    
+
         return view('gestion_cumplimiento.obligaciones.index', compact('requisitos', 'user', 'year', 'puestosExcluidos'));
     }
-    
-    
+
 
     public function obtenerDetalleEvidencia(Request $request)
     {
@@ -695,7 +738,7 @@ class ObligacionesController extends Controller
     public function obtenerUsuarios()
     {
         try {
-            
+
             $usuarios = DB::table('users')->select('id', 'name', 'puesto', 'email')->get();
 
             if ($usuarios->isEmpty()) {
@@ -711,7 +754,7 @@ class ObligacionesController extends Controller
 
     public function UsuarioNuevoTablaNotificaciones(Request $request)
     {
-        
+
         $validatedData = $request->validate([
             'requisitoId' => 'required|integer|exists:requisitos,id',
             'numeroRequisito' => 'required|string|max:50',
@@ -721,9 +764,9 @@ class ObligacionesController extends Controller
             'email' => 'required|email|max:255',
             'tipoNotificacion' => 'required|string|in:primera_notificacion,segunda_notificacion,tercera_notificacion,notificacion_carga_vobo|max:50',
         ]);
-    
+
         try {
-            
+
             $existeRegistro = DB::table('notificaciones')->where([
                 ['requisito_id', $validatedData['numeroRequisito']],
                 ['numero_evidencia', $validatedData['evidenciaId']],
@@ -732,15 +775,15 @@ class ObligacionesController extends Controller
                 ['email', $validatedData['email']],
                 ['tipo_notificacion', $validatedData['tipoNotificacion']],
             ])->exists();
-    
+
             if ($existeRegistro) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Ya existe esta notificación para este puesto.',
-                ], 200); 
+                ], 200);
             }
-    
-            
+
+
             DB::table('notificaciones')->insert([
                 'requisito_id' => $validatedData['numeroRequisito'],
                 'numero_evidencia' => $validatedData['evidenciaId'],
@@ -751,53 +794,48 @@ class ObligacionesController extends Controller
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
-    
+
             return response()->json([
                 'success' => true,
                 'message' => 'Usuario agregado a la tabla de notificaciones correctamente.',
-            ], 200); 
+            ], 200);
         } catch (\Exception $e) {
-            
+
             Log::error('Error al guardar notificación: ', [
                 'error' => $e->getMessage(),
                 'datos' => $validatedData,
             ]);
-    
+
             return response()->json([
                 'success' => false,
                 'message' => 'Ocurrió un error al guardar el usuario en la tabla de notificaciones.',
             ], 500);
         }
     }
-    
-    
-    
+
+
+
 
     public function eliminarNotificacion(Request $request)
     {
         $validatedData = $request->validate([
             'id' => 'required|integer|exists:notificaciones,id'
         ]);
-    
+
         try {
-            
+
             $notificacion = DB::table('notificaciones')->where('id', $validatedData['id'])->first();
-    
+
             if (is_null($notificacion)) {
                 return response()->json(['error' => 'La notificación no existe o ya fue eliminada.'], 404);
             }
-    
-            
+
+
             DB::table('notificaciones')->where('id', $validatedData['id'])->delete();
-    
+
             return response()->json(['message' => 'La notificación se eliminó correctamente.'], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Error interno del servidor. Intente más tarde.'], 500);
         }
     }
-
-    
-    
-    
-    
 }

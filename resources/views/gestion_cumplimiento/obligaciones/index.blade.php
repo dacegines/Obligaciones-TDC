@@ -9,7 +9,7 @@
             // Definir los puestos que no deben mostrar el puesto del usuario
             $puestosExcluidos = DB::table('users')
                 ->join('model_has_authorizations', 'users.id', '=', 'model_has_authorizations.model_id')
-                ->where('model_has_authorizations.authorization_id', 7) 
+                ->where('model_has_authorizations.authorization_id', 7)
                 ->distinct()
                 ->pluck('users.puesto')
                 ->toArray();
@@ -129,7 +129,7 @@
                     </div>
                     <div class="modal-body">
                         <div class="row">
-                            
+
                             <div class="col-md-6">
                                 <h5><b>Obligaciones</b></h5>
 
@@ -154,7 +154,7 @@
                                             data-parent="#obligacionesContainer{{ $requisito->id }}">
                                             @foreach ($requisitos->where('nombre', $requisito->nombre)->where('numero_evidencia', $evidencia->numero_evidencia) as $detalle)
                                                 @php
-                                                    
+
                                                     $isApproved = $detalle->approved == 1;
                                                 @endphp
 
@@ -186,7 +186,7 @@
                                 </div>
                             </div>
 
-                            
+
                             <div class="col-md-6">
                                 <h5><b>Detalles de Obligación</b></h5>
                                 <div id="detail-info-{{ $requisito->id }}" class="info-container">
@@ -225,7 +225,7 @@
 
         <div class="modal fade" id="modalDetalleContent" tabindex="-1"
             aria-labelledby="modalDetalleLabel{{ $detalle->id }}">
-            <div class="modal-dialog modal-xl modal-dialog-scrollable"> 
+            <div class="modal-dialog modal-xl modal-dialog-scrollable">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="modalDetalleLabel{{ $detalle->id }}">Obligación</h5>
@@ -278,7 +278,7 @@
                                                 <button type="button" class="btn btn-success"
                                                     onclick="handleFileUpload('#uploadForm')">Subir Archivo</button>
                                                 <!-- <button type="button" class="btn btn-success"
-                                                        onclick="ejecutarAccionConDatos()">Enviar correo</button> -->
+                                                            onclick="ejecutarAccionConDatos()">Enviar correo</button> -->
                                             @else
                                                 <!-- Mostrar mensaje si el usuario tiene el rol de invitado -->
                                                 <p class="text-center text-muted" style="font-size: 1.0rem;">
@@ -318,7 +318,7 @@
                                     </div>
                                 </div>
                                 <hr>
-                                
+
                             </div>
                         </div>
                     </div>
@@ -326,10 +326,8 @@
             </div>
         </div>
     @else
-        
         <div class="text-center mt-4">
-            <h5>Este usuario no tiene obligaciones registradas, permisos para ver las obligaciones o el año no contiene obligaciones.</h5>
-            <h5>Favor de validarlo con el administrador del sistema.</h5>
+            <h5>{{ $error }}</h5>
         </div>
     @endif
 
@@ -369,9 +367,6 @@
         const eliminarNotificacionUrl = "{{ route('eliminar.usuario.notificacion') }}";
         const guardarComentarioUrl = "{{ route('guardar.comentario') }}";
         const eliminarComentarioUrl = "{{ route('comentarios.eliminar', ':id') }}";
-
-
-        
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
