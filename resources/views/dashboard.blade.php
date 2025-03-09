@@ -498,7 +498,8 @@ new Chart(document.getElementById('vencidasPorVencerCompletasChart').getContext(
             x: {
                 ticks: {
                     font: {
-                        size: 14 // Tamaño de fuente más pequeño para móviles
+                        size: 14, // Tamaño de fuente más pequeño para móviles
+                        weight: 'bold'
                     }
                 },
                 grid: {
@@ -506,6 +507,9 @@ new Chart(document.getElementById('vencidasPorVencerCompletasChart').getContext(
                 }
             },
             y: {
+                
+                grace: '10%',
+                beginAtZero: true,
                 ticks: {
                     font: {
                         size: 14 // Tamaño de fuente más pequeño para móviles
@@ -519,11 +523,13 @@ new Chart(document.getElementById('vencidasPorVencerCompletasChart').getContext(
         plugins: {
             legend: {
                 display: true,
-                position: 'top',
+                position: 'bottom',
                 labels: {
                     font: {
-                        size: 14 // Tamaño de fuente más pequeño para móviles
-                    }
+                        size: 14, // Tamaño de fuente más pequeño para móviles
+                        weight: 'bold'
+                    },
+                    padding: 20
                 }
             },
             tooltip: {

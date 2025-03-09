@@ -52,7 +52,7 @@ class CalendarController extends Controller
 
             if (!$tieneObligaciones) {
                 Log::info('El usuario no tiene obligaciones con view = 1', ['user_id' => $user->id]);
-                return view('gestion_cumplimiento.calendario.index')->with('error', 'Este usuario no tiene obligaciones registradas, permisos para ver las obligaciones o el año no contiene obligaciones.');
+                return view('gestion_cumplimiento.calendario.index')->with('error', 'No tienes obligaciones para mostrar. Favor de validarlo con el administrador del sistema.');
             }
 
 

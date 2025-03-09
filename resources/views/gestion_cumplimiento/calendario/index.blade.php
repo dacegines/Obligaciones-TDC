@@ -15,7 +15,6 @@
                 <div class="text-center mt-4">
                     <div class="divider"></div>
                     <h5>{{ $error }}</h5>
-                    <h5>Favor de validarlo con el administrador del sistema.</h5>
                 </div>
             @else
                 <!-- Mostrar el calendario si todo está bien -->

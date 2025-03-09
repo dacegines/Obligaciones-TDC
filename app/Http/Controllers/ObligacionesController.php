@@ -82,7 +82,7 @@ class ObligacionesController extends Controller
                     'user' => $user,
                     'currentYear' => $currentYear,
                     'puestosExcluidos' => [],
-                    'error' => 'No tienes obligaciones asignadas. Favor de validarlo con el administrador del sistema.'
+                    'error' => 'No tienes obligaciones para mostrar. Favor de validarlo con el administrador del sistema.'
                 ]);
             }
 

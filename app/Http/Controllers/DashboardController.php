@@ -176,7 +176,7 @@ class DashboardController extends Controller
                 'mostrarAnual' => false,
                 'user_id' => $user_id,
                 'status' => $status,
-                'error' => 'No tienes obligaciones asignadas para mostrar. Favor de validarlo con el administrador del sistema.',
+                'error' => 'No tienes obligaciones para mostrar. Favor de validarlo con el administrador del sistema.',
                 'mostrarBotonPDF' => false, // Bloquear botón PDF
             ]);
         }
