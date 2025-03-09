@@ -35,10 +35,9 @@
 
                     <!-- Botón para "Descargar PDF" -->
                     <button type="button" onclick="descargarPDF()" class="btn btn-danger btn-sm ml-2"
-                    title="Exportar en PDF" data-toggle="tooltip"
-                    @if (!$mostrarBotonPDF) disabled @endif>
-                    <i class="fas fa-file-pdf"></i> PDF
-                </button>
+                        title="Exportar en PDF" data-toggle="tooltip" @if (!$mostrarBotonPDF) disabled @endif>
+                        <i class="fas fa-file-pdf"></i> PDF
+                    </button>
                     <!-- Campos ocultos para las imágenes de los gráficos -->
                     <input type="hidden" name="chartImageAvanceObligaciones" id="chartImageAvanceObligaciones">
                     <input type="hidden" name="chartImageAvanceTotal" id="chartImageAvanceTotal">
@@ -56,12 +55,12 @@
 
             <hr class="divider">
             @if (isset($error))
-            <div class="text-center mt-4">
-                <h5>{{ $error }}</h5>
-                <br>
-            </div>
-@endif
-            
+                <div class="text-center mt-4">
+                    <h5>{{ $error }}</h5>
+                    <br>
+                </div>
+            @endif
+
             {{-- <div class="row text-center justify-content-center">
                 @foreach ([['icon' => 'fa-tasks', 'color' => 'primary', 'title' => 'Obligaciones', 'id' => 'total_obligaciones', 'value' => e($totalObligaciones), 'modal' => 'detailsModal'], ['icon' => 'fa-comments', 'color' => 'info', 'title' => 'Activas', 'id' => 'activas', 'value' => e($activas), 'modal' => 'detailsModalA'], ['icon' => 'fa-check', 'color' => 'success', 'title' => 'Completas', 'id' => 'completas', 'value' => e($completas), 'modal' => 'detailsModalC'], ['icon' => 'fa-times-circle', 'color' => 'danger', 'title' => 'Vencidas', 'id' => 'vencidas', 'value' => e($vencidas), 'modal' => 'detailsModalV'], ['icon' => 'fa-clock', 'color' => 'warning', 'title' => 'Por vencer', 'id' => 'por_vencer', 'value' => e($porVencer), 'modal' => 'detailsModalP']] as $card)
                     <div class="col-md-2">
@@ -97,7 +96,7 @@
                         </a>
                     </div>
                 </div>
-            
+
                 <!-- Tarjeta de Activas -->
                 <div class="col-lg col-6">
                     <div class="small-box bg-info">
@@ -113,7 +112,7 @@
                         </a>
                     </div>
                 </div>
-            
+
                 <!-- Tarjeta de Completas -->
                 <div class="col-lg col-6">
                     <div class="small-box bg-success">
@@ -129,7 +128,7 @@
                         </a>
                     </div>
                 </div>
-            
+
                 <!-- Tarjeta de Vencidas -->
                 <div class="col-lg col-6">
                     <div class="small-box bg-danger">
@@ -145,7 +144,7 @@
                         </a>
                     </div>
                 </div>
-            
+
                 <!-- Tarjeta de Por Vencer -->
                 <div class="col-lg col-6">
                     <div class="small-box bg-warning">
@@ -162,7 +161,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="row">
                 <div class="col-md-6">
                     <div class="card">
@@ -198,7 +197,7 @@
                     </div>
                 </div>
             </div>
-            
+
         </div>
     </div>
 
@@ -234,7 +233,8 @@
                                                 <td>{{ e($requisito->evidencia) }}</td>
                                                 <td>{{ e($requisito->responsable) }}</td>
                                                 <td>{{ e($requisito->periodicidad) }}</td>
-                                                <td style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                                <td
+                                                    style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                                                     {{ \Carbon\Carbon::parse($requisito->fecha_limite_cumplimiento)->format('d-m-Y') }}
                                                 </td>
                                             </tr>
@@ -290,31 +290,31 @@
 
     <script>
         function generarPDF() {
-            // Asegura que jsPDF esté disponible
+
             const {
                 jsPDF
             } = window.jspdf;
 
-            // Seleccionar el elemento que quieres capturar
+
             const elemento = document.getElementById('card-resumen');
 
-            // Utilizar html2canvas para capturar el elemento como imagen
-            html2canvas(elemento).then(canvas => {
-                const imgData = canvas.toDataURL('image/png'); // Convierte el canvas a imagen PNG
 
-                // Crear un nuevo documento PDF
+            html2canvas(elemento).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+
+
                 const pdf = new jsPDF();
-                const imgWidth = 190; // Ancho de la imagen en el PDF (ajústalo según necesites)
+                const imgWidth = 190;
                 const pageHeight = pdf.internal.pageSize.height;
                 const imgHeight = canvas.height * imgWidth / canvas.width;
                 let heightLeft = imgHeight;
                 let position = 0;
 
-                // Agregar la imagen al PDF
+
                 pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
                 heightLeft -= pageHeight;
 
-                // Si la imagen es más alta que una página, añadir páginas adicionales
+
                 while (heightLeft >= 0) {
                     position = heightLeft - imgHeight;
                     pdf.addPage();
@@ -322,7 +322,7 @@
                     heightLeft -= pageHeight;
                 }
 
-                // Descargar el archivo PDF
+
                 pdf.save('reporte.pdf');
             });
         }
@@ -332,21 +332,21 @@
 
     <script>
         window.chartData = {
-            fechas: @json($fechasAgrupadas), // Usar $fechasAgrupadas en lugar de $fechas
-        vencidas: @json($vencidasAgrupadas),
-        porVencer: @json($porVencerAgrupadas),
-        completas: @json($completasAgrupadas),
-        nombres: @json($nombres),
-        avancesTotales: @json($avancesTotales)
+            fechas: @json($fechasAgrupadas),
+            vencidas: @json($vencidasAgrupadas),
+            porVencer: @json($porVencerAgrupadas),
+            completas: @json($completasAgrupadas),
+            nombres: @json($nombres),
+            avancesTotales: @json($avancesTotales)
         };
 
-        // Ajuste de avances totales: redondear a 2 decimales y ajustar valores cercanos a 100%
+
 
         window.chartData.avancesTotales = window.chartData.avancesTotales.map(avance => {
-            // Verificar que avance sea un número, en caso contrario asignar 0
+
             avance = typeof avance === 'number' ? avance : 0;
-            avance = parseFloat(avance.toFixed(2)); // Redondear a 2 decimales
-            return (avance >= 99.95 && avance <= 100.05) ? 100 : avance; // Ajustar a 100 si está cerca
+            avance = parseFloat(avance.toFixed(2));
+            return (avance >= 99.95 && avance <= 100.05) ? 100 : avance;
         });
 
 
@@ -377,7 +377,7 @@
                                     return value + '%';
                                 },
                                 font: {
-                                    size: 10 // Ajustar el tamaño de fuente aquí
+                                    size: 10
                                 }
                             }
                         },
@@ -387,14 +387,14 @@
                             },
                             ticks: {
                                 font: {
-                                    size: 12 // Ajustar el tamaño de fuente aquí para etiquetas de nombres
+                                    size: 12
                                 }
                             }
                         }
                     },
                     layout: {
                         padding: {
-                            right: 40 // Aumenta el espacio derecho para que se vea el "100%"
+                            right: 40
                         }
                     },
                     plugins: {
@@ -406,7 +406,7 @@
                             anchor: 'end',
                             align: 'end',
                             formatter: function(value) {
-                                return Math.round(value) + '%'; // Redondea y muestra solo enteros
+                                return Math.round(value) + '%';
                             },
                             color: 'black',
                             font: {
@@ -419,7 +419,7 @@
             });
 
 
-            // Avance Total Gráfico
+
             new Chart(document.getElementById('avanceTotalChart').getContext('2d'), {
                 type: 'doughnut',
                 data: {
@@ -462,101 +462,100 @@
                 plugins: [ChartDataLabels]
             });
 
-            // Estatus General Gráfico
 
 
-new Chart(document.getElementById('vencidasPorVencerCompletasChart').getContext('2d'), {
-    type: 'line',
-    data: {
-        labels: @json($fechasAgrupadas), // Usar los meses agrupados
-        datasets: [
-            {
-                label: 'Vencidas',
-                data: @json($vencidasAgrupadas), // Datos agrupados por mes
-                borderColor: '#ff6384', // Color del borde (rojo)
-                backgroundColor: 'rgba(255, 99, 132, 0.2)', // Fondo semitransparente (rojo claro)
-                fill: true // Rellenar el área bajo la línea
-            },
-            {
-                label: 'Por Vencer',
-                data: @json($porVencerAgrupadas), // Datos agrupados por mes
-                borderColor: '#ffcd56', // Color del borde (amarillo)
-                backgroundColor: 'rgba(255, 205, 86, 0.2)', // Fondo semitransparente (amarillo claro)
-                fill: true // Rellenar el área bajo la línea
-            },
-            {
-                label: 'Completas',
-                data: @json($completasAgrupadas), // Datos agrupados por mes
-                borderColor: '#4bc0c0', // Color del borde (verde azulado)
-                backgroundColor: 'rgba(75, 192, 192, 0.2)', // Fondo semitransparente (verde azulado claro)
-                fill: true // Rellenar el área bajo la línea
-            }
-        ]
-    },
-    options: {
-        scales: {
-            x: {
-                ticks: {
-                    font: {
-                        size: 14, // Tamaño de fuente más pequeño para móviles
-                        weight: 'bold'
-                    }
+
+            new Chart(document.getElementById('vencidasPorVencerCompletasChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: @json($fechasAgrupadas),
+                    datasets: [{
+                            label: 'Vencidas',
+                            data: @json($vencidasAgrupadas),
+                            borderColor: '#ff6384',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            fill: true
+                        },
+                        {
+                            label: 'Por Vencer',
+                            data: @json($porVencerAgrupadas),
+                            borderColor: '#ffcd56',
+                            backgroundColor: 'rgba(255, 205, 86, 0.2)',
+                            fill: true
+                        },
+                        {
+                            label: 'Completas',
+                            data: @json($completasAgrupadas),
+                            borderColor: '#4bc0c0',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            fill: true
+                        }
+                    ]
                 },
-                grid: {
-                    display: true
-                }
-            },
-            y: {
-                
-                grace: '10%',
-                beginAtZero: true,
-                ticks: {
-                    font: {
-                        size: 14 // Tamaño de fuente más pequeño para móviles
-                    }
-                },
-                grid: {
-                    display: true
-                }
-            }
-        },
-        plugins: {
-            legend: {
-                display: true,
-                position: 'bottom',
-                labels: {
-                    font: {
-                        size: 14, // Tamaño de fuente más pequeño para móviles
-                        weight: 'bold'
+                options: {
+                    scales: {
+                        x: {
+                            ticks: {
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            },
+                            grid: {
+                                display: true
+                            }
+                        },
+                        y: {
+
+                            grace: '10%',
+                            beginAtZero: true,
+                            ticks: {
+                                font: {
+                                    size: 14
+                                }
+                            },
+                            grid: {
+                                display: true
+                            }
+                        }
                     },
-                    padding: 20
-                }
-            },
-            tooltip: {
-                bodyFont: {
-                    size: 14 // Tamaño de fuente más pequeño para móviles
-                }
-            },
-            datalabels: { // Configuración del plugin datalabels
-                anchor: 'end', // Posición de la etiqueta (final del punto)
-                align: 'top', // Alineación de la etiqueta
-                formatter: function(value, context) {
-                    return value; // Mostrar el valor del dato
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                },
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            bodyFont: {
+                                size: 14
+                            }
+                        },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            formatter: function(value, context) {
+                                return value;
+                            },
+                            color: '#000',
+                            font: {
+                                size: 12,
+                                weight: 'bold'
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeInOutQuad'
+                    }
                 },
-                color: '#000', // Color del texto
-                font: {
-                    size: 12, // Tamaño de la fuente
-                    weight: 'bold' // Negrita
-                }
-            }
-        },
-        animation: {
-            duration: 1000, // Duración de la animación en milisegundos
-            easing: 'easeInOutQuad' // Tipo de animación
-        }
-    },
-    plugins: [ChartDataLabels] // Habilitar el plugin
-});
+                plugins: [ChartDataLabels]
+            });
 
             document.getElementById('tablasPeriodicidad').innerHTML = `
 <div class="row d-flex justify-content-center">
@@ -613,26 +612,25 @@ new Chart(document.getElementById('vencidasPorVencerCompletasChart').getContext(
         }
 
         function descargarPDF() {
-            // Obtener las imágenes en base64 de todas las gráficas
+
             const chartImageAvanceObligaciones = getChartAsBase64('barChartObligaciones');
             const chartImageAvanceTotal = getChartAsBase64('avanceTotalChart');
             const chartImageEstatusGeneral = getChartAsBase64(
-                'vencidasPorVencerCompletasChart'); // Nueva gráfica de Estatus General
+                'vencidasPorVencerCompletasChart');
 
-            // Crear un formulario dinámico para enviar la solicitud de PDF
+
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = "{{ route('descargar-pdf') }}"; // Ruta al controlador de PDF
-            form.target = "_blank"; // Abre el PDF en una nueva pestaña
+            form.action = "{{ route('descargar-pdf') }}";
+            form.target = "_blank";
 
-            // Agregar token CSRF
+
             const csrfTokenInput = document.createElement('input');
             csrfTokenInput.type = 'hidden';
             csrfTokenInput.name = '_token';
             csrfTokenInput.value = "{{ csrf_token() }}";
             form.appendChild(csrfTokenInput);
 
-            // Agregar otros datos necesarios
             const yearInput = document.createElement('input');
             yearInput.type = 'hidden';
             yearInput.name = 'year';
@@ -651,7 +649,7 @@ new Chart(document.getElementById('vencidasPorVencerCompletasChart').getContext(
             statusInput.value = "{{ $status }}";
             form.appendChild(statusInput);
 
-            // Agregar las imágenes en base64 de las gráficas
+
             if (chartImageAvanceObligaciones) {
                 const chartImageAvanceObligacionesInput = document.createElement('input');
                 chartImageAvanceObligacionesInput.type = 'hidden';
@@ -678,17 +676,16 @@ new Chart(document.getElementById('vencidasPorVencerCompletasChart').getContext(
                 console.error("La imagen de la gráfica Estatus General no se pudo capturar.");
             }
 
-            // Agregar el formulario al documento y enviarlo
+
             document.body.appendChild(form);
             form.submit();
 
-            // Remover el formulario después de enviarlo
             document.body.removeChild(form);
         }
     </script>
     <script>
         $(document).ready(function() {
-            // Inicializar los tooltips de Bootstrap
+
             $('[data-toggle="tooltip"]').tooltip();
         });
     </script>
