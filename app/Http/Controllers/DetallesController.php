@@ -30,20 +30,20 @@ class DetallesController extends Controller
         // Verificar si el usuario tiene un rol asignado
         if (!$user->roles->count()) {
             return view('gestion_cumplimiento.detalles.index', [
-                'requisitos' => collect(),
+                'requisitos' => collect(), 
                 'year' => $year,
                 'error' => 'No tienes un rol asignado. Favor de validarlo con el administrador del sistema.',
-                'mostrarBotonPDF' => false,
+                'mostrarBotonPDF' => false, 
             ]);
         }
 
 
         if (!$user->puesto) {
             return view('gestion_cumplimiento.detalles.index', [
-                'requisitos' => collect(),
+                'requisitos' => collect(), 
                 'year' => $year,
                 'error' => 'No se encontró el puesto del usuario. Favor de validarlo con el administrador del sistema.',
-                'mostrarBotonPDF' => false,
+                'mostrarBotonPDF' => false, 
             ]);
         }
 
@@ -57,7 +57,7 @@ class DetallesController extends Controller
                 'requisitos' => collect(),
                 'year' => $year,
                 'error' => 'No tienes autorización para ver detalles. Favor de validarlo con el administrador del sistema.',
-                'mostrarBotonPDF' => false,
+                'mostrarBotonPDF' => false, 
             ]);
         }
 
@@ -67,10 +67,10 @@ class DetallesController extends Controller
 
         if (!$tieneObligaciones) {
             return view('gestion_cumplimiento.detalles.index', [
-                'requisitos' => collect(),
+                'requisitos' => collect(), 
                 'year' => $year,
                 'error' => 'No tienes obligaciones para mostrar. Favor de validarlo con el administrador del sistema.',
-                'mostrarBotonPDF' => false,
+                'mostrarBotonPDF' => false, 
             ]);
         }
 
@@ -79,7 +79,7 @@ class DetallesController extends Controller
         return view('gestion_cumplimiento.detalles.index', [
             'requisitos' => $requisitos,
             'year' => $year,
-            'mostrarBotonPDF' => true,
+            'mostrarBotonPDF' => true, 
         ]);
     }
 
@@ -96,20 +96,20 @@ class DetallesController extends Controller
 
         if (!$user->roles->count()) {
             return view('gestion_cumplimiento.detalles.index', [
-                'requisitos' => collect(),
+                'requisitos' => collect(), 
                 'year' => $year,
                 'error' => 'No tienes un rol asignado. Favor de validarlo con el administrador del sistema.',
-                'mostrarBotonPDF' => false,
+                'mostrarBotonPDF' => false, 
             ]);
         }
 
 
         if (!$user->puesto) {
             return view('gestion_cumplimiento.detalles.index', [
-                'requisitos' => collect(),
+                'requisitos' => collect(), 
                 'year' => $year,
                 'error' => 'No se encontró el puesto del usuario. Favor de validarlo con el administrador del sistema.',
-                'mostrarBotonPDF' => false,
+                'mostrarBotonPDF' => false, 
             ]);
         }
 
@@ -121,10 +121,10 @@ class DetallesController extends Controller
 
         if (!$tieneAutorizacion) {
             return view('gestion_cumplimiento.detalles.index', [
-                'requisitos' => collect(),
+                'requisitos' => collect(), 
                 'year' => $year,
                 'error' => 'No tienes autorización para ver detalles. Favor de validarlo con el administrador del sistema.',
-                'mostrarBotonPDF' => false,
+                'mostrarBotonPDF' => false, 
             ]);
         }
 
@@ -135,7 +135,7 @@ class DetallesController extends Controller
 
         if (!$tieneObligaciones) {
             return view('gestion_cumplimiento.detalles.index', [
-                'requisitos' => collect(),
+                'requisitos' => collect(), 
                 'year' => $year,
                 'error' => 'No tienes obligaciones para mostrar. Favor de validarlo con el administrador del sistema.',
                 'mostrarBotonPDF' => false,
@@ -148,7 +148,7 @@ class DetallesController extends Controller
         return view('gestion_cumplimiento.detalles.index', [
             'requisitos' => $requisitos,
             'year' => $year,
-            'mostrarBotonPDF' => true,
+            'mostrarBotonPDF' => true, 
         ]);
     }
 

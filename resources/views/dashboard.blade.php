@@ -35,9 +35,10 @@
 
                     <!-- Botón para "Descargar PDF" -->
                     <button type="button" onclick="descargarPDF()" class="btn btn-danger btn-sm ml-2"
-                        title="Exportar en PDF" data-toggle="tooltip">
-                        <i class="fas fa-file-pdf"></i> PDF
-                    </button>
+                    title="Exportar en PDF" data-toggle="tooltip"
+                    @if (!$mostrarBotonPDF) disabled @endif>
+                    <i class="fas fa-file-pdf"></i> PDF
+                </button>
                     <!-- Campos ocultos para las imágenes de los gráficos -->
                     <input type="hidden" name="chartImageAvanceObligaciones" id="chartImageAvanceObligaciones">
                     <input type="hidden" name="chartImageAvanceTotal" id="chartImageAvanceTotal">
@@ -54,6 +55,13 @@
             </div>
 
             <hr class="divider">
+            @if (isset($error))
+            <div class="text-center mt-4">
+                <h5>{{ $error }}</h5>
+                <br>
+            </div>
+@endif
+            
             {{-- <div class="row text-center justify-content-center">
                 @foreach ([['icon' => 'fa-tasks', 'color' => 'primary', 'title' => 'Obligaciones', 'id' => 'total_obligaciones', 'value' => e($totalObligaciones), 'modal' => 'detailsModal'], ['icon' => 'fa-comments', 'color' => 'info', 'title' => 'Activas', 'id' => 'activas', 'value' => e($activas), 'modal' => 'detailsModalA'], ['icon' => 'fa-check', 'color' => 'success', 'title' => 'Completas', 'id' => 'completas', 'value' => e($completas), 'modal' => 'detailsModalC'], ['icon' => 'fa-times-circle', 'color' => 'danger', 'title' => 'Vencidas', 'id' => 'vencidas', 'value' => e($vencidas), 'modal' => 'detailsModalV'], ['icon' => 'fa-clock', 'color' => 'warning', 'title' => 'Por vencer', 'id' => 'por_vencer', 'value' => e($porVencer), 'modal' => 'detailsModalP']] as $card)
                     <div class="col-md-2">

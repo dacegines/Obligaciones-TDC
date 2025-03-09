@@ -15,6 +15,7 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
+        // Verificar roles del usuario
         if (!Auth::user()->can('superUsuario') && !Auth::user()->can('obligaciones de concesión')) {
             abort(403, 'No tienes permiso para acceder a esta página.');
         }
@@ -22,6 +23,7 @@ class DashboardController extends Controller
         $user = Auth::user();
         $user_id = $user->id;
     
+        // Validar el año
         $request->validate([
             'year' => 'nullable|integer|min:2000|max:' . (Carbon::now()->year + 20),
         ]);
@@ -30,14 +32,8 @@ class DashboardController extends Controller
         $userPuesto = $user->puesto;
         $status = $request->input('status', 'default_status');
     
-        // Verificar si el usuario tiene autorización (authorization_id = 7)
-        $tieneAutorizacion = DB::table('model_has_authorizations')
-            ->where('authorization_id', 7)
-            ->where('model_id', $user->id)
-            ->exists();
-    
-        if (!$tieneAutorizacion) {
-            // Si no tiene autorización, no mostrar datos
+        // Verificar si el usuario tiene un rol asignado
+        if (!$user->roles->count()) {
             return view('dashboard', [
                 'totalObligaciones' => 0,
                 'activas' => 0,
@@ -65,8 +61,85 @@ class DashboardController extends Controller
                 'mostrarSemestral' => false,
                 'mostrarAnual' => false,
                 'user_id' => $user_id,
-                'status' => $status
-            ])->with('info', 'No tienes autorización para ver el dashboard.');
+                'status' => $status,
+                'error' => 'No tienes un rol asignado para ver el avance de las obligaciones. Favor de validarlo con el administrador del sistema.',
+                'mostrarBotonPDF' => false, // Bloquear botón PDF
+            ]);
+        }
+    
+        // Verificar si el usuario tiene un puesto asignado
+        if (!$user->puesto) {
+            return view('dashboard', [
+                'totalObligaciones' => 0,
+                'activas' => 0,
+                'completas' => 0,
+                'vencidas' => 0,
+                'porVencer' => 0,
+                'requisitos' => collect(),
+                'requisitosCompletos' => collect(),
+                'requisitosActivos' => collect(),
+                'requisitosVencidos' => collect(),
+                'requisitosPorVencer' => collect(),
+                'fechasAgrupadas' => [],
+                'vencidasAgrupadas' => [],
+                'porVencerAgrupadas' => [],
+                'completasAgrupadas' => [],
+                'porcentajesEficiencia' => [],
+                'nombres' => [],
+                'avancesTotales' => [],
+                'porcentajeAvance' => 0,
+                'bimestral' => null,
+                'semestral' => null,
+                'anual' => null,
+                'year' => $year,
+                'mostrarBimestral' => false,
+                'mostrarSemestral' => false,
+                'mostrarAnual' => false,
+                'user_id' => $user_id,
+                'status' => $status,
+                'error' => 'No se encontró el puesto del usuario. Favor de validarlo con el administrador del sistema.',
+                'mostrarBotonPDF' => false, // Bloquear botón PDF
+            ]);
+        }
+    
+        // Verificar si el usuario tiene autorización (authorization_id = 7)
+        $tieneAutorizacion = DB::table('model_has_authorizations')
+            ->where('authorization_id', 7)
+            ->where('model_id', $user->id)
+            ->exists();
+    
+        if (!$tieneAutorizacion) {
+            return view('dashboard', [
+                'totalObligaciones' => 0,
+                'activas' => 0,
+                'completas' => 0,
+                'vencidas' => 0,
+                'porVencer' => 0,
+                'requisitos' => collect(),
+                'requisitosCompletos' => collect(),
+                'requisitosActivos' => collect(),
+                'requisitosVencidos' => collect(),
+                'requisitosPorVencer' => collect(),
+                'fechasAgrupadas' => [],
+                'vencidasAgrupadas' => [],
+                'porVencerAgrupadas' => [],
+                'completasAgrupadas' => [],
+                'porcentajesEficiencia' => [],
+                'nombres' => [],
+                'avancesTotales' => [],
+                'porcentajeAvance' => 0,
+                'bimestral' => null,
+                'semestral' => null,
+                'anual' => null,
+                'year' => $year,
+                'mostrarBimestral' => false,
+                'mostrarSemestral' => false,
+                'mostrarAnual' => false,
+                'user_id' => $user_id,
+                'status' => $status,
+                'error' => 'No tienes autorización para ver el avance de las obligaciones. Favor de validarlo con el administrador del sistema.',
+                'mostrarBotonPDF' => false, // Bloquear botón PDF
+            ]);
         }
     
         // Verificar si el usuario tiene obligaciones con view = 1
@@ -75,7 +148,6 @@ class DashboardController extends Controller
             ->exists();
     
         if (!$tieneObligaciones) {
-            // Si no tiene obligaciones con view = 1, no mostrar datos
             return view('dashboard', [
                 'totalObligaciones' => 0,
                 'activas' => 0,
@@ -103,25 +175,29 @@ class DashboardController extends Controller
                 'mostrarSemestral' => false,
                 'mostrarAnual' => false,
                 'user_id' => $user_id,
-                'status' => $status
-            ])->with('info', 'No tienes obligaciones para mostrar.');
+                'status' => $status,
+                'error' => 'No tienes obligaciones asignadas para mostrar. Favor de validarlo con el administrador del sistema.',
+                'mostrarBotonPDF' => false, // Bloquear botón PDF
+            ]);
         }
     
-        // Obtener los puestos de usuarios asociados con authorization_id = 7
-        $puestosExcluidos = DB::table('users')
-            ->join('model_has_authorizations', 'users.id', '=', 'model_has_authorizations.model_id')
-            ->where('model_has_authorizations.authorization_id', 7)
-            ->distinct()
-            ->pluck('users.puesto')
-            ->toArray();
-    
-        // Obtener los IDs de requisitos que el usuario puede ver
-        $requisitosIds = ObligacionUsuario::where('user_id', $user->id)
-            ->where('view', 1)
-            ->pluck('numero_evidencia')
-            ->toArray();
-    
+        // Si se cumplen todas las reglas, obtener los datos y mostrar el contenido
         try {
+            // Obtener los puestos de usuarios asociados con authorization_id = 7
+            $puestosExcluidos = DB::table('users')
+                ->join('model_has_authorizations', 'users.id', '=', 'model_has_authorizations.model_id')
+                ->where('model_has_authorizations.authorization_id', 7)
+                ->distinct()
+                ->pluck('users.puesto')
+                ->toArray();
+    
+            // Obtener los IDs de requisitos que el usuario puede ver
+            $requisitosIds = ObligacionUsuario::where('user_id', $user->id)
+                ->where('view', 1)
+                ->pluck('numero_evidencia')
+                ->toArray();
+    
+            // Obtener los requisitos
             if (in_array($userPuesto, $puestosExcluidos)) {
                 $requisitos = Requisito::whereYear('fecha_limite_cumplimiento', $year)
                     ->when(!empty($requisitosIds), function ($query) use ($requisitosIds) {
@@ -319,6 +395,9 @@ class DashboardController extends Controller
             $mostrarSemestral = !is_null($semestral) && $semestral->avance > 0;
             $mostrarAnual = !is_null($anual) && $anual->avance > 0;
     
+            // Pasar la variable mostrarBotonPDF a la vista
+            $mostrarBotonPDF = true;
+    
             return view('dashboard', compact(
                 'totalObligaciones',
                 'activas',
@@ -346,7 +425,8 @@ class DashboardController extends Controller
                 'mostrarSemestral',
                 'mostrarAnual',
                 'user_id',
-                'status'
+                'status',
+                'mostrarBotonPDF' // Habilitar botón PDF
             ));
         } catch (\Exception $e) {
             Log::error('Error en DashboardController@index: ' . $e->getMessage());
