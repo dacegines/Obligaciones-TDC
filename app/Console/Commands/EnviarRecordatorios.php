@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\Requisito;
 use App\Models\Notificacion;
+use App\Models\Reminder; // Importamos el modelo de la tabla reminders
 use App\Mail\RecordatorioObligacion;
 use Illuminate\Support\Facades\Mail;
 
@@ -15,12 +16,8 @@ class EnviarRecordatorios extends Command
 
     public function handle()
     {
-        // Definir los tipos de notificación y días restantes
-        $notificaciones = [
-            'primera_notificacion' => 30,
-            'segunda_notificacion' => 58,
-            'tercera_notificacion' => 5,
-        ];
+        // Obtener los recordatorios desde la base de datos
+        $notificaciones = Reminder::pluck('reminder_days', 'reminder_type')->toArray();
 
         foreach ($notificaciones as $tipo => $dias) {
             $this->enviarRecordatorios($tipo, $dias);
@@ -37,6 +34,7 @@ class EnviarRecordatorios extends Command
             ->where('requisitos.approved', 0)
             ->select(
                 'requisitos.nombre',
+                'requisitos.numero_evidencia',
                 'requisitos.evidencia',
                 'requisitos.periodicidad',
                 'requisitos.responsable',
@@ -46,26 +44,39 @@ class EnviarRecordatorios extends Command
                 'notificaciones2.email'
             )
             ->get();
-
+    
+        if ($requisitos->isEmpty()) {
+            $this->info("No hay registros para la notificación {$tipo_notificacion} con {$dias_restantes} días restantes.");
+            return;
+        }
+    
         foreach ($requisitos as $requisito) {
-            Mail::to($requisito->email)->send(new RecordatorioObligacion($requisito, $tipo_notificacion, $dias_restantes, $this->obtenerColorNotificacion($tipo_notificacion, $dias_restantes)));
+            $color = $this->obtenerColorNotificacion($tipo_notificacion);
+            
+            // Mensaje de depuración antes de enviar el correo
+            $this->info("Enviando correo a: {$requisito->email} con tipo: {$tipo_notificacion} y días restantes: {$dias_restantes}");
+    
+            Mail::to($requisito->email)->send(new RecordatorioObligacion($requisito, $tipo_notificacion, $dias_restantes, $color));
+            
             $this->info("Correo enviado a {$requisito->email}");
         }
     }
+    
+    
 
     /**
-     * Función para determinar el color según el tipo de notificación y los días restantes
+     * Función para determinar el color según el tipo de notificación
      */
-    private function obtenerColorNotificacion($tipo_notificacion, $dias_restantes)
+    private function obtenerColorNotificacion($tipo_notificacion)
     {
-        if ($tipo_notificacion == 'primera_notificacion' && $dias_restantes == 30) {
-            return '#90ee90'; 
-        } elseif ($tipo_notificacion == 'segunda_notificacion' && $dias_restantes == 58) {
-            return '#ffff99'; 
-        } elseif ($tipo_notificacion == 'tercera_notificacion' && $dias_restantes == 5) {
-            return '#ffcc99'; 
-        } else {
-            return '#ced4da';
-        }
+
+        $colores = [
+            'primera notificación' => '#90ee90', 
+            'segunda notificación' => '#ffff99', 
+            'tercera notificación' => '#ffcc99', 
+        ];
+
+
+        return $colores[$tipo_notificacion] ?? '#ced4da';
     }
 }

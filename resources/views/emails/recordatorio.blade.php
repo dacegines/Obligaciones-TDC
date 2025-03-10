@@ -37,7 +37,9 @@
         <p style="color: red; text-align: center;">¡Faltan {{ $dias_restantes }} días para cumplir esta obligación!</p>
 
         <div class="header">
-            {{ $requisito->nombre }}
+            {{ $requisito->numero_evidencia }} - {{ $requisito->nombre }} - {{ \Carbon\Carbon::parse($requisito->fecha_limite_cumplimiento)->format('d/m/Y') }}
+
+
         </div>
 
         <div class="details-card">
