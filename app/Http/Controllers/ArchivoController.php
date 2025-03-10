@@ -6,8 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Archivo;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth; 
-use App\Mail\ArchivoSubidoMail;
 use App\Models\Requisito;
+use App\Models\Notificacion;
 use App\Models\DeletedFile;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
@@ -21,7 +21,6 @@ class ArchivoController extends Controller
 {
     public function subirArchivo(Request $request)
     {
-        // Validaciones estrictas
         $validatedData = $request->validate([
             'archivo' => 'required|file|mimes:pdf,jpg,jpeg,png,doc,docx,xls,xlsx,ppt,pptx,txt|max:40960',
             'requisito_id' => 'required|integer|exists:requisitos,id',
@@ -41,7 +40,6 @@ class ArchivoController extends Controller
         $fileName = time() . '_' . preg_replace('/[^A-Za-z0-9_\-\.]/', '_', $file->getClientOriginalName());
         $filePath = $file->storeAs('uploads', $fileName, 'public');
     
-        // Verificar si el archivo se guardó correctamente
         if (!$filePath) {
             return response()->json(['error' => 'Error al guardar el archivo.'], 500);
         }
@@ -66,10 +64,19 @@ class ArchivoController extends Controller
             return response()->json(['error' => 'No se encontró el requisito asociado.'], 404);
         }
     
-        // Obtener destinatarios del correo
+        // Obtener destinatarios de EvidenceNotification
         $emailNotifications = EvidenceNotification::where('type', 1)->pluck('email')->toArray();
+    
+        // Obtener destinatario responsable del requisito
         $emailResponsables = !empty($requisito->email) ? [$requisito->email] : [];
-        $destinatarios = array_merge($emailResponsables, $emailNotifications);
+    
+        // Obtener destinatarios de la tabla Notificacion según la evidencia
+        $emailsNotificaciones = Notificacion::where('numero_evidencia', $validatedData['evidencia'])
+            ->pluck('email')
+            ->toArray();
+    
+        // Combinar todas las listas de correos y eliminar duplicados
+        $destinatarios = array_unique(array_merge($emailNotifications, $emailResponsables, $emailsNotificaciones));
     
         if (empty($destinatarios)) {
             return response()->json(['error' => 'No se encontraron destinatarios para el correo.'], 400);
@@ -91,21 +98,20 @@ class ArchivoController extends Controller
                 $rutaArchivo,
                 $validatedData['usuario'],
                 $validatedData['puesto'],
-                $requisito->numero_evidencia // Agregar número de evidencia
+                $requisito->numero_evidencia
             ));
     
             return response()->json(['success' => 'Archivo subido y correo enviado correctamente.']);
         } catch (\Exception $e) {
-            // Log del error
             Log::error('Error al enviar el correo: ' . $e->getMessage());
     
-            // Respuesta en caso de error
             return response()->json([
                 'error' => 'El archivo fue subido, pero hubo un error enviando el correo.',
                 'details' => $e->getMessage(),
             ], 500);
         }
     }
+    
     
 
     public function listarArchivos(Request $request)
