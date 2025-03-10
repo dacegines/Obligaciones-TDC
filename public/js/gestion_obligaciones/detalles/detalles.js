@@ -1,5 +1,4 @@
 $(document).ready(function () {
-
     let table = $("#detallesTable").DataTable({
         language: {
             lengthMenu:
@@ -69,8 +68,8 @@ $(document).ready(function () {
                     $("body").append(form);
                     form.submit();
                 },
-                enabled: mostrarBotonPDF, 
-                visible: mostrarBotonPDF, 
+                enabled: mostrarBotonPDF,
+                visible: mostrarBotonPDF,
             },
         ],
         lengthMenu: [

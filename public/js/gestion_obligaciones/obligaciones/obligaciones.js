@@ -38,10 +38,14 @@ document.addEventListener("DOMContentLoaded", function () {
                         document.querySelector(".status-alert");
                 })
                 .catch(function (error) {
-                    console.error(
-                        "Error al obtener el estado approved:",
-                        error
-                    );
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error al obtener el estado",
+                        text: "No se pudo verificar el estado de aprobación. Por favor, inténtalo de nuevo más tarde.",
+                        footer: `Detalles: ${
+                            error.message || "Error desconocido"
+                        }`,
+                    });
                 });
 
             $("#modalDetalleContent").modal("show");
@@ -196,7 +200,12 @@ function obtenerDetallesEvidencia(evidenciaId, requisitoId) {
         `;
         })
         .catch(function (error) {
-            console.error("Error al obtener los detalles:", error);
+            Swal.fire({
+                icon: "error",
+                title: "Error al obtener los detalles",
+                text: "No se pudieron cargar los detalles. Por favor, inténtalo de nuevo más tarde.",
+                footer: `Detalles: ${error.message || "Error desconocido"}`,
+            });
         });
 }
 
@@ -230,7 +239,12 @@ function obtenerNotificaciones(idNotificaciones, requisitoId) {
             ).innerHTML = notificacionesHtml;
         })
         .catch(function (error) {
-            console.error("Error al obtener las notificaciones:", error);
+            Swal.fire({
+                icon: "error",
+                title: "Error al obtener las notificaciones",
+                text: "No se pudieron cargar las notificaciones. Por favor, inténtalo de nuevo más tarde.",
+                footer: `Detalles: ${error.message || "Error desconocido"}`,
+            });
         });
 }
 
@@ -381,10 +395,12 @@ function obtenerTablaNotificaciones(
             ).innerHTML = tablaNotificacionesHtml;
         })
         .catch(function (error) {
-            console.error(
-                "Error al obtener la tabla de notificaciones:",
-                error
-            );
+            Swal.fire({
+                icon: "error",
+                title: "Error al obtener la tabla de notificaciones",
+                text: "No se pudo cargar la tabla de notificaciones. Por favor, inténtalo de nuevo más tarde.",
+                footer: `Detalles: ${error.message || "Error desconocido"}`,
+            });
         });
 }
 
@@ -459,11 +475,11 @@ function guardarNotificacion(requisitoId) {
             }
         })
         .catch((error) => {
-            console.error("Error al guardar la notificación:", error);
             Swal.fire({
                 icon: "error",
-                title: "Error",
-                text: "Ocurrió un error inesperado al guardar.",
+                title: "Error al guardar la notificación",
+                text: "Ocurrió un error inesperado al guardar. Por favor, inténtalo de nuevo más tarde.",
+                footer: `Detalles: ${error.message || "Error desconocido"}`,
                 confirmButtonText: "Aceptar",
             });
         });
@@ -505,12 +521,15 @@ function eliminarNotificacion(
                     );
                 })
                 .catch((error) => {
-                    console.error(error);
-                    Swal.fire(
-                        "Error",
-                        "No se pudo eliminar la notificación.",
-                        "error"
-                    );
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error al eliminar la notificación",
+                        text: "No se pudo eliminar la notificación. Por favor, inténtalo de nuevo más tarde.",
+                        footer: `Detalles: ${
+                            error.message || "Error desconocido"
+                        }`,
+                        confirmButtonText: "Aceptar",
+                    });
                 });
         }
     });
@@ -555,8 +574,13 @@ function mostrarFormulario(requisitoId) {
             });
         })
         .catch((error) => {
-            console.error("Error al cargar la lista de usuarios:", error);
-            alert("Ocurrió un error al cargar la lista de usuarios.");
+            Swal.fire({
+                icon: "error",
+                title: "Error al cargar la lista de usuarios",
+                text: "Ocurrió un error al cargar la lista de usuarios. Por favor, inténtalo de nuevo más tarde.",
+                footer: `Detalles: ${error.message || "Error desconocido"}`,
+                confirmButtonText: "Aceptar",
+            });
         });
 }
 
@@ -737,10 +761,16 @@ function cargarDetalleEvidencia(
                                         }
                                     })
                                     .catch(function (error) {
-                                        console.error(
-                                            "Error al verificar los archivos:",
-                                            error
-                                        );
+                                        Swal.fire({
+                                            icon: "error",
+                                            title: "Error al verificar los archivos",
+                                            text: "Ocurrió un error al verificar los archivos. Por favor, inténtalo de nuevo más tarde.",
+                                            footer: `Detalles: ${
+                                                error.message ||
+                                                "Error desconocido"
+                                            }`,
+                                            confirmButtonText: "Aceptar",
+                                        });
                                     });
                             }
                         );
@@ -758,7 +788,13 @@ function cargarDetalleEvidencia(
             }
         })
         .catch(function (error) {
-            console.error("Error al obtener los detalles:", error);
+            Swal.fire({
+                icon: "error",
+                title: "Error al obtener los detalles",
+                text: "Ocurrió un error al obtener los detalles. Por favor, inténtalo de nuevo más tarde.",
+                footer: `Detalles: ${error.message || "Error desconocido"}`,
+                confirmButtonText: "Aceptar",
+            });
         });
 }
 
@@ -805,16 +841,16 @@ function handleFileUpload(formSelector) {
     }
 
     const validFileTypes = [
-        "application/pdf", 
-        "image/jpeg", 
-        "image/png", 
-        "application/msword", 
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document", 
-        "application/vnd.ms-excel", 
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", 
-        "application/vnd.ms-powerpoint", 
-        "application/vnd.openxmlformats-officedocument.presentationml.presentation", 
-        "text/plain" 
+        "application/pdf",
+        "image/jpeg",
+        "image/png",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/vnd.ms-excel",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "application/vnd.ms-powerpoint",
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        "text/plain",
     ];
     if (!validFileTypes.includes(archivoAdjunto.type)) {
         Swal.fire(
@@ -869,7 +905,15 @@ function handleFileUpload(formSelector) {
                     if (error.response && error.response.status === 413) {
                         errorMessage = "El archivo es demasiado grande.";
                     }
-                    Swal.fire("Error", errorMessage, "error");
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: errorMessage,
+                        footer: `Detalles: ${
+                            error.message || "Error desconocido"
+                        }`,
+                        confirmButtonText: "Aceptar",
+                    });
                 })
                 .finally(function () {
                     loader.style.display = "none";
@@ -887,12 +931,13 @@ function correoEnviar() {
             Swal.fire("Éxito", "El correo se envió correctamente.", "success");
         })
         .catch(function (error) {
-            console.error("Error al enviar el correo:", error);
-            Swal.fire(
-                "Error",
-                "Hubo un problema al enviar el correo.",
-                "error"
-            );
+            Swal.fire({
+                icon: "error",
+                title: "Error al enviar el correo",
+                text: "Hubo un problema al enviar el correo. Por favor, inténtalo de nuevo más tarde.",
+                footer: `Detalles: ${error.message || "Error desconocido"}`,
+                confirmButtonText: "Aceptar",
+            });
         });
 }
 
@@ -917,30 +962,52 @@ function cargarArchivos(requisitoId, evidenciaId, fechaLimite) {
 
             archivos.forEach((archivo) => {
                 let card = document.createElement("div");
-                card.classList.add("card", "mb-3", "shadow-sm", "position-relative");
+                card.classList.add(
+                    "card",
+                    "mb-3",
+                    "shadow-sm",
+                    "position-relative"
+                );
 
-                
-                let comentariosHTML = archivo.comments.length > 0 
-                    ? archivo.comments.map(comentario => `
-                        <div class="mb-3 p-2 bg-light rounded" id="comentario-${comentario.id}">
+                let comentariosHTML =
+                    archivo.comments.length > 0
+                        ? archivo.comments
+                              .map(
+                                  (comentario) => `
+                        <div class="mb-3 p-2 bg-light rounded" id="comentario-${
+                            comentario.id
+                        }">
                             <div class="d-flex align-items-center">
                                 <i class="fas fa-comment text-primary mr-2"></i>
-                                <strong>${sanitizeInput(comentario.user.name)}</strong> - 
-                                <span class="text-muted">${sanitizeInput(comentario.user.puesto)}</span>
+                                <strong>${sanitizeInput(
+                                    comentario.user.name
+                                )}</strong> - 
+                                <span class="text-muted">${sanitizeInput(
+                                    comentario.user.puesto
+                                )}</span>
                             </div>
-                            <p class="mb-1">${sanitizeInput(comentario.comment)}</p>
-                            <small class="text-muted d-block">${new Date(sanitizeInput(comentario.created_at)).toLocaleString()}</small>
+                            <p class="mb-1">${sanitizeInput(
+                                comentario.comment
+                            )}</p>
+                            <small class="text-muted d-block">${new Date(
+                                sanitizeInput(comentario.created_at)
+                            ).toLocaleString()}</small>
                 
-                            ${comentario.user_id === currentUserId ? `
+                            ${
+                                comentario.user_id === currentUserId
+                                    ? `
                                 <button class="btn btn-link text-danger p-0 mt-1" 
                                     onclick="eliminarComentario(${comentario.id}, ${archivo.id})"
                                     style="font-size: 0.9rem; text-decoration: none;">
                                     <span class="text-danger">Eliminar comentario</span>
-                                </button>` 
-                            : ""}
+                                </button>`
+                                    : ""
+                            }
                         </div>
-                    `).join("")
-                    : `<p class="text-muted">No hay comentarios aún.</p>`;
+                    `
+                              )
+                              .join("")
+                        : `<p class="text-muted">No hay comentarios aún.</p>`;
 
                 card.innerHTML = `
                     <div class="card-body">
@@ -952,15 +1019,26 @@ function cargarArchivos(requisitoId, evidenciaId, fechaLimite) {
                             <div class="flex-grow-1">
                                 <h5 class="mb-1">
                                     <i class="fas fa-file-alt"></i> 
-                                    ${sanitizeInput(archivo.nombre_archivo.split("_").slice(1).join("_"))}
+                                    ${sanitizeInput(
+                                        archivo.nombre_archivo
+                                            .split("_")
+                                            .slice(1)
+                                            .join("_")
+                                    )}
                                 </h5>
                                 <p class="mb-1 text-muted">
                                     <i class="fas fa-paperclip"></i> <strong>Archivo adjunto por:</strong> 
-                                    <i class="fas fa-user"></i> ${sanitizeInput(archivo.usuario)} - 
-                                    <i class="fas fa-briefcase"></i> ${sanitizeInput(archivo.puesto)}
+                                    <i class="fas fa-user"></i> ${sanitizeInput(
+                                        archivo.usuario
+                                    )} - 
+                                    <i class="fas fa-briefcase"></i> ${sanitizeInput(
+                                        archivo.puesto
+                                    )}
                                 </p>
                                 <p class="mb-1 text-muted">
-                                    <i class="fas fa-calendar-alt"></i> ${new Date(sanitizeInput(archivo.created_at)).toLocaleString()}
+                                    <i class="fas fa-calendar-alt"></i> ${new Date(
+                                        sanitizeInput(archivo.created_at)
+                                    ).toLocaleString()}
                                 </p>
                             </div>
                             
@@ -968,14 +1046,18 @@ function cargarArchivos(requisitoId, evidenciaId, fechaLimite) {
                             <div class="d-flex">
                                 <button 
                                     class="btn btn-sm btn-info btn-ver-archivo mr-2" 
-                                    data-url="${storageUploadsUrl}/${sanitizeInput(archivo.nombre_archivo)}"
+                                    data-url="${storageUploadsUrl}/${sanitizeInput(
+                    archivo.nombre_archivo
+                )}"
                                     ${userRole === "invitado" ? "disabled" : ""}
                                 >
                                     <i class="fas fa-eye"></i>
                                 </button>
                                 <button 
                                     class="btn btn-sm btn-success btn-descargar-archivo mr-2" 
-                                    data-url="${storageUploadsUrl}/${sanitizeInput(archivo.nombre_archivo)}"
+                                    data-url="${storageUploadsUrl}/${sanitizeInput(
+                    archivo.nombre_archivo
+                )}"
                                     ${userRole === "invitado" ? "disabled" : ""}
                                 >
                                     <i class="fas fa-download"></i>
@@ -983,11 +1065,25 @@ function cargarArchivos(requisitoId, evidenciaId, fechaLimite) {
                                 <button 
                                     class="btn btn-sm btn-danger btn-eliminar-archivo" 
                                     data-id="${sanitizeInput(archivo.id)}" 
-                                    data-url="${storageUploadsUrl}/${sanitizeInput(archivo.nombre_archivo)}"
-                                    data-requisito-id="${sanitizeInput(requisitoId)}" 
-                                    data-evidencia-id="${sanitizeInput(evidenciaId)}" 
-                                    data-fecha-limite="${sanitizeInput(fechaLimite)}"
-                                    ${(["admin", "superUsuario"].includes(userRole) || archivo.user_id === currentUserId ? "" : "disabled")}
+                                    data-url="${storageUploadsUrl}/${sanitizeInput(
+                    archivo.nombre_archivo
+                )}"
+                                    data-requisito-id="${sanitizeInput(
+                                        requisitoId
+                                    )}" 
+                                    data-evidencia-id="${sanitizeInput(
+                                        evidenciaId
+                                    )}" 
+                                    data-fecha-limite="${sanitizeInput(
+                                        fechaLimite
+                                    )}"
+                                    ${
+                                        ["admin", "superUsuario"].includes(
+                                            userRole
+                                        ) || archivo.user_id === currentUserId
+                                            ? ""
+                                            : "disabled"
+                                    }
                                 >
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
@@ -997,19 +1093,27 @@ function cargarArchivos(requisitoId, evidenciaId, fechaLimite) {
                         <!-- Botón para mostrar comentarios -->
                         <div class="mt-2 d-flex">
                             <button class="btn btn-sm btn-secondary mr-2" data-toggle="collapse" 
-                                data-target="#comentarios-${archivo.id}" aria-expanded="false">
+                                data-target="#comentarios-${
+                                    archivo.id
+                                }" aria-expanded="false">
                                 <i class="fas fa-comments"></i>
                                 Comentarios (${archivo.comments_count}) 
                             </button>
                         </div>
 
                         <!-- Sección colapsable de Comentarios -->
-                        <div class="collapse mt-2" id="comentarios-${archivo.id}">
+                        <div class="collapse mt-2" id="comentarios-${
+                            archivo.id
+                        }">
                             <div class="card card-body bg-light p-2">
                                 <!-- Formulario para agregar un nuevo comentario (ahora en la parte superior) -->
                                 <div class="mb-3">
-                                    <textarea class="form-control mb-2" rows="2" id="comentario-texto-${archivo.id}" placeholder="Escribe un comentario..."></textarea>
-                                    <button class="btn btn-sm btn-success" onclick="agregarComentario(${archivo.id})">
+                                    <textarea class="form-control mb-2" rows="2" id="comentario-texto-${
+                                        archivo.id
+                                    }" placeholder="Escribe un comentario..."></textarea>
+                                    <button class="btn btn-sm btn-success" onclick="agregarComentario(${
+                                        archivo.id
+                                    })">
                                         <i class="fas fa-paper-plane"></i> Agregar comentario
                                     </button>
                                 </div>
@@ -1026,41 +1130,47 @@ function cargarArchivos(requisitoId, evidenciaId, fechaLimite) {
                 container.appendChild(card);
             });
 
-            
             agregarEventos();
         })
         .catch(function (error) {
-            console.error("Error al cargar los archivos:", error);
+            Swal.fire({
+                icon: "error",
+                title: "Error al cargar los archivos",
+                text: "Ocurrió un error al cargar los archivos. Por favor, inténtalo de nuevo más tarde.",
+                footer: `Detalles: ${error.message || "Error desconocido"}`,
+                confirmButtonText: "Aceptar",
+            });
         });
 }
 
-
 function agregarComentario(archivoId) {
-    let comentarioTexto = document.getElementById(`comentario-texto-${archivoId}`).value.trim();
+    let comentarioTexto = document
+        .getElementById(`comentario-texto-${archivoId}`)
+        .value.trim();
 
     if (!comentarioTexto) {
         Swal.fire({
-            icon: 'warning',
-            title: 'Oops...',
-            text: 'El comentario no puede estar vacío.'
+            icon: "warning",
+            title: "Oops...",
+            text: "El comentario no puede estar vacío.",
         });
         return;
     }
 
-    axios.post(guardarComentarioUrl, { 
-        archivo_id: archivoId,
-        comment: comentarioTexto
-    })
-    .then(response => {
-        let nuevoComentario = response.data.comment;
+    axios
+        .post(guardarComentarioUrl, {
+            archivo_id: archivoId,
+            comment: comentarioTexto,
+        })
+        .then((response) => {
+            let nuevoComentario = response.data.comment;
 
-        // Crear el contenedor del comentario
-        let comentarioHTML = document.createElement("div");
-        comentarioHTML.classList.add("mb-3", "p-2", "bg-light", "rounded");
-        comentarioHTML.id = `comentario-${nuevoComentario.id}`;
-        comentarioHTML.style.opacity = "0"; 
+            let comentarioHTML = document.createElement("div");
+            comentarioHTML.classList.add("mb-3", "p-2", "bg-light", "rounded");
+            comentarioHTML.id = `comentario-${nuevoComentario.id}`;
+            comentarioHTML.style.opacity = "0";
 
-        comentarioHTML.innerHTML = `
+            comentarioHTML.innerHTML = `
             <div class="d-flex align-items-center">
                 <i class="fas fa-comment text-primary mr-2"></i>
                 <strong>${nuevoComentario.user}</strong> - <span class="text-muted">${nuevoComentario.puesto}</span>
@@ -1074,101 +1184,98 @@ function agregarComentario(archivoId) {
             </button>
         `;
 
-        // Agregar el texto del comentario de forma segura
-        comentarioHTML.querySelector("p").textContent = nuevoComentario.text;
+            comentarioHTML.querySelector("p").textContent =
+                nuevoComentario.text;
 
-        let listaComentarios = document.getElementById(`lista-comentarios-${archivoId}`);
+            let listaComentarios = document.getElementById(
+                `lista-comentarios-${archivoId}`
+            );
 
-        // Si hay un mensaje de "No hay comentarios", lo eliminamos
-        if (listaComentarios.innerHTML.includes("No hay comentarios aún")) {
-            listaComentarios.innerHTML = ""; 
-        }
+            if (listaComentarios.innerHTML.includes("No hay comentarios aún")) {
+                listaComentarios.innerHTML = "";
+            }
 
-        listaComentarios.prepend(comentarioHTML); 
+            listaComentarios.prepend(comentarioHTML);
 
-        // Animación de aparición
-        setTimeout(() => {
-            comentarioHTML.style.transition = "opacity 0.5s ease-in"; 
-            comentarioHTML.style.opacity = "1"; 
-        }, 50); 
+            setTimeout(() => {
+                comentarioHTML.style.transition = "opacity 0.5s ease-in";
+                comentarioHTML.style.opacity = "1";
+            }, 50);
 
-        // Actualizar el contador de comentarios
-        actualizarContadorComentarios(archivoId, 1);
+            actualizarContadorComentarios(archivoId, 1);
 
-        // Limpiar el campo de texto
-        document.getElementById(`comentario-texto-${archivoId}`).value = '';
-    })
-    .catch(error => {
-        let errorMessage = 'Ocurrió un error al agregar el comentario. Inténtalo de nuevo.';
-        
-        // Si hay un mensaje de error en la respuesta del servidor, úsalo
-        if (error.response && error.response.data.message) {
-            errorMessage = error.response.data.message;
-        }
+            document.getElementById(`comentario-texto-${archivoId}`).value = "";
+        })
+        .catch((error) => {
+            let errorMessage =
+                "Ocurrió un error al agregar el comentario. Inténtalo de nuevo.";
 
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: errorMessage
+            if (error.response && error.response.data.message) {
+                errorMessage = error.response.data.message;
+            }
+
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: errorMessage,
+                footer: `Detalles: ${error.message || "Error desconocido"}`,
+                confirmButtonText: "Aceptar",
+            });
         });
-    });
 }
 
-
-
-
-
-
 function eliminarComentario(comentarioId, archivoId) {
-    let url = eliminarComentarioUrl.replace(':id', comentarioId);
+    let url = eliminarComentarioUrl.replace(":id", comentarioId);
 
-    axios.delete(url)
-        .then(response => {
-            let comentarioElemento = document.getElementById(`comentario-${comentarioId}`);
+    axios
+        .delete(url)
+        .then((response) => {
+            let comentarioElemento = document.getElementById(
+                `comentario-${comentarioId}`
+            );
 
             if (comentarioElemento) {
-                
-                comentarioElemento.style.transition = "opacity 0.5s ease-out"; 
+                comentarioElemento.style.transition = "opacity 0.5s ease-out";
                 comentarioElemento.style.opacity = "0";
 
-                
                 setTimeout(() => {
                     comentarioElemento.remove();
 
-                    
                     actualizarContadorComentarios(archivoId, -1);
 
-                    
-                    let listaComentarios = document.getElementById(`lista-comentarios-${archivoId}`);
+                    let listaComentarios = document.getElementById(
+                        `lista-comentarios-${archivoId}`
+                    );
                     if (listaComentarios.children.length === 0) {
                         listaComentarios.innerHTML = `<p class="text-muted">No hay comentarios aún.</p>`;
                     }
-                }, 500); 
+                }, 500);
             }
         })
-        .catch(error => {
-            console.error("Error al eliminar el comentario:", error);
+        .catch((error) => {
+            Swal.fire({
+                icon: "error",
+                title: "Error al eliminar el comentario",
+                text: "Ocurrió un error al eliminar el comentario. Por favor, inténtalo de nuevo más tarde.",
+                footer: `Detalles: ${error.message || "Error desconocido"}`,
+                confirmButtonText: "Aceptar",
+            });
         });
 }
 
-
-
-
 function actualizarContadorComentarios(archivoId, cambio) {
-    let contadorComentarios = document.querySelector(`[data-target="#comentarios-${archivoId}"]`);
+    let contadorComentarios = document.querySelector(
+        `[data-target="#comentarios-${archivoId}"]`
+    );
     if (contadorComentarios) {
-        let countTexto = contadorComentarios.innerText.match(/\d+/); 
-        let count = countTexto ? parseInt(countTexto[0]) : 0; 
-        let nuevoCount = Math.max(0, count + cambio); 
+        let countTexto = contadorComentarios.innerText.match(/\d+/);
+        let count = countTexto ? parseInt(countTexto[0]) : 0;
+        let nuevoCount = Math.max(0, count + cambio);
         contadorComentarios.innerHTML = `<i class="fas fa-comments"></i> Comentarios (${nuevoCount})`;
     }
 }
 
-
-
-
 function agregarEventos() {
-    
     document.querySelectorAll(".btn-ver-archivo").forEach((button) => {
         button.addEventListener("click", function () {
             const fileUrl = this.dataset.url;
@@ -1176,7 +1283,6 @@ function agregarEventos() {
         });
     });
 
-    
     document.querySelectorAll(".btn-descargar-archivo").forEach((button) => {
         button.addEventListener("click", function () {
             const fileUrl = this.dataset.url;
@@ -1191,7 +1297,6 @@ function agregarEventos() {
         });
     });
 
-    
     document.querySelectorAll(".btn-eliminar-archivo").forEach((button) => {
         button.addEventListener("click", function () {
             const archivoId = this.dataset.id;
@@ -1237,15 +1342,15 @@ function agregarEventos() {
                             }
                         })
                         .catch((error) => {
-                            console.error(
-                                "Error al eliminar el archivo:",
-                                error
-                            );
-                            Swal.fire(
-                                "Error",
-                                "Ocurrió un problema al intentar eliminar el archivo.<br>Póngase en contacto con el administrador del sistema.",
-                                "error"
-                            );
+                            Swal.fire({
+                                icon: "error",
+                                title: "Error al eliminar el archivo",
+                                text: "Ocurrió un problema al intentar eliminar el archivo. Póngase en contacto con el administrador del sistema.",
+                                footer: `Detalles: ${
+                                    error.message || "Error desconocido"
+                                }`,
+                                confirmButtonText: "Aceptar",
+                            });
                         });
                 }
             });
@@ -1314,7 +1419,15 @@ function actualizarEstado(
                     }
                 })
                 .catch(function (error) {
-                    console.error("Error en la solicitud:", error);
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error en la solicitud",
+                        text: "Ocurrió un error en la solicitud. Por favor, inténtalo de nuevo más tarde.",
+                        footer: `Detalles: ${
+                            error.message || "Error desconocido"
+                        }`,
+                        confirmButtonText: "Aceptar",
+                    });
                 });
         }
     });
@@ -1349,7 +1462,13 @@ function abrirModalDetalle(detalleId, requisitoId) {
             }
         })
         .catch(function (error) {
-            console.error("Error al obtener el estado approved:", error);
+            Swal.fire({
+                icon: "error",
+                title: "Error al obtener el estado",
+                text: "No se pudo verificar el estado de aprobación. Por favor, inténtalo de nuevo más tarde.",
+                footer: `Detalles: ${error.message || "Error desconocido"}`,
+                confirmButtonText: "Aceptar",
+            });
         });
 }
 
@@ -1415,12 +1534,13 @@ function ejecutarAccionConDatos() {
             Swal.fire("Éxito", "El correo se envió correctamente.", "success");
         })
         .catch(function (error) {
-            console.error("Error al enviar el correo:", error);
-            Swal.fire(
-                "Error",
-                "Hubo un problema al enviar el correo.",
-                "error"
-            );
+            Swal.fire({
+                icon: "error",
+                title: "Error al enviar el correo",
+                text: "Hubo un problema al enviar el correo. Por favor, inténtalo de nuevo más tarde.",
+                footer: `Detalles: ${error.message || "Error desconocido"}`,
+                confirmButtonText: "Aceptar",
+            });
         });
 }
 
@@ -1441,8 +1561,13 @@ function cambiarEstadoEvidencia(requisitoId, evidenciaId) {
             }
         })
         .catch(function (error) {
-            console.error("Error:", error);
-            Swal.fire("Error", "Hubo un problema durante el proceso.", "error");
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: "Hubo un problema durante el proceso. Por favor, inténtalo de nuevo más tarde.",
+                footer: `Detalles: ${error.message || "Error desconocido"}`,
+                confirmButtonText: "Aceptar",
+            });
         });
 }
 
@@ -1463,7 +1588,13 @@ function actualizarPorcentaje(detalleId) {
             }
         })
         .catch(function (error) {
-            console.error("Error al actualizar el porcentaje:", error);
+            Swal.fire({
+                icon: "error",
+                title: "Error al actualizar el porcentaje",
+                text: "Ocurrió un error al actualizar el porcentaje. Por favor, inténtalo de nuevo más tarde.",
+                footer: `Detalles: ${error.message || "Error desconocido"}`,
+                confirmButtonText: "Aceptar",
+            });
         });
 }
 
@@ -1480,7 +1611,13 @@ function actualizarPorcentajeSuma(detalleId, numeroRequisito) {
         })
         .then(function (response) {})
         .catch(function (error) {
-            console.error("Error al contar los registros:", error);
+            Swal.fire({
+                icon: "error",
+                title: "Error al contar los registros",
+                text: "Ocurrió un error al contar los registros. Por favor, inténtalo de nuevo más tarde.",
+                footer: `Detalles: ${error.message || "Error desconocido"}`,
+                confirmButtonText: "Aceptar",
+            });
         });
 }
 
@@ -1520,5 +1657,3 @@ $("#modalDetalleContent").on("show.bs.modal", function () {
 $("#modalDetalleContent").on("hidden.bs.modal", function () {
     $(".modal").removeAttr("inert");
 });
-
-

@@ -1,8 +1,6 @@
-
 $(document).ready(function () {
     $("#usersTable").DataTable().destroy();
     $("#usersTable").DataTable({
-        
         language: {
             lengthMenu:
                 "Mostrar " +
@@ -48,16 +46,12 @@ $(document).ready(function () {
     });
 });
 
-
-
-
-
 document.addEventListener("DOMContentLoaded", function () {
     const deleteForms = document.querySelectorAll(".delete-user-form");
 
     deleteForms.forEach((form) => {
         form.addEventListener("submit", function (event) {
-            event.preventDefault(); 
+            event.preventDefault();
 
             Swal.fire({
                 title: "¿Estás seguro?",
@@ -70,100 +64,78 @@ document.addEventListener("DOMContentLoaded", function () {
                 cancelButtonText: "Cancelar",
             }).then((result) => {
                 if (result.isConfirmed) {
-                    form.submit(); 
+                    form.submit();
                 }
             });
         });
     });
 });
 
-
 $(document).on("click", ".role-btn", function () {
-    
     const userId = $(this).data("id");
     const userName = $(this).data("name");
     const userEmail = $(this).data("email");
 
-    
     $("#modelIdRoleInput").val(userId);
 
-    
     $("#userNameEmailRoleInput").val(`${userName} - ${userEmail}`);
 });
 
-
 $(document).on("click", ".area-btn", function () {
-    
     const userId = $(this).data("id");
     const userName = $(this).data("name");
     const userEmail = $(this).data("email");
 
-    
     $("#modelIdInput").val(userId);
 
-    
     $("#userNameEmailInput").val(`${userName} - ${userEmail}`);
 });
 
-
 $(document).on("click", ".authorization-btn", function () {
-    
-    const userId = $(this).data("id"); 
-    const userName = $(this).data("name"); 
-    const userEmail = $(this).data("email"); 
+    const userId = $(this).data("id");
+    const userName = $(this).data("name");
+    const userEmail = $(this).data("email");
 
-    
     $("#modelIdAuthorization").val(userId);
 
-    
     $("#userNameAuthorization").val(`${userName} - ${userEmail}`);
 });
 
-
 $(document).ready(function () {
     $("#create-user-form").on("submit", function (e) {
-        e.preventDefault(); 
+        e.preventDefault();
 
         const form = $(this);
         const submitBtn = $("#submit-btn");
 
-        
         submitBtn.prop("disabled", true);
 
-        
         $.ajax({
             url: form.attr("action"),
             method: "POST",
-            data: form.serialize(), 
+            data: form.serialize(),
             success: function (response) {
-                
                 Swal.fire({
                     icon: "success",
                     title: "Usuario creado",
                     text: "El usuario se ha creado correctamente.",
                     confirmButtonText: "Aceptar",
                 }).then(() => {
-                    
                     location.reload();
                 });
 
-                
                 form[0].reset();
 
-                
                 submitBtn.hide();
 
-                
                 $("#createUserModal").modal("hide");
             },
             error: function (xhr) {
-                
                 const errors = xhr.responseJSON?.errors || {};
                 let errorMessage =
                     "Ocurrió un error. Por favor, inténtalo nuevamente.";
 
                 if (Object.keys(errors).length > 0) {
-                    
                     errorMessage = Object.values(errors).join("\n");
                 }
 
@@ -175,13 +147,11 @@ $(document).ready(function () {
                 });
             },
             complete: function () {
-                
                 submitBtn.prop("disabled", false);
             },
         });
     });
 });
-
 
 $(document).ready(function () {
     $("#email").on("blur", function () {
@@ -190,10 +160,10 @@ $(document).ready(function () {
 
         if (email) {
             $.ajax({
-                url: checkEmailUrl, 
+                url: checkEmailUrl,
                 type: "POST",
                 data: {
-                    _token: $('meta[name="csrf-token"]').attr("content"), 
+                    _token: $('meta[name="csrf-token"]').attr("content"),
                     email: email,
                 },
                 success: function (response) {
@@ -210,7 +180,6 @@ $(document).ready(function () {
                     }
                 },
                 error: function (xhr) {
-                    
                     feedback
                         .text("Ocurrió un error al validar el correo.")
                         .addClass("text-danger");
@@ -222,7 +191,6 @@ $(document).ready(function () {
     });
 });
 
-
 $(document).ready(function () {
     const emailField = $("#email");
     const nameField = $('input[name="name"]');
@@ -232,7 +200,6 @@ $(document).ready(function () {
     const feedback = $("#email-feedback");
     const submitBtn = $("#submit-btn");
 
-    
     function allFieldsFilled() {
         return (
             nameField.val().trim() !== "" &&
@@ -243,12 +210,11 @@ $(document).ready(function () {
         );
     }
 
-    
     $("input").on("input", function () {
         if (allFieldsFilled() && feedback.hasClass("text-success")) {
-            submitBtn.show(); 
+            submitBtn.show();
         } else {
-            submitBtn.hide(); 
+            submitBtn.hide();
         }
     });
 });
@@ -262,19 +228,16 @@ $(document).ready(function () {
     const feedback = $("#email-feedback");
     const submitBtn = $("#submit-btn");
 
-    
     const requirements = $("#password-requirements");
     const lengthReq = $("#length");
     const uppercaseReq = $("#uppercase");
     const numberReq = $("#number");
     const specialReq = $("#special");
 
-    
     const uppercaseRegex = /[A-Z]/;
     const numberRegex = /[0-9]/;
     const specialCharRegex = /[!@#$%^&*]/;
 
-    
     function validateForm() {
         const emailValid = feedback.hasClass("text-success");
         const password = passwordField.val();
@@ -298,35 +261,29 @@ $(document).ready(function () {
         );
     }
 
-    
     function toggleSubmitButton() {
         if (validateForm()) {
-            submitBtn.show(); 
+            submitBtn.show();
         } else {
-            submitBtn.hide(); 
+            submitBtn.hide();
         }
     }
 
-    
     passwordField.on("input", function () {
         const password = $(this).val();
 
-        
         lengthReq
             .toggleClass("text-success", password.length >= 8)
             .toggleClass("text-danger", password.length < 8);
 
-        
         uppercaseReq
             .toggleClass("text-success", uppercaseRegex.test(password))
             .toggleClass("text-danger", !uppercaseRegex.test(password));
 
-        
         numberReq
             .toggleClass("text-success", numberRegex.test(password))
             .toggleClass("text-danger", !numberRegex.test(password));
 
-        
         specialReq
             .toggleClass("text-success", specialCharRegex.test(password))
             .toggleClass("text-danger", !specialCharRegex.test(password));
@@ -334,7 +291,6 @@ $(document).ready(function () {
         toggleSubmitButton();
     });
 
-    
     passwordConfirmField.on("input", function () {
         const password = passwordField.val();
         const confirmPassword = $(this).val();
@@ -355,7 +311,6 @@ $(document).ready(function () {
         toggleSubmitButton();
     });
 
-    
     $("input").on("input", toggleSubmitButton);
 });
 
@@ -363,48 +318,39 @@ $(document).ready(function () {
     const passwordField = $("#password");
     const submitBtn = $("#submit-btn");
 
-    
     const requirements = $("#password-requirements");
     const lengthReq = $("#length");
     const uppercaseReq = $("#uppercase");
     const numberReq = $("#number");
     const specialReq = $("#special");
 
-    
     const uppercaseRegex = /[A-Z]/;
     const numberRegex = /[0-9]/;
     const specialCharRegex = /[!@#$%^&*]/;
 
-    
     passwordField.on("focus", function () {
         requirements.removeClass("d-none");
     });
 
-    
     passwordField.on("input", function () {
         const password = $(this).val();
 
-        
         lengthReq
             .toggleClass("text-success", password.length >= 8)
             .toggleClass("text-danger", password.length < 8);
 
-        
         uppercaseReq
             .toggleClass("text-success", uppercaseRegex.test(password))
             .toggleClass("text-danger", !uppercaseRegex.test(password));
 
-        
         numberReq
             .toggleClass("text-success", numberRegex.test(password))
             .toggleClass("text-danger", !numberRegex.test(password));
 
-        
         specialReq
             .toggleClass("text-success", specialCharRegex.test(password))
             .toggleClass("text-danger", !specialCharRegex.test(password));
 
-        
         const allValid =
             password.length >= 8 &&
             uppercaseRegex.test(password) &&
@@ -413,7 +359,6 @@ $(document).ready(function () {
         submitBtn.toggle(allValid);
     });
 
-    
     passwordField.on("blur", function () {
         const password = $(this).val();
 
@@ -434,7 +379,6 @@ $(document).ready(function () {
     const feedback = $("#password-feedback");
     const submitBtn = $("#submit-btn");
 
-    
     passwordConfirmField.on("input", function () {
         const password = passwordField.val();
         const confirmPassword = $(this).val();
@@ -446,19 +390,18 @@ $(document).ready(function () {
                 )
                 .addClass("text-danger")
                 .removeClass("text-success");
-            submitBtn.hide(); 
+            submitBtn.hide();
         } else {
             feedback
                 .text("Las contraseñas coinciden.")
                 .addClass("text-success")
                 .removeClass("text-danger");
             if (validateForm()) {
-                submitBtn.show(); 
+                submitBtn.show();
             }
         }
     });
 
-    
     function validateForm() {
         const password = passwordField.val();
         const confirmPassword = passwordConfirmField.val();
@@ -480,7 +423,6 @@ $(document).ready(function () {
     const feedback = $("#password-feedback");
     const submitBtn = $("#submit-btn");
 
-    
     passwordConfirmField.on("blur", function () {
         const password = passwordField.val();
         const confirmPassword = $(this).val();
@@ -490,22 +432,21 @@ $(document).ready(function () {
                 .text("Las contraseñas no coinciden.")
                 .addClass("text-danger")
                 .removeClass("text-success");
-            submitBtn.hide(); 
+            submitBtn.hide();
         } else if (password === "") {
             feedback.text("");
-            submitBtn.hide(); 
+            submitBtn.hide();
         } else {
             feedback
                 .text("Las contraseñas coinciden.")
                 .addClass("text-success")
                 .removeClass("text-danger");
             if (allFieldsFilled()) {
-                submitBtn.show(); 
+                submitBtn.show();
             }
         }
     });
 
-    
     function allFieldsFilled() {
         return (
             $('input[name="name"]').val().trim() !== "" &&
@@ -516,7 +457,6 @@ $(document).ready(function () {
         );
     }
 
-    
     $("input").on("input", function () {
         if (allFieldsFilled() && feedback.hasClass("text-success")) {
             submitBtn.show();
@@ -526,22 +466,19 @@ $(document).ready(function () {
     });
 });
 
-
 $(document).on("click", ".toggle-password", function () {
-    const target = $(this).data("target"); 
+    const target = $(this).data("target");
     const input = $(target);
     const icon = $(this).find("i");
 
-    
     if (input.attr("type") === "password") {
         input.attr("type", "text");
-        icon.removeClass("fa-eye").addClass("fa-eye-slash"); 
+        icon.removeClass("fa-eye").addClass("fa-eye-slash");
     } else {
         input.attr("type", "password");
-        icon.removeClass("fa-eye-slash").addClass("fa-eye"); 
+        icon.removeClass("fa-eye-slash").addClass("fa-eye");
     }
 });
-
 
 $(document).ready(function () {
     $(document).on("click", ".edit-user-btn", function () {
@@ -550,16 +487,13 @@ $(document).ready(function () {
         const userEmail = $(this).data("email");
         const userPuesto = $(this).data("puesto");
 
-        
         $("#editUserId").val(userId);
         $("#editUserName").val(userName);
         $("#editUserEmail").val(userEmail);
         $("#editUserPuesto").val(userPuesto);
 
-        
         cargarObligaciones(userId);
 
-        
         $("#editUserModal").modal("show");
     });
 });
@@ -575,8 +509,7 @@ function cargarObligaciones(userId) {
 
             let groupedObligaciones = {};
 
-            
-            obligaciones.forEach(obligacion => {
+            obligaciones.forEach((obligacion) => {
                 if (!groupedObligaciones[obligacion.nombre]) {
                     groupedObligaciones[obligacion.nombre] = [];
                 }
@@ -587,7 +520,6 @@ function cargarObligaciones(userId) {
                 let obligacionesGrupo = groupedObligaciones[nombre];
                 let collapseId = `collapse-${index}`;
 
-                
                 let button = $(`
                     <button class="btn btn-secondary  btn-block text-center mb-3 border rounded p-2 font-weight-bold shadow-sm" 
                         type="button" data-toggle="collapse" data-target="#${collapseId}" aria-expanded="false" aria-controls="${collapseId}">
@@ -595,16 +527,19 @@ function cargarObligaciones(userId) {
                     </button>
                 `);
 
-                
-                let collapseDiv = $(`<div class="collapse border rounded p-3 bg-white shadow-sm mb-3" id="${collapseId}"></div>`);
+                let collapseDiv = $(
+                    `<div class="collapse border rounded p-3 bg-white shadow-sm mb-3" id="${collapseId}"></div>`
+                );
                 let rowDiv = $("<div>").addClass("row w-100");
 
                 obligacionesGrupo.forEach((obligacion) => {
                     let numeroEvidencia = obligacion.numero_evidencia;
                     let evidenciaTexto = `${numeroEvidencia} - ${obligacion.evidencia}`;
-                    let isChecked = obligacion.view == 1 ? "checked" : ""; 
+                    let isChecked = obligacion.view == 1 ? "checked" : "";
 
-                    let colDiv = $("<div>").addClass("col-md-6 d-flex flex-column align-items-center mb-3");
+                    let colDiv = $("<div>").addClass(
+                        "col-md-6 d-flex flex-column align-items-center mb-3"
+                    );
 
                     colDiv.html(`
                         <div class="custom-control custom-switch">
@@ -627,21 +562,16 @@ function cargarObligaciones(userId) {
                 container.append(collapseDiv);
             });
 
-            
             setTimeout(() => {
                 $(".toggle-switch").each(function () {
                     let isChecked = $(this).attr("checked") ? true : false;
                     $(this).prop("checked", isChecked);
-                    
                 });
-            }, 300); 
+            }, 300);
         },
-        error: function (xhr, status, error) {
-            console.error("Error cargando obligaciones:", error);
-        }
+        error: function (xhr, status, error) {},
     });
 }
-
 
 $(document).on("change", ".toggle-switch", function () {
     const numeroEvidencia = $(this).attr("id").replace("switch-", "");
@@ -655,179 +585,150 @@ $(document).on("change", ".toggle-switch", function () {
             _token: $('meta[name="csrf-token"]').attr("content"),
             user_id: userId,
             numero_evidencia: numeroEvidencia,
-            checked: checked
+            checked: checked,
         },
-        success: function (response) {
-            
-        },
-        error: function (xhr, status, error) {
-            
-        }
+        success: function (response) {},
+        error: function (xhr, status, error) {},
     });
 });
 
-
 $(document).on("click", "#deleteRole", function () {
-    // Obtener el ID del usuario desde el input oculto en el modal
     const userId = $("#modelIdRoleInput").val();
 
-    // Confirmar antes de eliminar usando SweetAlert2
     Swal.fire({
-        title: '¿Estás seguro?',
+        title: "¿Estás seguro?",
         text: "¿Deseas eliminar el rol actual de este usuario?",
-        icon: 'warning',
+        icon: "warning",
         showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar'
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Sí, eliminar",
+        cancelButtonText: "Cancelar",
     }).then((result) => {
         if (result.isConfirmed) {
-            // Si el usuario confirma, hacer la solicitud AJAX
             $.ajax({
-                url: removeRoleUrl, // Usar la URL definida
+                url: removeRoleUrl,
                 type: "POST",
                 data: {
-                    _token: $('meta[name="csrf-token"]').attr("content"), // Token CSRF
-                    model_id: userId, // ID del usuario
-                    model_type: "App\Models\User" // Tipo de modelo
+                    _token: $('meta[name="csrf-token"]').attr("content"),
+                    model_id: userId,
+                    model_type: "AppModelsUser",
                 },
                 success: function (response) {
                     if (response.success) {
-                        // Mostrar alerta de éxito con SweetAlert2
                         Swal.fire({
-                            title: '¡Éxito!',
-                            text: 'Rol eliminado correctamente.',
-                            icon: 'success',
-                            confirmButtonText: 'Aceptar'
+                            title: "¡Éxito!",
+                            text: "Rol eliminado correctamente.",
+                            icon: "success",
+                            confirmButtonText: "Aceptar",
                         }).then(() => {
-                            location.reload(); // Recargar la página para ver los cambios
+                            location.reload();
                         });
                     }
                 },
                 error: function (xhr, status, error) {
-                    console.error("Error al eliminar el rol:", error);
-                    // Mostrar alerta de error con SweetAlert2
                     Swal.fire({
-                        title: 'Error',
-                        text: 'Hubo un error al eliminar el rol. Por favor, inténtalo de nuevo.',
-                        icon: 'error',
-                        confirmButtonText: 'Aceptar'
+                        title: "Error",
+                        text: "Hubo un error al eliminar el rol. Por favor, inténtalo de nuevo.",
+                        icon: "error",
+                        confirmButtonText: "Aceptar",
                     });
-                }
+                },
             });
         }
     });
 });
 
-// Definir la URL para eliminar el permiso
-
-
 $(document).on("click", "#deletePermissionButton", function () {
-    // Obtener el ID del usuario desde el input oculto en el modal
     const userId = $("#modelIdInput").val();
-    
-    // Confirmar antes de eliminar usando SweetAlert2
+
     Swal.fire({
-        title: '¿Estás seguro?',
+        title: "¿Estás seguro?",
         text: "¿Deseas eliminar el permiso actual de este usuario?",
-        icon: 'warning',
+        icon: "warning",
         showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar'
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Sí, eliminar",
+        cancelButtonText: "Cancelar",
     }).then((result) => {
         if (result.isConfirmed) {
-            // Si el usuario confirma, hacer la solicitud AJAX
             $.ajax({
-                url: removePermissionUrl, // Usar la URL definida
+                url: removePermissionUrl,
                 type: "POST",
                 data: {
-                    _token: $('meta[name="csrf-token"]').attr("content"), // Token CSRF
-                    model_id: userId, // ID del usuario
-                    model_type: "App\Models\User" // Tipo de modelo
+                    _token: $('meta[name="csrf-token"]').attr("content"),
+                    model_id: userId,
+                    model_type: "AppModelsUser",
                 },
                 success: function (response) {
                     if (response.success) {
-                        // Mostrar alerta de éxito con SweetAlert2
                         Swal.fire({
-                            title: '¡Éxito!',
-                            text: 'Permiso eliminado correctamente.',
-                            icon: 'success',
-                            confirmButtonText: 'Aceptar'
+                            title: "¡Éxito!",
+                            text: "Permiso eliminado correctamente.",
+                            icon: "success",
+                            confirmButtonText: "Aceptar",
                         }).then(() => {
-                            location.reload(); // Recargar la página para ver los cambios
+                            location.reload();
                         });
                     }
                 },
                 error: function (xhr, status, error) {
-                    console.error("Error al eliminar el permiso:", error);
-                    // Mostrar alerta de error con SweetAlert2
                     Swal.fire({
-                        title: 'Error',
-                        text: 'Hubo un error al eliminar el permiso. Por favor, inténtalo de nuevo.',
-                        icon: 'error',
-                        confirmButtonText: 'Aceptar'
+                        title: "Error",
+                        text: "Hubo un error al eliminar el permiso. Por favor, inténtalo de nuevo.",
+                        icon: "error",
+                        confirmButtonText: "Aceptar",
                     });
-                }
+                },
             });
         }
     });
 });
 
 $(document).on("click", "#deleteAuthorizationButton", function () {
-    // Obtener el ID del usuario desde el input oculto en el modal
     const userId = $("#modelIdAuthorization").val();
 
-    console.log('User ID:', userId); // Verificar que el ID no sea undefined
-
-    // Confirmar antes de eliminar usando SweetAlert2
     Swal.fire({
-        title: '¿Estás seguro?',
+        title: "¿Estás seguro?",
         text: "¿Deseas eliminar la autorización actual de este usuario?",
-        icon: 'warning',
+        icon: "warning",
         showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar'
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Sí, eliminar",
+        cancelButtonText: "Cancelar",
     }).then((result) => {
         if (result.isConfirmed) {
-            // Si el usuario confirma, hacer la solicitud AJAX
             $.ajax({
-                url: removeAuthorizationUrl, // Usar la URL definida
+                url: removeAuthorizationUrl,
                 type: "POST",
                 data: {
-                    _token: $('meta[name="csrf-token"]').attr("content"), // Token CSRF
-                    model_id: userId, // ID del usuario
-                    model_type: "App\Models\User" // Tipo de modelo
+                    _token: $('meta[name="csrf-token"]').attr("content"),
+                    model_id: userId,
+                    model_type: "AppModelsUser",
                 },
                 success: function (response) {
                     if (response.success) {
-                        // Mostrar alerta de éxito con SweetAlert2
                         Swal.fire({
-                            title: '¡Éxito!',
-                            text: 'Autorización eliminada correctamente.',
-                            icon: 'success',
-                            confirmButtonText: 'Aceptar'
+                            title: "¡Éxito!",
+                            text: "Autorización eliminada correctamente.",
+                            icon: "success",
+                            confirmButtonText: "Aceptar",
                         }).then(() => {
-                            location.reload(); // Recargar la página para ver los cambios
+                            location.reload();
                         });
                     }
                 },
                 error: function (xhr, status, error) {
-                    console.error("Error al eliminar la autorización:", error);
-                    // Mostrar alerta de error con SweetAlert2
                     Swal.fire({
-                        title: 'Error',
-                        text: 'Hubo un error al eliminar la autorización. Por favor, inténtalo de nuevo.',
-                        icon: 'error',
-                        confirmButtonText: 'Aceptar'
+                        title: "Error",
+                        text: "Hubo un error al eliminar la autorización. Por favor, inténtalo de nuevo.",
+                        icon: "error",
+                        confirmButtonText: "Aceptar",
                     });
-                }
+                },
             });
         }
     });
 });
-
